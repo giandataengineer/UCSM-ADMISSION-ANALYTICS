@@ -92,6 +92,11 @@ CAMPOS = {
     "DMI": "codigo", "DNI": "codigo",
     "APELLIDOS Y NOMBRES": "nombre",
     "Opc": "opcion", "Opción": "opcion",
+    # Los documentos de aptos parten el encabezado en varias lineas y usan
+    # rotulos largos propios.
+    "ORDEN DE MERITO": "orden", "ORDEN DE MÉRITO": "orden",
+    "PROMEDIO": "total", "PROMEDIO NOTAS SEGÚN": "total",
+    "EQUIVALENCIA DEL PROMEDIO": "equivalencia",
 }
 
 # La postulacion NO entra aca: es un valor legitimo del grupo, no ruido.
@@ -161,6 +166,11 @@ def encontrar_encabezado(lineas):
 
     Se reconoce por su contenido, no por rotulos fijos: debe traer el nombre de
     la persona, su resultado o puntaje, y al menos tres columnas reconocibles.
+
+    Se probo unir las lineas contiguas para leer encabezados partidos en varias
+    alturas, y salio peor: con las vecinas incluidas hay lineas que no son
+    encabezado y alcanzan el umbral, y el reconocimiento cayo de 116 a 62
+    archivos. Los encabezados multilinea se cubren declarando sus rotulos.
     Los rotulos ajenos a CAMPOS se ignoran, asi un esquema nuevo se parsea
     igual en las columnas que si conoce en vez de fallar entero.
     """
@@ -215,18 +225,30 @@ def asignar(palabras, anclas):
 
 
 def es_fila_datos(fila):
-    """Una fila real identifica a una persona y su resultado.
+    """Una fila real identifica a una persona y le asigna un resultado.
 
-    Vale con orden mas condicion, o con orden mas puntaje. La segunda via
-    cubre los documentos sin columna de condicion, y la primera los que no
-    publican puntaje, como el tercer examen a distancia de 2023.
+    Hay tres formas validas, porque no todos los documentos publican las mismas
+    columnas. Unos omiten el puntaje, otros la condicion, y varios no traen
+    columna de orden de merito: exigir las tres descartaba 10 archivos enteros.
+
+    Lo que no se negocia es que haya una persona identificable, sea por codigo
+    o por un nombre de al menos dos palabras.
     """
-    orden = fila.get("orden", "").isdigit()
-    if orden and condicion_de(fila.get("condicion", "")):
+    codigo = fila.get("codigo", "") or ""
+    # Un codigo con letras es arrastre de la columna vecina, no un documento.
+    # Aparece cuando una linea de encabezado partida se lee como fila.
+    if codigo and not codigo.isdigit():
+        return False
+    persona = codigo.isdigit() or len((fila.get("nombre") or "").split()) >= 2
+    if not persona:
+        return False
+    if condicion_de(fila.get("condicion", "")):
         return True
-    if orden and len((fila.get("nombre") or "").split()) >= 2:
+    if re.fullmatch(r"\d{1,4}\.\d+", fila.get("total", "") or ""):
         return True
-    return bool(re.fullmatch(r"\d{1,4}\.\d+", fila.get("total", "")))
+    # Sin condicion ni puntaje, solo vale si el documento numera la fila: es la
+    # unica señal de que pertenece a la tabla y no al pie de pagina.
+    return fila.get("orden", "").isdigit()
 
 
 def calibrar(lineas, idx, anclas):
