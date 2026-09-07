@@ -105,20 +105,23 @@ def main():
 
     for rel, url in SUELTOS.items():
         ruta = os.path.join(DESTINO, rel)
+        # Si ya esta en disco se reusa, pero igual entra al manifiesto: el CSV
+        # describe el corpus completo, no solo lo descargado en esta corrida.
         if os.path.exists(ruta):
-            continue
-        datos = intentar(url)
-        if not datos:
-            continue
-        os.makedirs(os.path.dirname(ruta), exist_ok=True)
-        with open(ruta, "wb") as f:
-            f.write(datos)
+            datos, origen = open(ruta, "rb").read(), "cache"
+        else:
+            datos, origen = intentar(url), "sitio"
+            if not datos:
+                continue
+            os.makedirs(os.path.dirname(ruta), exist_ok=True)
+            with open(ruta, "wb") as f:
+                f.write(datos)
         anio, tipo = rel.split("/")[0], rel.split("/")[1].replace(".pdf", "")
         filas.append(dict(anio=anio, tipo=tipo, archivo_origen=url.split("/")[-1],
-                          fuente="sitio", bytes=len(datos),
+                          fuente=origen, bytes=len(datos),
                           sha256=hashlib.sha256(datos).hexdigest()[:16],
                           ruta=os.path.relpath(ruta, RAIZ)))
-        print(f"  {anio} {tipo:<11} {len(datos)//1024:>5} KB  (acuerdo de consejo)")
+        print(f"  {anio} {tipo:<11} {len(datos)//1024:>5} KB  ({origen})")
 
     destino_csv = os.path.join(RAIZ, "data", "documentos_base.csv")
     with open(destino_csv, "w", newline="", encoding="utf-8") as f:

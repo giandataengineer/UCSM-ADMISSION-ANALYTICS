@@ -32,3 +32,8 @@ anio,tipo,archivo_origen,fuente,bytes,sha256,ruta
 2026,cronograma,2026_CRONOGRAMA.pdf,sitio,245789,f830e1f9ce6ec0d7,data/documentos_base/2026/cronograma.pdf
 2026,temario,2026_TEMARIO.pdf,sitio,356733,47efc61c45c6e687,data/documentos_base/2026/temario.pdf
 2026,vacantes,2026_VACANTES.pdf,sitio,779150,1ce6a352de5b4320,data/documentos_base/2026/vacantes.pdf
+2027,cronograma,9807-CU-2026-CRONOGRAMA-2027.pdf,cache,260720,cb364b350747bab5,data/documentos_base/2027/cronograma.pdf
+2027,perfil_de_ingreso,9785-CU-2026-PERFIL-DE-INGRESO.pdf,cache,245176,324927ab6c724cd5,data/documentos_base/2027/perfil_de_ingreso.pdf
+2027,reglamento,9786-CU-2026-Nuevo-TUO-Texto-Unico-Ordenado-Reglamento-de-Admision.pdf,cache,486229,e1ac1626486de6e0,data/documentos_base/2027/reglamento.pdf
+2027,temario,TEMARIO-DE-ADMISION-2027.pdf,cache,323744,7217c6287f128af9,data/documentos_base/2027/temario.pdf
+2027,vacantes,9813-CU-2026-cuadro-de-vacantes-2027.pdf,cache,548153,d2772b0dc5618665,data/documentos_base/2027/vacantes.pdf
