@@ -213,7 +213,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,ENFERMERIA,beca,12,5,,si,16.0,16.0
 2022,ENFERMERIA,extraordinario,29,29,,no,,
 2022,ENFERMERIA,ordinario,324,22,6.8,si,66.83,72.94
-2022,ENFERMERIA,otro,5,5,,no,,
+2022,ENFERMERIA,otro,6,6,,no,,
 2022,ENFERMERIA,precatolica,82,11,13.4,si,127.35,160.33
 2022,ENFERMERIA,rendimiento_superior,7,7,,no,71.42,81.32
 2022,ENFERMERIA,traslado,8,6,,si,56.32,67.57
@@ -221,7 +221,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,FARMACIA Y BIOQUIMICA,complementario,1,0,,si,,
 2022,FARMACIA Y BIOQUIMICA,extraordinario,25,25,,no,,
 2022,FARMACIA Y BIOQUIMICA,ordinario,129,33,25.6,si,60.25,69.55
-2022,FARMACIA Y BIOQUIMICA,otro,6,6,,no,,
+2022,FARMACIA Y BIOQUIMICA,otro,14,14,,no,,
 2022,FARMACIA Y BIOQUIMICA,precatolica,11,11,,no,117.71,167.25
 2022,FARMACIA Y BIOQUIMICA,rendimiento_superior,2,2,,no,84.85,86.18
 2022,FARMACIA Y BIOQUIMICA,traslado,4,4,,no,59.0,73.57
@@ -240,7 +240,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,INGENIERIA AMBIENTAL,traslado,1,1,,no,79.19,79.19
 2022,INGENIERIA BIOTECNOLOGICA,extraordinario,10,10,,no,,
 2022,INGENIERIA BIOTECNOLOGICA,ordinario,22,21,,no,71.75,80.21
-2022,INGENIERIA BIOTECNOLOGICA,otro,5,5,,no,,
+2022,INGENIERIA BIOTECNOLOGICA,otro,6,6,,no,,
 2022,INGENIERIA BIOTECNOLOGICA,precatolica,7,7,,no,110.1,216.75
 2022,INGENIERIA BIOTECNOLOGICA,rendimiento_superior,11,11,,no,82.01,88.92
 2022,INGENIERIA BIOTECNOLOGICA,traslado,1,1,,no,83.06,83.06
@@ -301,7 +301,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,MEDICINA HUMANA,beca,45,8,17.8,si,23.0,17.0
 2022,MEDICINA HUMANA,extraordinario,49,49,,no,,
 2022,MEDICINA HUMANA,ordinario,1322,28,2.1,si,100.54,83.98
-2022,MEDICINA HUMANA,otro,3,3,,no,,
+2022,MEDICINA HUMANA,otro,6,6,,no,,
 2022,MEDICINA HUMANA,precatolica,1671,84,5.0,si,224.51,216.43
 2022,MEDICINA HUMANA,rendimiento_superior,224,15,6.7,si,100.49,89.4
 2022,MEDICINA HUMANA,traslado,59,15,25.4,si,89.01,87.62
@@ -316,7 +316,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,OBSTETRICIA Y PUERICULTURA,complementario,1,0,,si,,15.0
 2022,OBSTETRICIA Y PUERICULTURA,extraordinario,21,21,,no,,
 2022,OBSTETRICIA Y PUERICULTURA,ordinario,108,28,25.9,si,64.19,70.71
-2022,OBSTETRICIA Y PUERICULTURA,otro,7,6,,no,,
+2022,OBSTETRICIA Y PUERICULTURA,otro,9,8,,no,,
 2022,OBSTETRICIA Y PUERICULTURA,precatolica,11,10,,no,120.47,176.74
 2022,OBSTETRICIA Y PUERICULTURA,rendimiento_superior,1,1,,no,80.34,80.34
 2022,OBSTETRICIA Y PUERICULTURA,traslado,1,1,,no,73.88,73.88
@@ -324,13 +324,13 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,ODONTOLOGIA,complementario,1,0,,si,,15.0
 2022,ODONTOLOGIA,extraordinario,28,28,,no,,
 2022,ODONTOLOGIA,ordinario,194,48,24.7,si,69.34,75.39
-2022,ODONTOLOGIA,otro,10,10,,no,,
+2022,ODONTOLOGIA,otro,14,14,,no,,
 2022,ODONTOLOGIA,precatolica,43,30,69.8,si,138.94,188.04
 2022,ODONTOLOGIA,rendimiento_superior,8,8,,no,69.59,88.34
 2022,PSICOLOGIA,beca,11,4,,si,11.0,19.0
 2022,PSICOLOGIA,extraordinario,20,20,,no,,
 2022,PSICOLOGIA,ordinario,242,35,14.5,si,71.97,71.67
-2022,PSICOLOGIA,otro,6,6,,no,,
+2022,PSICOLOGIA,otro,9,9,,no,,
 2022,PSICOLOGIA,precatolica,36,22,61.1,si,152.06,177.9
 2022,PSICOLOGIA,rendimiento_superior,7,7,,no,77.32,84.93
 2022,PSICOLOGIA,traslado,5,5,,no,71.5,75.19

@@ -79,6 +79,10 @@ CAMPOS = {
     "Nota 01": "nota_01", "Nota 1": "nota_01", "Exam 1": "nota_01",
     "Nota 02": "nota_02", "Nota 2": "nota_02", "Exam 2": "nota_02",
     "Nota": "total",
+    # Precatolica 2025 agrega un componente sobre los dos habituales. Sin
+    # declararlo, su columna se descartaba del encabezado y las siguientes se
+    # corrian una posicion.
+    "Adic": "nota_adicional", "Adicional": "nota_adicional",
     "Total": "total", "TOTAL": "total", "Puntaje": "total",
     "Condición": "condicion", "Condicion": "condicion",
     "RESULTADO": "condicion", "Resultado": "condicion",
@@ -101,13 +105,19 @@ RUIDO = {
 # grano queda mal definido: precatolica2021-I trae MEDICINA HUMANA en 16
 # bloques distintos y todos con un orden 6, que parecen duplicados y no lo son.
 #
-# La sede va al final de la linea del proceso, 'PRECATOLICA 2021-I - AREQUIPA'
-# frente a '- ILO'. El grupo es la linea entre el proceso y la carrera, y no
-# siempre es la postulacion: tambien aparece 'EGRESADO SECUNDARIA'.
+# Lo que va tras el guion en la linea del proceso separa bloques, pero no
+# siempre es lo mismo: en precatolica es la sede ('- AREQUIPA', '- ILO') y en
+# los extraordinarios la submodalidad ('- DEPORTISTAS DESTACADOS',
+# '- GRADUADO O PROFESIONAL UNIVERSITARIO'). Se guarda tal cual bajo un nombre
+# que no promete de mas, porque para el grano ambos cumplen la misma funcion.
+#
+# Sin limite de largo: acotarlo a 24 caracteres dejaba fuera
+# 'GRADUADO O PROFESIONAL UNIVERSITARIO' y sus bloques se mezclaban con los de
+# deportistas, dando 39 filas donde el documento declaraba 24.
 # Se excluyen los numerales romanos: 'PRECATOLICA 2026-III' termina en '- III'
 # y sin este filtro el numero de proceso se guardaba como si fuera una ciudad.
 ROMANOS = {"I", "II", "III", "IV", "V"}
-SEDE = re.compile(r"-\s*([A-ZÑÁÉÍÓÚ][A-ZÑÁÉÍÓÚ ]{2,24})\s*$")
+SEDE = re.compile(r"-\s*([A-ZÑÁÉÍÓÚ][A-ZÑÁÉÍÓÚ ]{2,})\s*$")
 LINEA_PROCESO = re.compile(r"EXAMEN|PRECATOLICA|CONCURSO|ADMISION|EXTRAORD", re.I)
 
 
@@ -345,8 +355,8 @@ def procesar_pdf(ruta):
 
 
 CAMPOS_CSV = ["archivo", "pagina", "sede", "grupo", "carrera", "orden", "codigo",
-              "nombre", "nota_01", "nota_02", "total", "condicion", "opcion",
-              "nota_minima"]
+              "nombre", "nota_adicional", "nota_01", "nota_02", "total",
+              "condicion", "opcion", "nota_minima"]
 
 
 def guardar(ciclo, nombre, filas):

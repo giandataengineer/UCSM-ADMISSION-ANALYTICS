@@ -51,6 +51,7 @@ def construir(con):
             CAST(pagina AS INTEGER)                       AS pagina,
             TRY_CAST(orden  AS INTEGER)                   AS orden,
             codigo, condicion, sede, grupo,
+            TRY_CAST(nota_adicional AS DOUBLE)            AS nota_adicional,
             TRY_CAST(nota_01 AS DOUBLE)                   AS nota_01,
             TRY_CAST(nota_02 AS DOUBLE)                   AS nota_02,
             TRY_CAST(total   AS DOUBLE)                   AS total,
@@ -84,19 +85,30 @@ def construir(con):
 
 # Cada prueba devuelve las filas que la incumplen. Vacio es aprobado.
 PRUEBAS = [
-    ("aritmetica: nota_01 + nota_02 = total", """
-        SELECT archivo, carrera, orden, nota_01, nota_02, total
+    # Precatolica 2025 publica tres componentes en vez de dos, asi que la suma
+    # incluye el adicional cuando existe.
+    ("aritmetica: los componentes suman el total", """
+        SELECT archivo, carrera, orden, nota_adicional, nota_01, nota_02, total
         FROM filas
         WHERE nota_01 IS NOT NULL AND nota_02 IS NOT NULL AND total IS NOT NULL
-          AND abs(nota_01 + nota_02 - total) > {eps}
+          AND abs(coalesce(nota_adicional, 0) + nota_01 + nota_02 - total) > {eps}
     """),
 
+    # Solo se afirma en documentos que publican los dos componentes. Precatolica
+    # 2026 y 2027 publican unicamente 'Exam 2' y el total, y ese total acumula
+    # periodos previos que el documento no muestra: ahi la suma no es
+    # verificable, que es distinto de estar mal.
     ("aritmetica: con un componente ausente, total = componente presente", """
-        SELECT archivo, carrera, orden, nota_01, nota_02, total
-        FROM filas
-        WHERE total IS NOT NULL
-          AND ((nota_01 IS NULL) <> (nota_02 IS NULL))
-          AND abs(coalesce(nota_01, nota_02) - total) > {eps}
+        WITH esquema AS (
+            SELECT archivo FROM filas
+            GROUP BY archivo
+            HAVING count(nota_01) > 0 AND count(nota_02) > 0
+        )
+        SELECT f.archivo, f.carrera, f.orden, f.nota_01, f.nota_02, f.total
+        FROM filas f JOIN esquema e USING (archivo)
+        WHERE f.total IS NOT NULL AND f.nota_adicional IS NULL
+          AND ((f.nota_01 IS NULL) <> (f.nota_02 IS NULL))
+          AND abs(coalesce(f.nota_01, f.nota_02) - f.total) > {eps}
     """),
 
     ("minimo: ningun INGRESO por debajo del minimo institucional", """
@@ -128,10 +140,14 @@ PRUEBAS = [
         GROUP BY archivo, sede, grupo, carrera, orden HAVING count(*) > 1
     """),
 
-    ("minimo unico: un solo minimo institucional por documento", """
-        SELECT archivo, count(DISTINCT nota_minima) AS distintos
-        FROM filas WHERE nota_minima IS NOT NULL
-        GROUP BY archivo HAVING count(DISTINCT nota_minima) > 1
+    # Un archivo puede cubrir varios subprocesos, cada uno con su minimo.
+    # Extraordinario2025I trae dos y no publica sede ni grupo con que
+    # separarlos, asi que se excluye: es un limite de la fuente, no un error.
+    ("minimo unico: un solo minimo por documento, sede y grupo", """
+        SELECT archivo, sede, grupo, count(DISTINCT nota_minima) AS distintos
+        FROM filas
+        WHERE nota_minima IS NOT NULL AND archivo <> 'Extraordinario2025I.pdf'
+        GROUP BY archivo, sede, grupo HAVING count(DISTINCT nota_minima) > 1
     """),
 
     ("dominio: puntaje total dentro de rango plausible", """
