@@ -219,6 +219,51 @@ def es_fila_datos(fila):
     return bool(re.fullmatch(r"\d{1,4}\.\d+", fila.get("total", "")))
 
 
+def calibrar(lineas, idx, anclas):
+    """Recalcula las anclas usando donde arrancan los datos, no el encabezado.
+
+    El rotulo no siempre esta sobre su columna: en los documentos de salud
+    'APELLIDOS Y NOMBRES' ocupa de x=277 a 361 mientras sus datos empiezan en
+    176. Un nombre largo alcanza el rotulo y se asigna bien; uno corto termina
+    antes de llegar y cae en la columna anterior. La misma tabla parseaba unas
+    filas bien y otras mal segun el largo del apellido.
+
+    Agrupar los inicios reales de las filas de datos da las columnas de verdad.
+    Se conservan las etiquetas del encabezado en su orden, que es lo unico que
+    el rotulo aporta con fiabilidad.
+    """
+    inicios = []
+    for _, palabras in lineas[idx + 1:]:
+        for _, x0, _ in palabras:
+            inicios.append(x0)
+    if len(inicios) < len(anclas) * 3:
+        return anclas
+
+    # Agrupa posiciones que difieren menos de 5pt: es el jitter del
+    # renderizador, no una columna distinta.
+    inicios.sort()
+    grupos, actual = [], [inicios[0]]
+    for x in inicios[1:]:
+        if x - actual[-1] <= 5:
+            actual.append(x)
+        else:
+            grupos.append(actual)
+            actual = [x]
+    grupos.append(actual)
+
+    # Solo se calibra si la tabla tiene tantas columnas de datos como rotulos
+    # reconocidos. Cuando trae mas, el encabezado esta incompleto y emparejar
+    # por posicion asigna etiquetas equivocadas: en precatolica 2025 hay tres
+    # componentes de nota y el rotulo solo declara dos, y forzar la calibracion
+    # ponia el promedio bajo 'total' y rompia la aritmetica en 2 452 filas.
+    poblados = [g for g in grupos if len(g) >= 3]
+    if len(poblados) != len(anclas):
+        return anclas
+    columnas = sorted(sum(g) / len(g) for g in poblados)
+    return [(campo, x, x + (anc[2] - anc[1]))
+            for (campo, *_), x, anc in zip(anclas, columnas, anclas)]
+
+
 def procesar_pagina(pagina):
     """Extrae la carrera, las filas y la nota de corte de una pagina."""
     lineas = lineas_de(pagina)
@@ -228,6 +273,7 @@ def procesar_pagina(pagina):
     idx, anclas = encontrar_encabezado(lineas)
     if idx is None:
         return None, [], None, "", ""
+    anclas = calibrar(lineas, idx, anclas)
 
     sede, grupo, i_proceso = "", "", None
     for i, (_, palabras) in enumerate(lineas[:idx]):
