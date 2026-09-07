@@ -128,18 +128,24 @@ versión obtenible desde ahí es una vista previa con **14 de las 50 páginas**
 legibles; el resto viene rasterizado con desenfoque irreversible, así que no se
 recupera por OCR ni por ningún otro medio.
 
-Se guarda como `precatolica2026-II_PARCIAL.pdf` con el sufijo explícito. Trae
-117 filas de ingresantes en 14 carreras, incluidas Medicina Humana e Ingeniería
-de Sistemas, y cubre las páginas 1 a 20 del documento original de forma salteada.
-Nada de las páginas 21 a 50.
+Esa copia trae 117 ingresantes en 14 de las 27 carreras, fechada el 14/12/2025,
+lo que concuerda con el instructivo que fija matrícula del 17 al 31 de diciembre.
+Confirma que el proceso se realizó.
 
-**El parser debe excluirlo del cálculo de tasas de admisión.** Un denominador
-incompleto produce una tasa falsa, que es peor que no tener el dato. Sirve para
-verificar notas de corte de esas 14 carreras y como evidencia de que el proceso
-existió, no para estadística agregada.
+**Se decidió no incorporarla al corpus.** Un documento con 14 de 27 carreras
+mete un denominador incompleto: la tasa de admisión que saldría de ahí sería
+falsa, y una cifra falsa hace más daño que un proceso declarado como ausente.
+Tampoco se simulan los datos faltantes, por la misma razón y porque serían
+nombres y puntajes inventados de personas reales.
 
-La copia oficial y completa sigue pendiente de solicitud a la Dirección de
-Admisión.
+Búsqueda agotada también fuera del portal: Scribd, Issuu, SlideShare, Course
+Hero y páginas de academias en Facebook. Scribd aloja Precatólica 2026-I, el
+Tercer Ordinario 2026, EG2026II y el cuadro de vacantes, todos ya presentes en
+el corpus desde la fuente oficial. Del 2026-II no hay copia completa en ningún
+lado.
+
+El proceso queda declarado como ausente. Si la Dirección de Admisión facilita la
+copia oficial, se incorpora y la matriz cierra en 72 de 72.
 
 ## Consecuencias
 
