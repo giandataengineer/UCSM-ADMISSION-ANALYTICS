@@ -25,6 +25,9 @@ RAIZ = os.path.dirname(os.path.abspath(__file__))
 SILVER = os.path.join(RAIZ, "data_normalizada", "postulaciones.csv")
 GOLD = os.path.join(RAIZ, "data_normalizada", "gold")
 
+# El cambio de escala de calificacion, documentado en docs/ADR-004.
+CICLO_ANTERIOR_A_LA_ESCALA, CICLO_CAMBIO_ESCALA = "2023", "2024"
+
 resultados = []
 
 
@@ -126,26 +129,37 @@ def seudonimizacion(silver):
 
 
 def distribucion(silver):
-    """La mediana de puntaje de una carrera no puede multiplicarse de un ciclo
-    al siguiente sin que haya cambiado la escala. Se avisa donde ocurre para
-    que el tablero lo anote, no para bloquear."""
+    """La mediana de una carrera no puede multiplicarse de un ciclo al otro.
+
+    Cuando pasa en muchas carreras a la vez y en la misma transicion, no es un
+    cambio de exigencia sino de escala. UCSM hizo uno en 2024 y esta registrado
+    en ADR-004, asi que los saltos en ese limite estan explicados y la capa
+    Silver publica el percentil para poder comparar a traves de el.
+
+    Esos se exceptuan por su fecha, no por su cantidad: un salto en cualquier
+    otra transicion sigue haciendo fallar la prueba, que es para lo que sirve.
+    """
     por = defaultdict(list)
     for x in silver:
         t = num(x["total"])
         if t is not None and x["modalidad"] == "ordinario":
             por[(x["carrera"], x["ciclo"])].append(t)
 
-    saltos = set()
+    saltos, explicados = set(), 0
     carreras = {c for c, _ in por}
     for carrera in carreras:
         ciclos = sorted(c for ca, c in por if ca == carrera)
         for a, b in zip(ciclos, ciclos[1:]):
             ma = statistics.median(por[(carrera, a)])
             mb = statistics.median(por[(carrera, b)])
+            if a == CICLO_ANTERIOR_A_LA_ESCALA and b == CICLO_CAMBIO_ESCALA:
+                explicados += 1
+                continue
             if ma > 0 and (mb / ma > 1.8 or mb / ma < 0.55):
                 saltos.add((carrera[:28], f"{a}->{b}", round(ma, 1), round(mb, 1)))
-    prueba("distribucion: sin saltos de mediana entre ciclos consecutivos",
-           saltos, "(cambio de escala de calificacion)")
+    prueba(f"distribucion: sin saltos de mediana fuera del cambio de escala "
+           f"({explicados} carreras saltan en {CICLO_ANTERIOR_A_LA_ESCALA}"
+           f"->{CICLO_CAMBIO_ESCALA}, ver ADR-004)", saltos)
 
 
 def idempotencia():

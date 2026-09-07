@@ -40,6 +40,8 @@ TOL_FILA = 2.5
 # Separacion horizontal minima para cortar dos palabras. Menor que el espacio
 # entre columnas y mayor que el espacio entre palabras de un nombre.
 CORTE_PALABRA = 2.2
+# Margen para buscar el hueco real alrededor del borde de una columna.
+CERCA_DEL_BORDE = 8
 
 # Cada tipo de proceso usa su propio vocabulario para el mismo concepto:
 # los ordinarios dicen INGRESO, los de seleccion previa SELECCIONADO, y las
@@ -155,14 +157,22 @@ def lineas_de(pagina):
             else:
                 actual.append(siguiente)
         palabras.append(actual)
+        # Se conservan los caracteres de cada palabra: hacen falta para poder
+        # partirla despues si resulta que cruza el borde de una columna.
         fuera.append((y, [("".join(c["text"] for c in w).strip(),
-                           w[0]["x0"], w[-1]["x1"]) for w in palabras if
+                           w[0]["x0"], w[-1]["x1"], w) for w in palabras if
                           "".join(c["text"] for c in w).strip()]))
     return fuera
 
 
-def encontrar_encabezado(lineas):
-    """Devuelve (indice, [(campo, x0), ...]) de la linea de encabezado.
+def encabezados(lineas):
+    """Todos los encabezados de la pagina, como [(indice, anclas), ...].
+
+    Una pagina no tiene una sola tabla. Los procesos con pocos admitidos por
+    carrera apilan varios bloques cortos en la misma hoja, cada uno con su
+    titulo y su encabezado: la pagina 78 de Extraordinario 2022-I trae seis.
+    Quedarse con el primero hacia que las 14 filas de esa pagina se guardaran
+    todas como INGENIERIA CIVIL, que era la carrera del primer bloque.
 
     Se reconoce por su contenido, no por rotulos fijos: debe traer el nombre de
     la persona, su resultado o puntaje, y al menos tres columnas reconocibles.
@@ -174,9 +184,10 @@ def encontrar_encabezado(lineas):
     Los rotulos ajenos a CAMPOS se ignoran, asi un esquema nuevo se parsea
     igual en las columnas que si conoce en vez de fallar entero.
     """
+    salida = []
     for i, (_, palabras) in enumerate(lineas):
         anclas, vistos = [], set()
-        for texto, x0, x1 in palabras:
+        for texto, x0, x1, _ in palabras:
             campo = CAMPOS.get(texto)
             if campo and campo not in vistos:
                 anclas.append((campo, x0, x1))
@@ -185,8 +196,66 @@ def encontrar_encabezado(lineas):
         # menos que eso la linea es un titulo o una nota al pie que coincidio.
         if "nombre" in vistos and len(anclas) >= 3 and (
                 "total" in vistos or "condicion" in vistos):
-            return i, anclas
-    return None, []
+            salida.append((i, anclas))
+    return salida
+
+
+def parte_un_numero(chars, i):
+    """Si cortar en i dejaria un puntaje partido en dos.
+
+    En Extraordinario 2025-I los tres componentes se imprimen pegados y sin
+    hueco. Cortar por el borde de columna producia nota_01 = '93' y nota_02 =
+    '.492000 60.745200' cuando el valor real era 93.492000.
+    """
+    return (chars[i - 1]["text"].isdigit()
+            and (chars[i]["text"].isdigit() or chars[i]["text"] == "."))
+
+
+def partir_en_columnas(palabras, anclas):
+    """Parte las palabras que cruzan el inicio de una columna.
+
+    Agrupar caracteres por hueco horizontal no distingue un espacio ancho del
+    borde entre dos celdas. En Beca Esperanza 2025 un nombre largo queda a
+    menos de CORTE_PALABRA de la carrera que le sigue y los dos textos salen
+    como una sola palabra, con lo que la carrera se pierde entera.
+
+    El inicio de la columna da el punto de corte exacto. Solo se parte por los
+    bordes que se piden: hacerlo por todos destruye nombres legitimos en los
+    documentos donde el rotulo del encabezado cae dentro de la columna vecina,
+    y la extraccion baja de 65 060 filas a 46 297.
+    """
+    bordes = [x0 for _, x0, _ in anclas]
+    fuera = []
+    for texto, px0, px1, chars in palabras:
+        cruza = [b for b in bordes if px0 < b < px1]
+        if not cruza or not chars:
+            fuera.append((texto, px0, px1))
+            continue
+        # El corte no va en la x del borde sino en el hueco entre caracteres
+        # mas cercano a el: dos celdas contiguas siempre dejan alguna separacion,
+        # solo que menor que CORTE_PALABRA. Cortar en la x exacta se comia la
+        # primera letra del campo siguiente.
+        indices = set()
+        for borde in cruza:
+            candidatos = [(chars[i + 1]["x0"] - chars[i]["x1"], i + 1)
+                          for i in range(len(chars) - 1)
+                          if abs(chars[i + 1]["x0"] - borde) <= CERCA_DEL_BORDE
+                          and not parte_un_numero(chars, i + 1)]
+            # Sin un corte admisible se deja la palabra entera: un campo vacio
+            # dice que no se sabe, un numero cortado afirma algo falso.
+            if candidatos:
+                indices.add(max(candidatos)[1])
+        piezas, previo = [], 0
+        for i in sorted(indices):
+            if i > previo:
+                piezas.append(chars[previo:i])
+            previo = i
+        piezas.append(chars[previo:])
+        for w in piezas:
+            t = "".join(c["text"] for c in w).strip()
+            if t:
+                fuera.append((t, w[0]["x0"], w[-1]["x1"]))
+    return fuera
 
 
 def asignar(palabras, anclas):
@@ -205,10 +274,24 @@ def asignar(palabras, anclas):
     puede caer en una columna anterior a la de la palabra que la precede. Eso
     evita que un nombre largo invada la columna siguiente y luego vuelva atras.
     """
+    fila = repartir(palabras, anclas)
+    # Una columna vacia cuando alguna palabra cubre su borde significa que dos
+    # celdas se leyeron como una sola palabra. Se reintenta partiendo solo por
+    # ese borde, que es donde consta que hay un campo perdido.
+    huecos = [a for a in anclas if not fila[a[0]]]
+    if huecos:
+        partidas = partir_en_columnas(palabras, huecos)
+        if len(partidas) > len(palabras):
+            fila = repartir(partidas, anclas)
+    return fila
+
+
+def repartir(palabras, anclas):
     fila = {campo: [] for campo, _, _ in anclas}
     centros = [(x0 + x1) / 2 for _, x0, x1 in anclas]
     minimo = 0
-    for texto, px0, px1 in palabras:
+    for palabra in palabras:
+        texto, px0, px1 = palabra[0], palabra[1], palabra[2]
         mejor, mejor_solape = None, 0
         for i in range(minimo, len(anclas)):
             _, hx0, hx1 = anclas[i]
@@ -266,7 +349,7 @@ def calibrar(lineas, idx, anclas):
     """
     inicios = []
     for _, palabras in lineas[idx + 1:]:
-        for _, x0, _ in palabras:
+        for _, x0, _, _ in palabras:
             inicios.append(x0)
     if len(inicios) < len(anclas) * 3:
         return anclas
@@ -296,58 +379,90 @@ def calibrar(lineas, idx, anclas):
             for (campo, *_), x, anc in zip(anclas, columnas, anclas)]
 
 
-def procesar_pagina(pagina):
-    """Extrae la carrera, las filas y la nota de corte de una pagina."""
-    lineas = lineas_de(pagina)
-    if not lineas:
-        return None, [], None, "", ""
+def titulo_carrera(lineas):
+    """La carrera es la ultima linea en mayusculas y sin digitos del tramo.
 
-    idx, anclas = encontrar_encabezado(lineas)
-    if idx is None:
-        return None, [], None, "", ""
-    anclas = calibrar(lineas, idx, anclas)
-
-    sede, grupo, i_proceso = "", "", None
-    for i, (_, palabras) in enumerate(lineas[:idx]):
-        texto = " ".join(p[0] for p in palabras).strip()
-        if LINEA_PROCESO.search(texto):
-            i_proceso = i
-            m = SEDE.search(texto)
-            if m and m.group(1).strip() not in ROMANOS:
-                sede = m.group(1).strip()
-    # El grupo es la linea siguiente al proceso, si no es ya la carrera.
-    if i_proceso is not None and i_proceso + 1 < idx:
-        candidato = " ".join(p[0] for p in lineas[i_proceso + 1][1]).strip()
-        if candidato and candidato not in RUIDO and i_proceso + 2 <= idx - 1:
-            grupo = candidato
-
-    # La carrera es la ultima linea de una sola palabra en mayusculas antes
-    # del encabezado. El proceso y la modalidad quedan mas arriba.
-    carrera = None
-    for y, palabras in reversed(lineas[:idx]):
+    Se busca hacia atras desde el encabezado: encima de el estan, en orden, el
+    proceso, la modalidad y por ultimo el nombre de la carrera. Las filas de
+    datos del bloque anterior no compiten porque llevan digitos.
+    """
+    for _, palabras in reversed(lineas):
         texto = " ".join(p[0] for p in palabras).strip()
         if texto in RUIDO or not texto:
             continue
         if texto == texto.upper() and len(texto) >= 5 and not re.search(r"\d", texto):
-            carrera = texto
-            break
+            return texto
+    return None
 
-    filas, corte = [], None
-    for y, palabras in lineas[idx + 1:]:
-        texto = " ".join(p[0] for p in palabras)
-        if texto.startswith("Nota M"):
-            m = re.search(r"(\d+\.\d+)", texto)
-            if m:
-                corte = float(m.group(1))
-            continue
-        if re.match(r"^(NC|NSP)\s*:", texto) or texto.startswith("*"):
-            continue
-        fila = asignar(palabras, anclas)
-        if es_fila_datos(fila):
-            fila["condicion"] = condicion_de(fila.get("condicion", ""))
-            filas.append(fila)
 
-    return carrera, filas, corte, sede, grupo
+def actualizar_proceso(tramo, estado):
+    """Actualiza sede y grupo si el tramo trae una linea de proceso.
+
+    Un mismo documento encadena subprocesos y el encabezado que los separa
+    aparece donde toque, incluso a mitad de pagina: en la 78 de Extraordinario
+    2022-I el convenio cambia de I a II entre dos bloques. Por eso sede y grupo
+    son estado que corre a lo largo del PDF y no un atributo de la pagina; las
+    primeras carreras de una hoja suelen pertenecer al proceso que arranco en
+    la anterior.
+    """
+    for i, (_, palabras) in enumerate(tramo):
+        texto = " ".join(p[0] for p in palabras).strip()
+        if not LINEA_PROCESO.search(texto):
+            continue
+        m = SEDE.search(texto)
+        estado["sede"] = (m.group(1).strip()
+                          if m and m.group(1).strip() not in ROMANOS else "")
+        # El grupo es la linea siguiente al proceso, si no es ya la carrera.
+        estado["grupo"] = ""
+        if i + 2 <= len(tramo) - 1:
+            candidato = " ".join(p[0] for p in tramo[i + 1][1]).strip()
+            if candidato and candidato not in RUIDO:
+                estado["grupo"] = candidato
+
+
+def procesar_pagina(pagina, estado):
+    """Extrae las filas de cada bloque de la pagina con su propia carrera."""
+    lineas = lineas_de(pagina)
+    if not lineas:
+        return []
+
+    cabezas = encabezados(lineas)
+    if not cabezas:
+        return []
+
+    filas = []
+    for k, (idx, anclas) in enumerate(cabezas):
+        fin = cabezas[k + 1][0] if k + 1 < len(cabezas) else len(lineas)
+        desde = 0 if k == 0 else cabezas[k - 1][0]
+        tramo = lineas[desde:idx]
+        actualizar_proceso(tramo, estado)
+        carrera = titulo_carrera(tramo)
+        # La calibracion mira solo las filas de este bloque: los de mas abajo
+        # pueden tener otro ancho de columna.
+        anclas_bloque = calibrar(lineas[:fin], idx, anclas)
+
+        bloque, corte = [], None
+        for _, palabras in lineas[idx + 1:fin]:
+            texto = " ".join(p[0] for p in palabras)
+            if texto.startswith("Nota M"):
+                m = re.search(r"(\d+\.\d+)", texto)
+                if m:
+                    corte = float(m.group(1))
+                continue
+            if re.match(r"^(NC|NSP)\s*:", texto) or texto.startswith("*"):
+                continue
+            fila = asignar(palabras, anclas_bloque)
+            if es_fila_datos(fila):
+                fila["condicion"] = condicion_de(fila.get("condicion", ""))
+                bloque.append(fila)
+        for f in bloque:
+            f["carrera_bloque"] = carrera
+            f["nota_minima"] = corte
+            f["sede"] = estado["sede"]
+            f["grupo"] = estado["grupo"]
+        filas.extend(bloque)
+
+    return filas
 
 
 def procesar_pdf(ruta):
@@ -356,20 +471,24 @@ def procesar_pdf(ruta):
     nombre = os.path.basename(ruta)
     try:
         with pdfplumber.open(ruta) as pdf:
+            estado = {"sede": "", "grupo": ""}
             for pagina in pdf.pages:
-                carrera, filas, corte, sede, grupo = procesar_pagina(pagina)
+                filas = procesar_pagina(pagina, estado)
                 if not filas:
                     continue
-                if not carrera and not any(f.get("escuela") for f in filas):
+                if not any(f.get("escuela") or f.get("carrera_bloque")
+                           for f in filas):
                     avisos.append(f"pag {pagina.page_number}: filas sin carrera")
                     continue
                 for f in filas:
                     # En la familia Excel la carrera es una columna de la fila;
-                    # en la del sistema de admision es el titulo del bloque.
+                    # en la del sistema de admision es el titulo de su bloque.
                     f.update(archivo=nombre,
-                             carrera=(f.get("escuela") or carrera or "").strip(),
-                             pagina=pagina.page_number, nota_minima=corte,
-                             sede=sede, grupo=grupo)
+                             carrera=(f.get("escuela")
+                                      or f.pop("carrera_bloque", None)
+                                      or "").strip(),
+                             pagina=pagina.page_number)
+                    f.pop("carrera_bloque", None)
                     fuera.append(f)
     except Exception as e:
         avisos.append(f"error de lectura: {type(e).__name__}: {e}")

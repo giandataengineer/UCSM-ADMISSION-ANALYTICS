@@ -7,5 +7,5 @@ reconciliacion: Gold no inventa carreras,0
 seudonimo: todos tienen el largo esperado,0
 seudonimo: proporcion de personas unicas plausible,0
 seudonimo: ningun nombre sobrevive en la salida,0
-distribucion: sin saltos de mediana entre ciclos consecutivos,27
+"distribucion: sin saltos de mediana fuera del cambio de escala (27 carreras saltan en 2023->2024, ver ADR-004)",0
 idempotencia: la normalizacion es reproducible,0

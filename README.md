@@ -16,7 +16,7 @@ ExtraccionPDF/
   5_DocumentosBase.py            reglamentos, temarios, cronogramas y vacantes por año
   6_RescateHistorico.py          archivos fuera de convención de nombre
   7_RequisitosIngresantes.py     instructivos por proceso
-  8_ExtraccionTablas.py          [pendiente] reconstrucción de filas por coordenadas
+  8_ExtraccionTablas.py          reconstrucción de filas por coordenadas
   9_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
   10_AnalisisExploratorio.ipynb  [pendiente]
   data/
@@ -128,8 +128,8 @@ Once etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Base normativa | `5_DocumentosBase.py` | reglamentos, temarios, cronogramas |
 | Rescate histórico | `6_RescateHistorico.py` | archivos sin convención de nombre |
 | Instructivos | `7_RequisitosIngresantes.py` | 22 documentos por proceso |
-| **Extracción de tablas** | `8_ExtraccionTablas.py` | **64 077 filas** por coordenadas |
-| Normalización (Silver) | `9_NormalizacionDatos.py` | 64075 filas, 46 carreras, seudonimizadas |
+| **Extracción de tablas** | `8_ExtraccionTablas.py` | **65 060 filas** por coordenadas, bloque a bloque |
+| Normalización (Silver) | `9_NormalizacionDatos.py` | 64 794 filas, 47 carreras, seudonimizadas |
 | Agregados (Gold) | `10_Agregados.py` | 6 CSV para Tableau |
 | Reconciliación | `11_Validacion.py` | 10 pruebas en DuckDB |
 | Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
