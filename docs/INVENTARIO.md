@@ -1,11 +1,14 @@
 # Inventario del corpus UCSM
-220 PDFs de resultados descargados, agrupados por ciclo de admision.
+
+221 PDFs de resultados descargados, agrupados por ciclo de admision.
+
 El ciclo es el año de INGRESO declarado dentro del PDF, no el año en que se rindio el examen.
 
 **Columna utilidad**
+
 - `DENOM` trae INGRESO y NO INGRESO: permite calcular tasas de admision
 - `ing.` solo lista ingresantes
-- `office` exportado de Excel/Word: necesita pdfplumber, mi extractor rapido no lo lee
+- `office` exportado de Excel/Word: necesita pdfplumber, el extractor rapido no lo lee
 
 ## Ciclo 2016  ·  1 PDFs  ·  0 con denominador
 
@@ -191,7 +194,7 @@ El ciclo es el año de INGRESO declarado dentro del PDF, no el año en que se ri
 | 20/03/2023 | TERCER EXAMEN ESTUDIOS A DISTANCIA Y SEMIPRESE | `DISTANCIA_E2023III.pdf` | 67 | DENOM | 0 | 2119 |
 | 06/08/2023 | EXAMEN EXTRAORDINARIO 2023 II - TRASLADO EXTER | `Extraordinario2023II.pdf` | 38 | DENOM | 382 | 130 |
 
-## Ciclo 2024  ·  26 PDFs  ·  15 con denominador
+## Ciclo 2024  ·  27 PDFs  ·  16 con denominador
 
 | fecha | proceso | archivo | pág | util | puntajes | códigos |
 |---|---|---|---|---|---|---|
@@ -216,6 +219,7 @@ El ciclo es el año de INGRESO declarado dentro del PDF, no el año en que se ri
 | 28/01/2024 | SEGUNDO EXAMEN ESTUDIOS A DISTANCIA Y SEMIPRES | `DISTANCIA_E2024II.pdf` | 22 | DENOM | 203 | 231 |
 | 04/02/2024 | EXAMEN EXTRAORDINARIO 2024 I - CONVENIO ANDRES | `Extraordinario20241.pdf` | 83 | DENOM | 1172 | 0 |
 | 11/02/2024 | PRECATOLICA 2024-III | `precatolica2024-III.pdf` | 64 | DENOM | 3427 | 0 |
+| 18/02/2024 | TERCER EXAMEN ORDINARIO 2024 | `EG2024III.pdf` | 76 | DENOM | 6081 | 0 |
 | 03/03/2024 | EXAMEN COMPLEMENTARIO 2024 | `EComplementario2024.pdf` | 2 | DENOM | 139 | 0 |
 | 03/03/2024 | Nota 02 : Examen | `Nivelacion2024.pdf` | 13 | DENOM | 59 | 0 |
 | 25/03/2024 | RESULTADOS EXAMEN DE ADMISION 2024 - BECA ESPE | `Beca_Esperanza_2024.pdf` | 26 | punt. | 770 | 954 |

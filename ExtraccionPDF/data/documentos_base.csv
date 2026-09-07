@@ -15,9 +15,11 @@ anio,tipo,archivo_origen,fuente,bytes,sha256,ruta
 2020,temario,2020_TEMARIO.pdf,sitio,269263,b879ec0d30643ab0,data/documentos_base/2020/temario.pdf
 2020,vacantes,2020_VACANTES.pdf,sitio,3823133,f4dd12161299722e,data/documentos_base/2020/vacantes.pdf
 2021,reglamento,2021_REGLAMENTO.pdf,sitio,315597,f981e02a5b85473f,data/documentos_base/2021/reglamento.pdf
+2021,reglamento_examen_virtual,REGLAMENTO_EXAMEN_VIRTUAL_ORDINARIO_2021.pdf,sitio,462398,a0d73a415f7de688,data/documentos_base/2021/reglamento_examen_virtual.pdf
 2021,temario,2021_TEMARIO.pdf,sitio,608752,b4a116c33513598f,data/documentos_base/2021/temario.pdf
 2021,vacantes,2021_VACANTES.pdf,sitio,1825084,c8d28743d5f40c79,data/documentos_base/2021/vacantes.pdf
 2022,cronograma,2022_CRONOGRAMA.pdf,sitio,473264,59bdf4fe211fdbec,data/documentos_base/2022/cronograma.pdf
+2022,reglamento,REGLAMENTO_EXAMEN_VIRTUAL_2022.pdf,sitio,129284,95bf547316d44a48,data/documentos_base/2022/reglamento.pdf
 2022,temario,2022_TEMARIO.pdf,sitio,608633,c56e2be663249a0b,data/documentos_base/2022/temario.pdf
 2022,vacantes,2022_VACANTES.pdf,sitio,1758097,080f1cd9786e8205,data/documentos_base/2022/vacantes.pdf
 2023,cronograma,2023_CRONOGRAMA.pdf,sitio,153402,22905cd970d590d4,data/documentos_base/2023/cronograma.pdf
@@ -30,6 +32,7 @@ anio,tipo,archivo_origen,fuente,bytes,sha256,ruta
 2025,temario,2025_TEMARIO.pdf,sitio,278495,51cac33b270fef4b,data/documentos_base/2025/temario.pdf
 2025,vacantes,2025_VACANTES.pdf,sitio,783296,29735091bab54ed8,data/documentos_base/2025/vacantes.pdf
 2026,cronograma,2026_CRONOGRAMA.pdf,sitio,245789,f830e1f9ce6ec0d7,data/documentos_base/2026/cronograma.pdf
+2026,reglamento,2026_REGLAMENTO_ADMISION.pdf,sitio,512312,7f0005747593b442,data/documentos_base/2026/reglamento.pdf
 2026,temario,2026_TEMARIO.pdf,sitio,356733,47efc61c45c6e687,data/documentos_base/2026/temario.pdf
 2026,vacantes,2026_VACANTES.pdf,sitio,779150,1ce6a352de5b4320,data/documentos_base/2026/vacantes.pdf
 2027,cronograma,9807-CU-2026-CRONOGRAMA-2027.pdf,cache,260720,cb364b350747bab5,data/documentos_base/2027/cronograma.pdf

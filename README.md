@@ -22,7 +22,7 @@ ExtraccionPDF/
     auditoria.csv                221 filas: contenido real de cada PDF
     carreras_por_ciclo.csv       47 carreras × 9 ciclos
     vacantes.csv                 vacantes 2027 por carrera y modalidad
-    documentos_base.csv          38 documentos normativos indexados
+    documentos_base.csv          41 documentos normativos indexados
     raw/<ciclo>/                 221 PDFs de resultados por año de ingreso
     documentos_base/<año>/       vacantes, reglamento, temario, cronograma
   data_extraida/                 [vacío] salida del parser
@@ -37,7 +37,7 @@ pip install -r requirements.txt
 python ExtraccionPDF/1_DescubrimientoDescarga.py   # ~5 min, 47 MB
 python ExtraccionPDF/2_AuditoriaCorpus.py
 python ExtraccionPDF/3_CatalogoCarreras.py
-python ExtraccionPDF/5_DocumentosBase.py           # 22 MB de normativa
+python ExtraccionPDF/5_DocumentosBase.py           # 22.9 MB de normativa
 python ExtraccionPDF/4_Vacantes.py
 ```
 
@@ -45,7 +45,7 @@ Los PDFs no están versionados. Se reconstruyen con el primer script.
 
 ## El corpus
 
-220 PDFs, 47 MB, 5 501 páginas, ciclos de admisión 2016 a 2027.
+221 PDFs de resultados, 47.9 MB, 5 577 páginas, ciclos de admisión 2016 a 2027.
 
 El **ciclo** es el año de ingreso declarado dentro del PDF, no el año en que se
 rindió el examen: `EG2023I.pdf` dice *PRIMER EXAMEN ORDINARIO 2023* pero está
@@ -69,8 +69,8 @@ En 2026 UCSM cambió la convención: de `EG2026I.pdf` pasaron a
 
 ## Lo que limita el análisis
 
-**Dos familias de PDF.** 98 archivos vienen de Excel/Word con object streams;
-88 del generador del sistema de admisión, que usa fuentes subset con ToUnicode.
+**Dos familias de PDF.** 104 archivos vienen de Excel/Word con object streams y 117
+del generador del sistema de admisión, que usa fuentes subset con ToUnicode.
 Son dos parsers distintos y el más laborioso cubre la mayoría del corpus.
 
 **Siete esquemas distintos.** El más completo es
@@ -87,7 +87,7 @@ en 12 de 17 de 2025, en 1 de 19 de 2026 y en ninguno de 2027. El análisis de
 cohortes, que es seguir a la misma persona entre procesos, solo es viable
 **2021-2024**.
 
-**66 PDFs traen el denominador.** Es decir, listan `NO INGRESO` además de
+**67 PDFs traen el denominador.** Es decir, listan `NO INGRESO` además de
 `INGRESO`, lo que permite calcular tasas de admisión reales y no solo contar
 ganadores. Concentrados en 2022-2025.
 
@@ -133,14 +133,14 @@ publique no habilita a republicarlos consolidados.
 
 ## Base normativa
 
-38 documentos oficiales, 22 MB, uno por año de 2016 a 2027, en
+41 documentos oficiales, 22.9 MB, de 2016 a 2027, en
 `data/documentos_base/<año>/`:
 
 | Documento | Cobertura | Para qué sirve |
 |---|---|---|
 | `vacantes.pdf` | 2016-2027, completo | Plazas por carrera y modalidad. Es el denominador. |
 | `temario.pdf` | 2016-2027, completo | Qué se evalúa. Explica saltos en las notas. |
-| `reglamento.pdf` | 2016-2021 y 2027 | Reglas del proceso. Los PDFs citan sus artículos. |
+| `reglamento.pdf` | 2016-2022, 2026-2027 | Reglas del proceso. Los PDFs citan sus artículos. |
 | `cronograma.pdf` | 2022-2027 | Fechas oficiales de cada proceso. |
 
 El cuadro de vacantes reparte las plazas entre cinco vías de ingreso. Para 2027:

@@ -15,7 +15,7 @@ Es trabajo intensivo en CPU sobre archivos independientes, no un problema de
 volumen de datos.
 
 Medición sobre el corpus real, máquina de 10 núcleos, pdfplumber 0.11.8,
-extracción char-level de 221 PDFs (47.9 MB, 5 501 páginas):
+extracción char-level de 221 PDFs (47.9 MB, 5 577 páginas):
 
 | Configuración | Tiempo del corpus | Aceleración | Eficiencia |
 |---|---|---|---|

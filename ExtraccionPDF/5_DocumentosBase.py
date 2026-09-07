@@ -31,6 +31,32 @@ CARPETAS = [
 TIPOS = ["VACANTES", "REGLAMENTO", "TEMARIO", "CRONOGRAMA"]
 ANIOS = [str(a) for a in range(2016, 2028)]
 
+# Documentos que rompen la convencion <año>_<TIPO>.pdf y solo aparecen buscando
+# en el indice historico de Wayback sobre todo el dominio. Tapan los huecos de
+# reglamento entre 2022 y 2026 y el cronograma de 2017.
+FUERA_DE_PATRON = {
+    "2016/reglamento_admision.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/reglamento_admision_2016.pdf",
+    "2017/cronograma.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/CronogramaPregrado2017.pdf",
+    "2021/reglamento_examen_virtual.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/REGLAMENTO_EXAMEN_VIRTUAL_ORDINARIO_2021.pdf",
+    "2021/reglamento_precatolica.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/REGLAMENTO-PRECATOLICA-PROCESO-2021-III-1.pdf",
+    "2022/reglamento.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/REGLAMENTO_EXAMEN_VIRTUAL_2022.pdf",
+    "2022/reglamento_precatolica.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/REGLAMENTO-PRECATOLICA-2022-I.pdf",
+    "2022/vacantes_detalle.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/CUADRO-DE-VACANTES-ADMISION-2022.pdf",
+    "2023/cronograma_pregrado.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/2023_CronogramaPregrado.pdf",
+    "2024/reglamento.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/8627-CU-2024-TEXTO-UNICO-ORDENADO-DEL-REGLAMENTO-DE-ADMISION-VERSION-04.pdf",
+    "2026/reglamento.pdf":
+        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/2026_REGLAMENTO_ADMISION.pdf",
+}
+
 # Documentos del ciclo 2027, que viven fuera de /admision/ con nombre de acuerdo
 SUELTOS = {
     "2027/vacantes.pdf":
@@ -103,7 +129,7 @@ def main():
                               ruta=os.path.relpath(ruta, RAIZ)))
             print(f"  {anio} {tipo.lower():<11} {len(datos)//1024:>5} KB  ({fuente})")
 
-    for rel, url in SUELTOS.items():
+    for rel, url in {**FUERA_DE_PATRON, **SUELTOS}.items():
         ruta = os.path.join(DESTINO, rel)
         # Si ya esta en disco se reusa, pero igual entra al manifiesto: el CSV
         # describe el corpus completo, no solo lo descargado en esta corrida.
@@ -121,7 +147,7 @@ def main():
                           fuente=origen, bytes=len(datos),
                           sha256=hashlib.sha256(datos).hexdigest()[:16],
                           ruta=os.path.relpath(ruta, RAIZ)))
-        print(f"  {anio} {tipo:<11} {len(datos)//1024:>5} KB  ({origen})")
+        print(f"  {anio} {tipo:<24} {len(datos)//1024:>5} KB  ({origen})")
 
     destino_csv = os.path.join(RAIZ, "data", "documentos_base.csv")
     with open(destino_csv, "w", newline="", encoding="utf-8") as f:
