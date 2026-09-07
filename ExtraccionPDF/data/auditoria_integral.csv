@@ -1,0 +1,24 @@
+nivel,bloque,hallazgo
+ok,cadena,auditoria cubre los 151 PDFs en disco
+ok,cadena,el parser proceso los 151 PDFs
+aviso,cadena,2 PDFs descubiertos que no se pudieron descargar
+aviso,perdidas,46 de 151 PDFs no producen filas (30%)
+ok,perdidas,"normalizacion descarta 2 filas (0.00%), titulos leidos como carrera"
+ok,perdidas,"58,083 filas con resultado binario (91% del total)"
+ok,privacidad,ningun DNI ni nombre en los 31 archivos versionados
+ok,privacidad,data/raw/ esta en .gitignore
+ok,privacidad,data_extraida/ esta en .gitignore
+ok,privacidad,postulaciones.csv esta en .gitignore
+ok,cobertura,"ciclo 2021:  8,245 filas, 59.7% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2022: 11,012 filas, 50.8% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2023: 13,611 filas, 61.4% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2024: 12,837 filas, 55.8% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2025: 11,460 filas, 47.3% rechazados (denominador fiable)"
+aviso,cobertura,"ciclo 2026:  5,213 filas,  9.6% rechazados (solo ingresantes)"
+aviso,cobertura,"ciclo 2027:  1,697 filas,  0.0% rechazados (solo ingresantes)"
+ok,cobertura,46 carreras normalizadas contra 47 del catalogo
+ok,documentacion,README cita PDFs de resultados = 151
+ok,documentacion,README cita filas normalizadas = 64 075
+ok,documentacion,decision registrada: ADR-001-paralelismo.md
+ok,documentacion,decision registrada: ADR-002-ventana-temporal.md
+ok,documentacion,decision registrada: ADR-003-hallazgos-validacion.md

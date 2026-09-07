@@ -115,9 +115,47 @@ Estudios a Distancia no aparece en 2021 ni 2022 porque la modalidad se creó en
 generales antes de ese ciclo. Verificado con seis métodos independientes; el
 detalle está en `docs/ADR-002-ventana-temporal.md`.
 
+## Procesamiento
+
+Once etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
+
+| Etapa | Script | Salida |
+|---|---|---|
+| Descubrir y descargar | `1_DescubrimientoDescarga.py` | 151 PDFs de resultados |
+| Auditar el corpus | `2_AuditoriaCorpus.py` | qué trae cada PDF |
+| Catálogo de carreras | `3_CatalogoCarreras.py` | 47 carreras × 7 ciclos |
+| Cuadro de vacantes | `4_Vacantes.py` | plazas por carrera y modalidad |
+| Base normativa | `5_DocumentosBase.py` | reglamentos, temarios, cronogramas |
+| Rescate histórico | `6_RescateHistorico.py` | archivos sin convención de nombre |
+| Instructivos | `7_RequisitosIngresantes.py` | 22 documentos por proceso |
+| **Extracción de tablas** | `8_ExtraccionTablas.py` | **64 077 filas** por coordenadas |
+| Normalización (Silver) | `9_NormalizacionDatos.py` | 64075 filas, 46 carreras, seudonimizadas |
+| Agregados (Gold) | `10_Agregados.py` | 6 CSV para Tableau |
+| Reconciliación | `11_Validacion.py` | 10 pruebas en DuckDB |
+| Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
+
+### Verificación
+
+`11_Validacion.py` contrasta cada fila contra las redundancias que el propio
+PDF publica: si el parser asignara mal una columna, la aritmética dejaría de
+cerrar. Aprueban cinco de diez pruebas y las otras cinco se reportan en rojo,
+cuantificadas. Una suite ajustada para pasar no sirve de nada; el detalle está
+en `docs/ADR-003-hallazgos-validacion.md`.
+
+`12_Auditoria.py` revisa el conjunto: que cada etapa conserve lo que recibió,
+que no se filtre información personal a lo versionado, y que las cifras del
+README existan de verdad.
+
 ## Decisiones de arquitectura
 
 Registradas en `docs/`, con la medición que las sostiene.
+
+**ADR-003 · Hallazgos de la validación.** Cuatro errores de modelo que la
+reconciliación destapó: `Nota Mínima` no es la nota de corte sino el mínimo
+institucional, faltaban las dimensiones de sede y grupo (aparecieron ocho
+sedes), el corte no se puede calcular mezclando modalidades porque cada una usa
+su escala, y en Medicina aprobar el examen da `TEST + ENTREVISTA` y no
+`INGRESO`.
 
 **ADR-001 · Paralelismo.** La etapa de extracción usa `ProcessPoolExecutor` con
 8 procesos: 40.8 s en serial contra 9.3 s en paralelo sobre los 221 PDFs.
