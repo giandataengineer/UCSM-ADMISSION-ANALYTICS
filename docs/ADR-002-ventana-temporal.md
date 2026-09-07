@@ -50,6 +50,63 @@ convenios y traslados.
 Estudios a Distancia no aparece en 2021 ni 2022 porque la modalidad se creó
 en 2023. 2027 es el ciclo en curso y se completa conforme la UCSM publique.
 
+## Verificación de completitud del ciclo
+
+Cada ciclo se contrastó contra la plantilla de procesos deducida de los propios
+documentos y del cronograma oficial. Los exámenes de un ciclo se rinden en dos
+años calendario: para el ciclo 2021, entre agosto de 2020 y agosto de 2021.
+
+Ejemplo del ciclo 2021 completo, con las fechas que trae cada PDF por dentro:
+
+| Fecha | Proceso |
+|---|---|
+| 18/08/2020 | Precatólica 2021-I |
+| 22/08/2020 | Concurso de Admisión 2021 · Tercio Superior |
+| 31/08/2020 | Primer Examen General 2021 |
+| 13/12/2020 | Precatólica 2021-II |
+| 21/12/2020 | Segundo Examen General 2021 |
+| 11/02/2021 | Cobertura de Metas Segundo Examen |
+| 20/02/2021 | Precatólica 2021-III |
+| 22/02/2021 | Extraordinario 2021 I · Deportistas Destacados |
+| 01/03/2021 | Tercer Examen General 2021 |
+| 01/03/2021 | PRONABEC Beca-18 2021 |
+| 08 y 24/08/2021 | Extraordinario 2021 II · Traslado Externo |
+
+### Dos ausencias que no son huecos
+
+**Estudios a Distancia no existe en 2021 ni 2022.** La modalidad se creó en el
+ciclo 2023: el primer examen es del 13/11/2022. Antes de eso no hay nada que
+falte.
+
+**Tercio Superior y Rendimiento Superior son la misma modalidad renombrada.**
+Ocupa el mismo lugar del calendario, fines de junio o inicios de julio del año
+anterior, sin interrupción:
+
+| Ciclo | Fecha | Nombre publicado |
+|---|---|---|
+| 2021 | 22/08/2020 | Concurso de Admisión · Tercio Superior |
+| 2022 | 27/06/2021 | Concurso de Admisión · Tercio Superior |
+| 2023 | 03/07/2022 | Concurso de Admisión · Tercio Superior |
+| 2024 | 09/07/2023 | Examen Extraordinario I · Rendimiento Superior |
+| 2025 | 14/07/2024 | Examen Extraordinario I · Rendimiento Superior |
+| 2026 | 06/07/2025 | Examen Extraordinario I · Rendimiento Superior |
+| 2027 | 06/07/2026 | Examen Extraordinario I · Rendimiento Superior |
+
+La cobertura es 7 de 7 ciclos. El normalizador tiene que unificarlos bajo una
+sola modalidad o la serie mostrará un corte en 2024 que no ocurrió.
+
+### El único hueco real
+
+**Precatólica 2026-II no está publicada.** El proceso sí ocurrió: el cronograma
+oficial 2026 programa Centro Preuniversitario II con inscripciones del 4 de
+agosto al 12 de setiembre de 2025 y clases desde el 15 de setiembre. Están
+publicadas la I (03/08/2025, 51 páginas) y la III (08/02/2026, 55 páginas), pero
+no la II.
+
+Verificado en la página viva de resultados, que hoy lista 25 PDFs y no la
+incluye, y en Wayback, que entre noviembre de 2025 y setiembre de 2026 solo
+capturó un archivo de esa carpeta. Es un hueco de la fuente.
+
 ## Consecuencias
 
 El README declara siete ciclos, no diez. Prometer una década y entregar tres
