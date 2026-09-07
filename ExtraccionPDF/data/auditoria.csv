@@ -14,6 +14,8 @@ ingresantes_ucsm_2014_2015.pdf,2015,,,,,data/raw/2015/ingresantes_ucsm_2014_2015
 2017I/TI.pdf,2017,otro,,,3,data/raw/2017/2017I__TI.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 2017I/TIS.pdf,2017,otro,,,1,data/raw/2017/2017I__TIS.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 2017PP.pdf,2017,otro,,,6,data/raw/2017/2017PP.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
+RESULTADOS2017II.pdf,2017,,,,,data/raw/2017/RESULTADOS2017II.pdf,2,DEVEXP,,,0,0,0,0,vacio_para_regex
+RESULTADO_CPU-III_2017salud.pdf,2017,,,,,data/raw/2017/RESULTADO_CPU-III_2017salud.pdf,2,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 simulacro2017I.pdf,2017,otro,,,9,data/raw/2017/simulacro2017I.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 2018IIImajes.pdf,2018,otro,,,1,data/raw/2018/2018IIImajes.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 2018II/GyT.pdf,2018,otro,,,2,data/raw/2018/2018II__GyT.pdf,0,MS-OFFICE,,,0,0,0,0,vacio_para_regex
@@ -69,6 +71,7 @@ simulacro2017I.pdf,2017,otro,,,9,data/raw/2017/simulacro2017I.pdf,0,MS-OFFICE,,,
 2020TSupAQP.pdf,2020,tercio_superior,,,39,data/raw/2020/2020TSupAQP.pdf,2,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 2020TSupES.pdf,2020,tercio_superior,,18/06/2019,28,data/raw/2020/2020TSupES.pdf,28,DEVEXP,INGRESO|NO INGRESO,Condición|Código|Nombre|Ord.|Total,177,0,155,0,con_denominador
 2020TSupOREG.pdf,2020,tercio_superior,,18/06/2019,27,data/raw/2020/2020TSupOREG.pdf,34,DEVEXP,INGRESO|NO INGRESO,Condición|Código|Nombre|Ord.|Total,232,0,159,0,con_denominador
+RESULTADOS_SALUD_3EG2020.pdf,2020,,,,,data/raw/2020/RESULTADOS_SALUD_3EG2020.pdf,2,MS-OFFICE,,,0,0,0,0,vacio_para_regex
 majes2020.pdf,2020,ordinario,RESULTADOS EXAMEN ORDINARIO MAJES 2020,09/03/2020,3,data/raw/2020/majes2020.pdf,3,DEVEXP,INGRESO,Condición|Código|Nombre|Ord.|Total,21,0,3,3,solo_ingresantes
 primer-EXAMEN_GENERAL_2020.pdf,2020,,,,,data/raw/2020/primer-EXAMEN_GENERAL_2020.pdf,1,MS-OFFICE,,,0,0,2,0,sin_datos_tabulares
 2021COBERII.pdf,2021,convenio_cci,COBERTURA DE METAS SEGUNDO EXAMEN GENERAL 2021,11/02/2021,10,data/raw/2021/2021COBERII.pdf,10,DEVEXP,INGRESO,Condición|Código|Nombre|Nota 01|Nota 02|Ord.|Total,49,13,25,10,solo_ingresantes
