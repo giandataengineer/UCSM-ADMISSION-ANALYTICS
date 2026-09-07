@@ -1,0 +1,4 @@
+pdfplumber==0.11.4
+pymupdf==1.24.14
+pandas==2.2.3
+duckdb==1.1.3

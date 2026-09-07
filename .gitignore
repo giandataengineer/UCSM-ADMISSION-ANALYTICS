@@ -1,0 +1,14 @@
+# Los PDFs no se versionan: se reconstruyen con 1_DescubrimientoDescarga.py
+ExtraccionPDF/data/raw/
+ExtraccionPDF/data/contexto/
+ExtraccionPDF/data/.tmp/
+
+# Warehouse derivado
+*.duckdb
+
+# Datos con informacion personal: nunca al repo
+ExtraccionPDF/data_extraida/
+.env
+
+__pycache__/
+.DS_Store
