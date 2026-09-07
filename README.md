@@ -14,9 +14,11 @@ ExtraccionPDF/
   3_CatalogoCarreras.py          qué carreras se convocaron en cada ciclo
   4_Vacantes.py                  cuadro de vacantes por carrera y modalidad
   5_DocumentosBase.py            reglamentos, temarios, cronogramas y vacantes por año
-  6_ExtraccionTablas.py          [pendiente] reconstrucción de filas por coordenadas
-  7_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
-  8_AnalisisExploratorio.ipynb   [pendiente]
+  6_RescateHistorico.py          archivos fuera de convención de nombre
+  7_RequisitosIngresantes.py     instructivos por proceso
+  8_ExtraccionTablas.py          [pendiente] reconstrucción de filas por coordenadas
+  9_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
+  10_AnalisisExploratorio.ipynb  [pendiente]
   data/
     manifest.csv                 223 filas: una por PDF de resultados descubierto
     auditoria.csv                151 filas: contenido real de cada PDF
@@ -25,6 +27,7 @@ ExtraccionPDF/
     documentos_base.csv          30 documentos normativos indexados
     raw/<ciclo>/                 151 PDFs de resultados por ciclo de admisión
     documentos_base/<año>/       vacantes, reglamento, temario, cronograma
+    requisitos/<ciclo>/          instructivos de ingresantes por proceso
   data_extraida/                 [vacío] salida del parser
   data_normalizada/              [vacío] listo para el warehouse
 docs/INVENTARIO.md               tabla detallada de los 151 PDFs

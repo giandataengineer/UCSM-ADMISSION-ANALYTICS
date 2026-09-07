@@ -103,9 +103,23 @@ agosto al 12 de setiembre de 2025 y clases desde el 15 de setiembre. Están
 publicadas la I (03/08/2025, 51 páginas) y la III (08/02/2026, 55 páginas), pero
 no la II.
 
-Verificado en la página viva de resultados, que hoy lista 25 PDFs y no la
-incluye, y en Wayback, que entre noviembre de 2025 y setiembre de 2026 solo
-capturó un archivo de esa carpeta. Es un hueco de la fuente.
+**La prueba está en la propia página de la UCSM.** Cada proceso publica dos
+enlaces, "Ingresantes" con los resultados e "Indicaciones" con el instructivo:
+
+| Proceso | Ingresantes | Indicaciones |
+|---|---|---|
+| Precatólica 2026-I | `precatolica2026-I_final.pdf` | `REQ_2026_PRECA_I.pdf` |
+| **Precatólica 2026-II** | **no existe** | `REQ_2026_PRECA_II.pdf` |
+| Precatólica 2026-III | `Resul_PrecaIII.pdf` | `REQ_2026_PRECAIII.pdf` |
+| Precatólica 2027-I | `Resultados_Final_Preca2027-I.pdf` | `INDICACIONES ... 2027-I.pdf` |
+
+La sección existe y el instructivo está publicado, pero el PDF de resultados
+nunca se subió. La sección está construida como pestaña, así que el enlace solo
+aparece al abrirla: por eso una lectura plana del HTML no lo detecta.
+
+También se verificó en Wayback, que entre noviembre de 2025 y setiembre de 2026
+capturó un solo archivo de esa carpeta. Es un hueco de la fuente, no de la
+búsqueda.
 
 ## Consecuencias
 

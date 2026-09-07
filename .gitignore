@@ -8,6 +8,7 @@ ExtraccionPDF/data/.tmp/
 
 # Datos con informacion personal: nunca al repo
 ExtraccionPDF/data_extraida/
+ExtraccionPDF/data/requisitos/
 .env
 
 __pycache__/
