@@ -38,7 +38,7 @@ SAL = os.environ.get("UCSM_SAL", "").encode() or b"desarrollo-cambiar-en-producc
 # quedan a la altura de la celda, y nombres de modalidad.
 NO_ES_CARRERA = re.compile(
     r"RESULTADO|POSTULANTES|AREA DE CIENCIAS|ESCUELA PROFESIONAL|APELLIDOS|"
-    r"^TRASLADO|^PRIMEROS PUESTOS|^GRADUADO|NOMBRES|^$")
+    r"TRASLADO|PRIMEROS PUESTOS|GRADUADO|NOMBRES|CONVENIO|DEPORTISTAS|^$")
 
 # Abreviaturas que aparecen cuando la celda es angosta.
 ABREVIATURAS = [
@@ -56,6 +56,15 @@ CONDICION = {
     "NIVELACION": "nivelacion", "TEST + ENTREVISTA": "test_entrevista",
     "OBSERVADO": "observado", "RETIRADO": "retirado",
 }
+
+# UCSM cambio la escala de calificacion en el ciclo 2024: la mediana del examen
+# ordinario pasa de 76.6 a 152.7 y 26 de 34 carreras saltan en esa misma
+# transicion. No es un error de extraccion, es un cambio institucional.
+#
+# La consecuencia practica es que un puntaje de 2023 y uno de 2024 no se pueden
+# comparar. Por eso se publica ademas el percentil dentro del propio proceso y
+# carrera, que es invariante a la escala y permite series de siete ciclos.
+CICLO_CAMBIO_ESCALA = "2024"
 
 MODALIDAD = {
     "tercio_superior": "rendimiento_superior",   # renombrada en 2024
@@ -87,22 +96,40 @@ def texto_corrupto(s):
     return False
 
 
-def catalogo_carreras(filas):
-    """Construye la lista canonica y el mapa de truncados.
+def catalogo_oficial():
+    """Las carreras que UCSM convoco, leidas del propio corpus de encabezados.
 
-    Un nombre truncado es prefijo de su forma completa: la fuente corta la
-    cadena al ancho de la celda, no la abrevia. Asi que basta buscar, entre las
-    formas largas, la unica que empieza igual.
+    Es la referencia contra la que se resuelven truncados y variantes. Usar una
+    lista autoritativa en vez del propio texto extraido evita dos errores que
+    aparecieron al hacerlo al reves: 'MEDICINA HUMANA' resolviendose hacia
+    'MEDICINA HUMANA TRASLADO INTERNO II', que era contaminacion de modalidad, y
+    cadenas corruptas por lineas superpuestas quedandose como carreras validas.
     """
+    ruta = os.path.join(RAIZ, "data", "carreras_por_ciclo.csv")
+    if not os.path.exists(ruta):
+        return []
+    return sorted({limpiar(f["carrera"]) for f in csv.DictReader(
+        open(ruta, encoding="utf-8")) if f.get("carrera")}, key=len, reverse=True)
+
+
+def catalogo_carreras(filas):
+    """Mapea cada forma observada a su carrera del catalogo.
+
+    La fuente corta el nombre al ancho de la celda, asi que un truncado es
+    prefijo de su forma completa. Se busca en el catalogo, no entre las formas
+    observadas, y solo se acepta cuando hay una unica coincidencia.
+    """
+    oficiales = catalogo_oficial()
     cuenta = Counter(f["carrera_limpia"] for f in filas if f["carrera_limpia"])
-    formas = [c for c in cuenta if not NO_ES_CARRERA.search(c) and len(c) >= 5]
-    largas = sorted(formas, key=len, reverse=True)
 
     mapa = {}
-    for forma in formas:
-        candidatas = [L for L in largas if L != forma and L.startswith(forma)]
-        # Solo se resuelve si hay una unica forma larga compatible: con dos, el
-        # truncamiento es ambiguo y se deja como esta en vez de adivinar.
+    for forma in cuenta:
+        if not forma or NO_ES_CARRERA.search(forma) or len(forma) < 5:
+            continue
+        if forma in oficiales:
+            mapa[forma] = forma
+            continue
+        candidatas = [o for o in oficiales if o.startswith(forma)]
         mapa[forma] = candidatas[0] if len(candidatas) == 1 else forma
     return mapa
 
@@ -115,7 +142,40 @@ def seudonimo(codigo):
 
 CAMPOS = ["ciclo", "archivo", "proceso", "modalidad", "fecha_examen", "carrera",
           "postulante", "orden_merito", "nota_01", "nota_02", "total",
-          "condicion", "ingreso", "nota_minima"]
+          "percentil", "escala", "condicion", "ingreso", "nota_minima"]
+
+
+def agregar_percentil(filas):
+    """Anade la posicion relativa del puntaje dentro de su proceso y carrera.
+
+    Se calcula sobre el grupo mas chico que comparte examen y escala, que es
+    la combinacion de archivo y carrera. Un percentil 90 significa lo mismo en
+    2021 que en 2027, cosa que el puntaje bruto no cumple.
+    """
+    grupos = {}
+    for f in filas:
+        t = f["total"]
+        try:
+            valor = float(t)
+        except (TypeError, ValueError):
+            continue
+        grupos.setdefault((f["archivo"], f["carrera"]), []).append(valor)
+    for clave in grupos:
+        grupos[clave].sort()
+
+    for f in filas:
+        try:
+            valor = float(f["total"])
+        except (TypeError, ValueError):
+            f["percentil"] = ""
+            continue
+        orden = grupos[(f["archivo"], f["carrera"])]
+        if len(orden) < 5:
+            f["percentil"] = ""
+            continue
+        debajo = sum(1 for v in orden if v < valor)
+        f["percentil"] = round(debajo / len(orden) * 100, 1)
+    return filas
 
 
 def main():
@@ -131,10 +191,17 @@ def main():
             crudas.append(x)
 
     mapa = catalogo_carreras(crudas)
+    oficiales = set(catalogo_oficial())
+    resueltas = set(mapa.values()) & oficiales
 
     filas, descartadas = [], 0
     for x in crudas:
         carrera = mapa.get(x["carrera_limpia"], x["carrera_limpia"])
+        # Fuera del catalogo y sin resolver: es ruido de extraccion, no una
+        # carrera que UCSM haya convocado.
+        if carrera and carrera not in oficiales and carrera not in resueltas:
+            descartadas += 1
+            continue
         if not carrera or NO_ES_CARRERA.search(carrera) or texto_corrupto(carrera):
             descartadas += 1
             continue
@@ -151,12 +218,16 @@ def main():
             orden_merito=x.get("orden", ""),
             nota_01=x.get("nota_01", ""), nota_02=x.get("nota_02", ""),
             total=x.get("total", ""),
+            escala=("nueva" if x["ciclo"] >= CICLO_CAMBIO_ESCALA else "anterior"),
+            percentil="",
             condicion=cond,
             # Campo derivado: 1 si entro, 0 si no, vacio si el documento no
             # publica condicion. Separar el vacio del cero evita contar como
             # rechazado a quien nunca tuvo esa columna.
             ingreso={"ingreso": "1", "no_ingreso": "0"}.get(cond, ""),
             nota_minima=x.get("nota_minima", "")))
+
+    filas = agregar_percentil(filas)
 
     os.makedirs(SALIDA, exist_ok=True)
     destino = os.path.join(SALIDA, "postulaciones.csv")

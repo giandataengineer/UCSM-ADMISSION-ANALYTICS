@@ -1,0 +1,11 @@
+prueba,casos_que_incumplen
+referencial: cada fila viene de un archivo del manifiesto,0
+referencial: cada ciclo existe en el manifiesto,0
+temporal: la fecha del examen cae en la ventana de su ciclo,0
+reconciliacion: los ingresantes de Gold coinciden con Silver,0
+reconciliacion: Gold no inventa carreras,0
+seudonimo: todos tienen el largo esperado,0
+seudonimo: proporcion de personas unicas plausible,0
+seudonimo: ningun nombre sobrevive en la salida,0
+distribucion: sin saltos de mediana entre ciclos consecutivos,27
+idempotencia: la normalizacion es reproducible,0

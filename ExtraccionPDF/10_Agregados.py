@@ -83,8 +83,16 @@ def por_carrera(datos):
                   and num(f["total"])]
         puntajes = [num(f["total"]) for f in filas if num(f["total"])]
         pct_rech, fiable = fiabilidad(filas)
+        # El percentil del ultimo admitido es el corte expresado en una escala
+        # comparable entre ciclos. UCSM cambio la escala de puntaje en 2024, asi
+        # que una serie de nota_corte se rompe ahi y una de percentil no.
+        pct_admitidos = [num(f["percentil"]) for f in filas
+                         if f["ingreso"] == "1" and f["modalidad"] == "ordinario"
+                         and num(f["percentil"]) is not None]
         fuera.append(dict(
             ciclo=ciclo, carrera=carrera,
+            escala=filas[0].get("escala", ""),
+            percentil_corte=round(min(pct_admitidos), 1) if pct_admitidos else "",
             postulaciones=len(filas), ingresantes=adm,
             pct_rechazados=pct_rech, denominador_fiable=fiable,
             tasa_ingreso=round(adm / len(filas) * 100, 1)
@@ -111,8 +119,16 @@ def por_modalidad(datos):
         admitidos = [num(f["total"]) for f in filas
                      if f["ingreso"] == "1" and num(f["total"])]
         pct_rech, fiable = fiabilidad(filas)
+        # El percentil del ultimo admitido es el corte expresado en una escala
+        # comparable entre ciclos. UCSM cambio la escala de puntaje en 2024, asi
+        # que una serie de nota_corte se rompe ahi y una de percentil no.
+        pct_admitidos = [num(f["percentil"]) for f in filas
+                         if f["ingreso"] == "1" and f["modalidad"] == "ordinario"
+                         and num(f["percentil"]) is not None]
         fuera.append(dict(
-            ciclo=ciclo, carrera=carrera, modalidad=modalidad,
+            ciclo=ciclo, carrera=carrera,
+            escala=filas[0].get("escala", ""),
+            percentil_corte=round(min(pct_admitidos), 1) if pct_admitidos else "", modalidad=modalidad,
             postulaciones=len(filas), ingresantes=adm,
             denominador_fiable=fiable,
             tasa_ingreso=round(adm / len(filas) * 100, 1)
@@ -237,8 +253,8 @@ def main():
     escribir("admision_por_carrera.csv",
              ["ciclo", "carrera", "postulaciones", "ingresantes", "tasa_ingreso",
               "denominador_fiable", "pct_rechazados", "nota_corte_ordinario",
-              "minimo_institucional", "puntaje_min", "puntaje_max",
-              "puntaje_mediana"],
+              "percentil_corte", "escala", "minimo_institucional",
+              "puntaje_min", "puntaje_max", "puntaje_mediana"],
              por_carrera(datos))
     escribir("comparador_modalidad.csv",
              ["ciclo", "carrera", "modalidad", "postulaciones", "ingresantes",
