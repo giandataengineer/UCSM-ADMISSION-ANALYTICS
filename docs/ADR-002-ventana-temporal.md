@@ -121,6 +121,26 @@ También se verificó en Wayback, que entre noviembre de 2025 y setiembre de 202
 capturó un solo archivo de esa carpeta. Es un hueco de la fuente, no de la
 búsqueda.
 
+### Copia parcial recuperada
+
+El documento circuló fuera del portal: una copia está subida a Studocu. La
+versión obtenible desde ahí es una vista previa con **14 de las 50 páginas**
+legibles; el resto viene rasterizado con desenfoque irreversible, así que no se
+recupera por OCR ni por ningún otro medio.
+
+Se guarda como `precatolica2026-II_PARCIAL.pdf` con el sufijo explícito. Trae
+117 filas de ingresantes en 14 carreras, incluidas Medicina Humana e Ingeniería
+de Sistemas, y cubre las páginas 1 a 20 del documento original de forma salteada.
+Nada de las páginas 21 a 50.
+
+**El parser debe excluirlo del cálculo de tasas de admisión.** Un denominador
+incompleto produce una tasa falsa, que es peor que no tener el dato. Sirve para
+verificar notas de corte de esas 14 carreras y como evidencia de que el proceso
+existió, no para estadística agregada.
+
+La copia oficial y completa sigue pendiente de solicitud a la Dirección de
+Admisión.
+
 ## Consecuencias
 
 El README declara siete ciclos, no diez. Prometer una década y entregar tres
