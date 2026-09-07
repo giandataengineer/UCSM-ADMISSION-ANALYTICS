@@ -93,20 +93,33 @@ def extraer(ruta):
 
 
 def main():
-    ruta = os.path.join(RAIZ, "data", "documentos_base", "2027", "vacantes.pdf")
-    filas = extraer(ruta)
+    """Recorre el cuadro de vacantes de cada ciclo.
+
+    El formato de la tabla cambia entre años, asi que se valida cada fila
+    exigiendo que el total declarado sea la suma de sus modalidades. Una fila
+    que no cuadra es un artefacto de la extraccion y se descarta en vez de
+    contaminar el calculo de ocupacion.
+    """
+    base = os.path.join(RAIZ, "data", "documentos_base")
+    todas = []
+    for ciclo in sorted(os.listdir(base)):
+        ruta = os.path.join(base, ciclo, "vacantes.pdf")
+        if not os.path.exists(ruta):
+            continue
+        filas = extraer(ruta)
+        for f in filas:
+            f["ciclo"] = ciclo
+        todas.extend(filas)
+        tot = sum(f["total"] for f in filas)
+        print(f"  {ciclo}  {len(filas):>3} carreras  {tot:>6} vacantes")
+
     destino = os.path.join(RAIZ, "data", "vacantes.csv")
     with open(destino, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["carrera", "seccion"] + COLS)
+        w = csv.DictWriter(f, fieldnames=["ciclo", "carrera", "seccion"] + COLS)
         w.writeheader()
-        w.writerows(filas)
-    print(f"vacantes -> data/vacantes.csv  ({len(filas)} carreras)")
-    if filas:
-        tot = {c: sum(r[c] for r in filas) for c in COLS}
-        print("  total de vacantes 2027 por modalidad:")
-        for c in COLS:
-            print(f"    {c:<18}{tot[c]:>6}")
-    return filas
+        w.writerows(sorted(todas, key=lambda r: (r["ciclo"], r["carrera"])))
+    print(f"\nvacantes -> data/vacantes.csv  ({len(todas)} filas)")
+    return todas
 
 
 if __name__ == "__main__":

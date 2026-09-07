@@ -1,29 +1,111 @@
-carrera,seccion,cepre,ordinarios,traslado_interno,extraordinario,pronabec,total
-Enfermeria,presencial,80,104,4,66,6,260
-Farmacia y Bioquimica,presencial,47,63,4,40,6,160
-Ingenieria Biotecnologica,presencial,38,50,2,32,6,128
-Medicina Humana,presencial,67,88,6,55,6,222
-Obstetricia y Puericultura,presencial,44,58,4,38,6,150
-Odontologia,presencial,57,75,4,48,6,190
-Tecnología Médica en Fisioterapia y,presencial,22,29,2,19,6,78
-Arquitectura,presencial,80,174,4,66,6,330
-Ingenieria Ambiental,presencial,22,29,2,19,6,78
-Ingeniería Biomédica,presencial,22,29,2,19,6,78
-Ingenieria Civil,presencial,76,170,4,64,8,322
-Ingenieria de Minas,presencial,67,158,2,56,10,293
-Ingenieria de Sistemas,presencial,76,170,4,64,10,324
-Ingeniería en Inteligencia Artificial,presencial,19,95,2,17,6,139
-Ingenieria Industrial,presencial,112,287,6,92,10,507
-Ingenieria Mecánica,presencial,38,50,2,32,6,128
-Ingeniería Mecánica Eléctrica,presencial,19,25,2,17,6,69
-Ingeniería Mecatrónica,presencial,38,120,2,32,6,198
-Medicina Veterinaria y Zootecnia,presencial,51,67,4,43,8,173
-Administracion de Empresas,presencial,51,67,4,44,6,172
-Ingenieria Comercial,presencial,51,137,2,42,6,238
-Contabilidad,presencial,22,29,2,19,6,78
-Derecho,presencial,134,316,6,110,10,576
-Ciencia Politica y Gobierno,presencial,32,42,2,26,6,108
-Comunicación Social,presencial,32,42,2,26,6,108
-Educacion Inicial,presencial,19,25,2,17,6,69
-Psicologia,presencial,67,88,6,56,6,223
-Publicidad y Multimedia,presencial,51,67,2,42,6,168
+ciclo,carrera,seccion,cepre,ordinarios,traslado_interno,extraordinario,pronabec,total
+2023,Trabajo Social,,0,0,0,0,0,0
+2024,Administracion de Empresas,presencial,54,101,2,49,4,210
+2024,Arquitectura,presencial,59,90,4,53,4,210
+2024,Ciencia Politica y Gobierno,presencial,20,25,2,21,2,70
+2024,Comunicación Social,presencial,37,53,2,25,3,120
+2024,Contabilidad,presencial,29,55,2,30,4,120
+2024,Derecho,presencial,127,141,6,70,6,350
+2024,Educacion Inicial,presencial,19,26,2,19,4,70
+2024,Enfermeria,presencial,59,91,4,42,4,200
+2024,Farmacia y Bioquimica,presencial,63,96,2,45,4,210
+2024,Ingenieria Agronomica y,presencial,19,27,2,21,1,70
+2024,Ingenieria Agronomica y Agrícola,presencial,1,1,1,1,1,5
+2024,Ingenieria Ambiental,presencial,21,25,2,20,2,70
+2024,Ingenieria Biotecnologica,presencial,46,56,4,31,3,140
+2024,Ingenieria Civil,presencial,63,85,4,54,4,210
+2024,Ingenieria Comercial,presencial,48,85,2,41,4,180
+2024,Ingenieria Industrial,presencial,89,118,6,61,6,280
+2024,Ingenieria Mecánica,presencial,38,46,2,32,2,120
+2024,Ingenieria de Industria,presencial,19,27,2,21,1,70
+2024,Ingenieria de Industria Alimentaria,presencial,1,1,1,1,1,5
+2024,Ingenieria de Minas,presencial,35,46,2,35,2,120
+2024,Ingenieria de Sistemas,presencial,65,88,4,49,4,210
+2024,Ingeniería Mecatrónica,presencial,35,48,2,33,2,120
+2024,Ingeniería Mecánica,presencial,22,27,2,18,1,70
+2024,Medicina Humana,presencial,106,114,6,68,6,300
+2024,Medicina Veterinaria y,presencial,61,92,4,49,4,210
+2024,Obstetricia y Puericultura,presencial,46,60,2,29,3,140
+2024,Odontologia,presencial,73,84,4,47,2,210
+2024,Psicologia,presencial,62,95,4,45,4,210
+2024,Publicidad y Multimedia,presencial,63,95,2,46,4,210
+2025,Administracion de Empresas,presencial,70,94,4,48,4,220
+2025,Arquitectura,presencial,70,94,4,48,4,220
+2025,Ciencia Politica y Gobierno,presencial,17,20,2,18,1,58
+2025,Comunicación Social,presencial,23,28,2,19,2,74
+2025,Contabilidad,presencial,23,28,2,19,2,74
+2025,Derecho,presencial,118,132,6,66,6,328
+2025,Educacion Inicial,presencial,17,20,2,18,1,58
+2025,Enfermeria,presencial,55,85,4,39,4,187
+2025,Farmacia y Bioquimica,presencial,55,85,4,39,4,187
+2025,Ingenieria Ambiental,presencial,33,42,2,33,2,112
+2025,Ingenieria Biotecnologica,presencial,33,42,2,33,2,112
+2025,Ingenieria Civil,presencial,70,94,4,48,4,220
+2025,Ingenieria Comercial,presencial,44,78,2,38,4,166
+2025,Ingenieria Industrial,presencial,88,116,6,60,6,276
+2025,Ingenieria Mecánica,presencial,33,42,2,33,2,112
+2025,Ingenieria de Minas,presencial,36,48,2,38,2,126
+2025,Ingenieria de Sistemas,presencial,70,94,4,48,4,220
+2025,Ingeniería Mecatrónica,presencial,33,42,2,33,2,112
+2025,Ingeniería Mecánica Eléctrica,presencial,17,20,2,18,1,58
+2025,Medicina Humana,presencial,78,85,4,51,4,222
+2025,Medicina Veterinaria y Zootecnia,presencial,55,85,4,39,4,187
+2025,Obstetricia y Puericultura,presencial,48,60,4,33,3,148
+2025,Odontologia,presencial,55,85,4,39,4,187
+2025,Psicologia,presencial,70,94,4,48,4,220
+2025,Publicidad y Multimedia,presencial,65,99,2,46,4,216
+2025,Tecnología Médica en Fisioterapia y Rehabilitación,presencial,23,28,2,19,2,74
+2026,Administracion de Empresas,presencial,73,98,4,50,4,229
+2026,Arquitectura,presencial,69,93,4,48,4,218
+2026,Ciencia Politica y Gobierno,presencial,16,19,2,18,1,56
+2026,Comunicación Social,presencial,23,28,2,19,2,74
+2026,Contabilidad,presencial,23,28,2,19,2,74
+2026,Derecho,presencial,130,146,6,73,6,361
+2026,Educacion Inicial,presencial,16,19,2,18,1,56
+2026,Enfermeria,presencial,58,90,4,41,4,197
+2026,Farmacia y Bioquimica,presencial,61,94,4,43,4,206
+2026,Ingenieria Ambiental,presencial,34,44,2,34,2,116
+2026,Ingenieria Biotecnologica,presencial,35,45,2,35,2,119
+2026,Ingenieria Civil,presencial,73,98,4,50,4,229
+2026,Ingenieria Comercial,presencial,47,83,2,40,4,176
+2026,Ingenieria Industrial,presencial,100,131,6,68,6,311
+2026,Ingenieria Mecánica,presencial,32,41,2,32,2,109
+2026,Ingenieria de Minas,presencial,37,50,2,39,2,130
+2026,Ingenieria de Sistemas,presencial,73,98,4,50,4,229
+2026,Ingeniería Mecatrónica,presencial,32,41,2,32,2,109
+2026,Ingeniería Mecánica Eléctrica,presencial,16,19,2,18,1,56
+2026,Medicina Humana,presencial,81,88,4,53,4,230
+2026,Medicina Veterinaria y Zootecnia,presencial,49,76,4,35,4,168
+2026,Obstetricia y Puericultura,presencial,47,59,4,33,3,146
+2026,Odontologia,presencial,55,85,4,39,4,187
+2026,Psicologia,presencial,70,94,4,48,4,220
+2026,Publicidad y Multimedia,presencial,66,100,2,46,4,218
+2026,Tecnología Médica en Fisioterapia y Rehabilitación,presencial,23,28,2,19,2,74
+2027,Administracion de Empresas,presencial,51,67,4,44,6,172
+2027,Arquitectura,presencial,80,174,4,66,6,330
+2027,Ciencia Politica y Gobierno,presencial,32,42,2,26,6,108
+2027,Comunicación Social,presencial,32,42,2,26,6,108
+2027,Contabilidad,presencial,22,29,2,19,6,78
+2027,Derecho,presencial,134,316,6,110,10,576
+2027,Educacion Inicial,presencial,19,25,2,17,6,69
+2027,Enfermeria,presencial,80,104,4,66,6,260
+2027,Farmacia y Bioquimica,presencial,47,63,4,40,6,160
+2027,Ingenieria Ambiental,presencial,22,29,2,19,6,78
+2027,Ingenieria Biotecnologica,presencial,38,50,2,32,6,128
+2027,Ingenieria Civil,presencial,76,170,4,64,8,322
+2027,Ingenieria Comercial,presencial,51,137,2,42,6,238
+2027,Ingenieria Industrial,presencial,112,287,6,92,10,507
+2027,Ingenieria Mecánica,presencial,38,50,2,32,6,128
+2027,Ingenieria de Minas,presencial,67,158,2,56,10,293
+2027,Ingenieria de Sistemas,presencial,76,170,4,64,10,324
+2027,Ingeniería Biomédica,presencial,22,29,2,19,6,78
+2027,Ingeniería Mecatrónica,presencial,38,120,2,32,6,198
+2027,Ingeniería Mecánica Eléctrica,presencial,19,25,2,17,6,69
+2027,Ingeniería en Inteligencia Artificial,presencial,19,95,2,17,6,139
+2027,Medicina Humana,presencial,67,88,6,55,6,222
+2027,Medicina Veterinaria y Zootecnia,presencial,51,67,4,43,8,173
+2027,Obstetricia y Puericultura,presencial,44,58,4,38,6,150
+2027,Odontologia,presencial,57,75,4,48,6,190
+2027,Psicologia,presencial,67,88,6,56,6,223
+2027,Publicidad y Multimedia,presencial,51,67,2,42,6,168
+2027,Tecnología Médica en Fisioterapia y,presencial,22,29,2,19,6,78

@@ -17,7 +17,7 @@ Cada archivo responde una vista del tablero:
 
 Salida: data_normalizada/gold/
 """
-import csv, os, statistics
+import csv, os, re, statistics, unicodedata
 from collections import defaultdict, Counter
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
@@ -167,6 +167,61 @@ def trayectoria(datos):
             for (n, e), c in sorted(g.items())]
 
 
+def ocupacion(datos):
+    """Plazas ofertadas contra ingresantes reales, por carrera y ciclo.
+
+    Es la metrica de gestion del conjunto: dice que carreras no llenan sus
+    cupos, que es una decision de oferta academica y no un dato descriptivo.
+
+    PROVISIONAL, no publicar en el tablero todavia. Dos cosas por resolver:
+
+    Primero, el INGRESO de precatolica significa aprobar la seleccion del
+    Centro Preuniversitario, no ocupar una plaza de la carrera. Sumarlo con los
+    ordinarios cuenta dos veces la misma vacante y por eso Contabilidad 2025 da
+    302% de ocupacion, que es imposible.
+
+    Segundo, del cuadro solo se extrae la seccion presencial; la de estudios a
+    distancia usa otra tabla que el extractor todavia no lee.
+
+    Hasta cerrar ambas, la columna ocupacion sirve para ordenar carreras entre
+    si, no como porcentaje absoluto.
+
+    Solo hay cuadro de vacantes parseable de 2024 en adelante; antes el
+    documento usa otro formato de tabla.
+    """
+    ruta = os.path.join(RAIZ, "data", "vacantes.csv")
+    if not os.path.exists(ruta):
+        return []
+    # El cuadro de vacantes escribe 'Ingeniería Mecatrónica' y los resultados
+    # 'INGENIERIA MECATRONICA'. Sin quitar tildes el cruce falla y la carrera
+    # aparece con 0% de ocupacion, que es un artefacto y no un hallazgo.
+    def clave(s):
+        s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+        return re.sub(r"[^A-Z0-9]", "", s.upper())
+
+    vac = {}
+    for v in csv.DictReader(open(ruta, encoding="utf-8")):
+        vac[(v["ciclo"], clave(v["carrera"]))] = (int(v["total"] or 0), v["carrera"])
+
+    ing = Counter()
+    for x in datos:
+        if x["ingreso"] == "1":
+            ing[(x["ciclo"], clave(x["carrera"]))] += 1
+
+    fuera = []
+    for (ciclo, k), (plazas, etiqueta) in sorted(vac.items()):
+        if not plazas:
+            continue
+        entraron = ing.get((ciclo, k), 0)
+        fuera.append(dict(
+            ciclo=ciclo, carrera=etiqueta, vacantes=plazas, ingresantes=entraron,
+            ocupacion=round(entraron / plazas * 100, 1),
+            plazas_libres=max(0, plazas - entraron),
+            cruzo="si" if entraron else "no",
+            estado="provisional"))
+    return fuera
+
+
 def main():
     datos = cargar()
     print(f"{len(datos):,} postulaciones normalizadas\n")
@@ -186,6 +241,9 @@ def main():
     escribir("cercanos_al_corte.csv",
              ["ciclo", "carrera", "no_ingresantes", "a_menos_de_un_punto",
               "porcentaje"], cercanos_al_corte(datos))
+    escribir("ocupacion_vacantes.csv",
+             ["ciclo", "carrera", "vacantes", "ingresantes", "ocupacion",
+              "plazas_libres", "cruzo", "estado"], ocupacion(datos))
     escribir("trayectoria_postulante.csv",
              ["postulaciones", "ingreso_alguna_vez", "personas"],
              trayectoria(datos))
