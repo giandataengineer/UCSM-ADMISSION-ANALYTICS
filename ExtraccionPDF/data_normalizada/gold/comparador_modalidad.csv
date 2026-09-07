@@ -221,7 +221,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,ENFERMERIA,precatolica,82,11,13.4,si,127.35,160.33
 2022,ENFERMERIA,rendimiento_superior,7,7,,no,71.42,81.32
 2022,ENFERMERIA,traslado,8,6,,si,56.32,67.57
-2022,ESCUELA PROFESIONAL -,extraordinario,48,48,,no,,
 2022,FARMACIA Y BIOQUIMICA,beca,4,3,,si,13.0,19.0
 2022,FARMACIA Y BIOQUIMICA,complementario,1,0,,si,,
 2022,FARMACIA Y BIOQUIMICA,extraordinario,25,25,,no,,
@@ -230,7 +229,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,FARMACIA Y BIOQUIMICA,precatolica,11,11,,no,117.71,167.25
 2022,FARMACIA Y BIOQUIMICA,rendimiento_superior,2,2,,no,84.85,86.18
 2022,FARMACIA Y BIOQUIMICA,traslado,4,4,,no,59.0,73.57
-2022,ING. MECATRONICA,convenio_cci,1,1,,no,,
 2022,INGENIERIA AGRONOMICA Y AGRICOLA,beca,1,1,,no,20.0,20.0
 2022,INGENIERIA AGRONOMICA Y AGRICOLA,complementario,2,2,,no,28.0,32.0
 2022,INGENIERIA AGRONOMICA Y AGRICOLA,extraordinario,27,27,,no,,
@@ -303,6 +301,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2022,INGENIERIA MECANICA ELECTRICA,traslado,2,2,,no,72.96,72.99
 2022,INGENIERIA MECATRONICA,beca,3,0,,si,,
 2022,INGENIERIA MECATRONICA,complementario,3,2,,si,43.0,45.5
+2022,INGENIERIA MECATRONICA,convenio_cci,1,1,,no,,
 2022,INGENIERIA MECATRONICA,extraordinario,7,7,,no,,
 2022,INGENIERIA MECATRONICA,ordinario,105,105,,no,47.73,75.84
 2022,INGENIERIA MECATRONICA,precatolica,38,38,,no,108.13,199.01
@@ -405,7 +404,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2023,ENFERMERIA,precatolica,163,42,25.8,si,,159.97
 2023,ENFERMERIA,rendimiento_superior,7,6,,no,77.44,89.42
 2023,ENFERMERIA,traslado,11,9,,no,53.0,72.4
-2023,ESCUELA PROFESIONAL - PRIMERA SEGUN REQUISITO,extraordinario,45,45,,no,,
 2023,FARMACIA Y BIOQUIMICA,beca,5,4,,no,16.0,17.0
 2023,FARMACIA Y BIOQUIMICA,extraordinario,24,21,,no,60.89,71.58
 2023,FARMACIA Y BIOQUIMICA,ordinario,105,0,0.0,si,,66.43
@@ -569,7 +567,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2024,ENFERMERIA,precatolica,245,71,29.0,si,123.12,151.38
 2024,ENFERMERIA,rendimiento_superior,10,10,,no,164.12,184.94
 2024,ENFERMERIA,traslado,7,6,,no,138.6,148.07
-2024,ESCUELA PROFESIONAL - PRIMERA PROCESO DESPUES,extraordinario,45,45,,no,,
 2024,FARMACIA Y BIOQUIMICA,complementario,1,1,,no,169.83,169.83
 2024,FARMACIA Y BIOQUIMICA,convenio_cci,21,21,,no,51.74,194.95
 2024,FARMACIA Y BIOQUIMICA,extraordinario,4,4,,no,,
@@ -577,7 +574,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2024,FARMACIA Y BIOQUIMICA,precatolica,59,45,,no,111.28,143.02
 2024,FARMACIA Y BIOQUIMICA,rendimiento_superior,18,18,,no,168.71,206.69
 2024,FARMACIA Y BIOQUIMICA,traslado,5,5,,no,173.73,225.53
-2024,ING. MECANICA ELECTRICA,extraordinario,1,1,,no,,
 2024,INGENIERIA AGRONOMICA Y AGRICOLA,beca,86,29,33.7,si,157.52,153.76
 2024,INGENIERIA AGRONOMICA Y AGRICOLA,convenio_cci,1,1,,no,161.56,161.56
 2024,INGENIERIA AGRONOMICA Y AGRICOLA,distancia,199,159,,no,48.77,146.25
@@ -632,6 +628,7 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2024,INGENIERIA INDUSTRIAL TRASLADO INTERNO II,traslado,5,5,,no,96.74,139.26
 2024,INGENIERIA MECANICA ELECTRICA,complementario,2,2,,no,156.26,159.9
 2024,INGENIERIA MECANICA ELECTRICA,convenio_cci,5,5,,no,155.11,199.46
+2024,INGENIERIA MECANICA ELECTRICA,extraordinario,1,1,,no,,
 2024,INGENIERIA MECANICA ELECTRICA,ordinario,126,108,,no,110.26,145.25
 2024,INGENIERIA MECANICA ELECTRICA,precatolica,63,50,,no,110.38,157.12
 2024,INGENIERIA MECANICA ELECTRICA,rendimiento_superior,20,20,,no,164.79,202.39
@@ -691,7 +688,6 @@ ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiabl
 2024,TEOLOGIA,distancia,43,40,,no,30.0,163.13
 2024,TRABAJO SOCIAL,beca,77,33,42.9,si,161.25,161.27
 2024,TRABAJO SOCIAL,distancia,154,137,,no,37.51,161.26
-2024,TRASLADO INTERNO II,extraordinario,1,1,,no,,
 2024,TURISMO Y GASTRONOMIA,beca,61,22,36.1,si,161.25,146.28
 2024,TURISMO Y GASTRONOMIA,distancia,27,23,,no,116.25,165.0
 2025,ADMINISTRACION DE EMPRESAS,convenio_cci,1,1,,no,239.51,239.51

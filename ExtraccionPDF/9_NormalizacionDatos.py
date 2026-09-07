@@ -34,9 +34,19 @@ SALIDA = os.path.join(RAIZ, "data_normalizada")
 # recomputar, que es justamente lo que se busca.
 SAL = os.environ.get("UCSM_SAL", "").encode() or b"desarrollo-cambiar-en-produccion"
 
-# Lineas de titulo que el parser confunde con carrera en los archivos de salud,
-# donde la carrera va como columna y no como encabezado de bloque.
-NO_ES_CARRERA = re.compile(r"RESULTADO|POSTULANTES|AREA DE CIENCIAS|^$")
+# Texto que el parser toma por carrera y no lo es: rotulos de encabezado que
+# quedan a la altura de la celda, y nombres de modalidad.
+NO_ES_CARRERA = re.compile(
+    r"RESULTADO|POSTULANTES|AREA DE CIENCIAS|ESCUELA PROFESIONAL|APELLIDOS|"
+    r"^TRASLADO|^PRIMEROS PUESTOS|^GRADUADO|NOMBRES|^$")
+
+# Abreviaturas que aparecen cuando la celda es angosta.
+ABREVIATURAS = [
+    (r"^ING\.\s+", "INGENIERIA "),
+    (r"^ADM\.\s+", "ADMINISTRACION "),
+    (r"^EDUC\.\s+", "EDUCACION "),
+    (r"^TEC\.\s+", "TECNOLOGIA "),
+]
 
 CONDICION = {
     "INGRESO": "ingreso", "SELECCIONADO": "ingreso", "APTO": "ingreso",
@@ -56,7 +66,25 @@ MODALIDAD = {
 def limpiar(s):
     s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
     s = re.sub(r"\(V\s*\d*\)?", "", s)          # sufijo de version del plan
-    return re.sub(r"\s+", " ", s.upper()).strip()
+    s = re.sub(r"\s+", " ", s.upper()).strip()
+    for patron, expansion in ABREVIATURAS:
+        s = re.sub(patron, expansion, s)
+    return s
+
+
+def texto_corrupto(s):
+    """Detecta cadenas donde dos lineas del PDF quedaron superpuestas.
+
+    Al solaparse producen secuencias sin vocales o con consonantes imposibles
+    en español, como 'RETHRAABSLIALDITOA'. Descartar la fila es preferible a
+    guardar una carrera que no existe.
+    """
+    for palabra in s.split():
+        if len(palabra) >= 12 and not re.search(r"[AEIOU]{1}[^AEIOU]{1}[AEIOU]", palabra):
+            return True
+        if re.search(r"[BCDFGHJKLMNPQRSTVWXYZ]{5}", palabra):
+            return True
+    return False
 
 
 def catalogo_carreras(filas):
@@ -107,7 +135,7 @@ def main():
     filas, descartadas = [], 0
     for x in crudas:
         carrera = mapa.get(x["carrera_limpia"], x["carrera_limpia"])
-        if not carrera or NO_ES_CARRERA.search(carrera):
+        if not carrera or NO_ES_CARRERA.search(carrera) or texto_corrupto(carrera):
             descartadas += 1
             continue
         m = manifiesto.get(x["archivo"], {})
