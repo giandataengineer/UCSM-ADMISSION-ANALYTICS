@@ -73,7 +73,14 @@ def por_carrera(datos):
     fuera = []
     for (ciclo, carrera), filas in sorted(g.items()):
         adm = sum(1 for f in filas if f["ingreso"] == "1")
-        cortes = [num(f["nota_minima"]) for f in filas if num(f["nota_minima"])]
+        # El corte se calcula solo sobre el examen ordinario. Cada modalidad
+        # califica en su propia escala: precatolica puntua sobre otro rango, y
+        # mezclarlas daba un corte de 23.0 en Medicina 2022 cuando el minimo
+        # institucional de ese año era 45.84. El corte por modalidad esta en
+        # comparador_modalidad.csv, que es donde la cifra significa algo.
+        cortes = [num(f["total"]) for f in filas
+                  if f["ingreso"] == "1" and f["modalidad"] == "ordinario"
+                  and num(f["total"])]
         puntajes = [num(f["total"]) for f in filas if num(f["total"])]
         pct_rech, fiable = fiabilidad(filas)
         fuera.append(dict(
@@ -82,7 +89,9 @@ def por_carrera(datos):
             pct_rechazados=pct_rech, denominador_fiable=fiable,
             tasa_ingreso=round(adm / len(filas) * 100, 1)
             if len(filas) >= MINIMO_PARA_TASA and fiable == "si" else "",
-            nota_corte=round(min(cortes), 4) if cortes else "",
+            nota_corte_ordinario=round(min(cortes), 2) if cortes else "",
+            minimo_institucional=next(
+                (f["nota_minima"] for f in filas if f["nota_minima"]), ""),
             puntaje_min=round(min(puntajes), 2) if puntajes else "",
             puntaje_max=round(max(puntajes), 2) if puntajes else "",
             puntaje_mediana=round(statistics.median(puntajes), 2) if puntajes else ""))
@@ -108,7 +117,7 @@ def por_modalidad(datos):
             denominador_fiable=fiable,
             tasa_ingreso=round(adm / len(filas) * 100, 1)
             if len(filas) >= MINIMO_PARA_TASA and fiable == "si" else "",
-            puntaje_min_admitido=round(min(admitidos), 2) if admitidos else "",
+            nota_corte=round(min(admitidos), 2) if admitidos else "",
             puntaje_mediana=round(statistics.median(puntajes), 2) if puntajes else ""))
     return fuera
 
@@ -227,12 +236,13 @@ def main():
     print(f"{len(datos):,} postulaciones normalizadas\n")
     escribir("admision_por_carrera.csv",
              ["ciclo", "carrera", "postulaciones", "ingresantes", "tasa_ingreso",
-              "denominador_fiable", "pct_rechazados", "nota_corte",
-              "puntaje_min", "puntaje_max", "puntaje_mediana"],
+              "denominador_fiable", "pct_rechazados", "nota_corte_ordinario",
+              "minimo_institucional", "puntaje_min", "puntaje_max",
+              "puntaje_mediana"],
              por_carrera(datos))
     escribir("comparador_modalidad.csv",
              ["ciclo", "carrera", "modalidad", "postulaciones", "ingresantes",
-              "tasa_ingreso", "denominador_fiable", "puntaje_min_admitido",
+              "tasa_ingreso", "denominador_fiable", "nota_corte",
               "puntaje_mediana"],
              por_modalidad(datos))
     escribir("distribucion_puntajes.csv",

@@ -1,4 +1,4 @@
-ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiable,puntaje_min_admitido,puntaje_mediana
+ciclo,carrera,modalidad,postulaciones,ingresantes,tasa_ingreso,denominador_fiable,nota_corte,puntaje_mediana
 2021,ADMINISTRACION DE EMPRESAS,beca,37,8,21.6,si,77.53,67.57
 2021,ADMINISTRACION DE EMPRESAS,extraordinario,8,8,,no,74.13,83.52
 2021,ADMINISTRACION DE EMPRESAS,ordinario,187,121,64.7,si,50.71,73.18

@@ -69,10 +69,25 @@ CAMPOS = {
     "Opc": "opcion", "Opción": "opcion",
 }
 
+# La postulacion NO entra aca: es un valor legitimo del grupo, no ruido.
 RUIDO = {
     "Universidad Católica de Santa María", "Dirección de Admisión",
-    "PRIMERA POSTULACION", "SEGUNDA POSTULACION", "Fecha:", "Pág.:",
+    "Fecha:", "Pág.:",
 }
+
+# Un documento repite la misma carrera muchas veces, una por sede y grupo, y
+# cada bloque reinicia el orden de merito desde 1. Sin estas dos dimensiones el
+# grano queda mal definido: precatolica2021-I trae MEDICINA HUMANA en 16
+# bloques distintos y todos con un orden 6, que parecen duplicados y no lo son.
+#
+# La sede va al final de la linea del proceso, 'PRECATOLICA 2021-I - AREQUIPA'
+# frente a '- ILO'. El grupo es la linea entre el proceso y la carrera, y no
+# siempre es la postulacion: tambien aparece 'EGRESADO SECUNDARIA'.
+# Se excluyen los numerales romanos: 'PRECATOLICA 2026-III' termina en '- III'
+# y sin este filtro el numero de proceso se guardaba como si fuera una ciudad.
+ROMANOS = {"I", "II", "III", "IV", "V"}
+SEDE = re.compile(r"-\s*([A-ZÑÁÉÍÓÚ][A-ZÑÁÉÍÓÚ ]{2,24})\s*$")
+LINEA_PROCESO = re.compile(r"EXAMEN|PRECATOLICA|CONCURSO|ADMISION|EXTRAORD", re.I)
 
 
 def normalizar(s):
@@ -179,11 +194,25 @@ def procesar_pagina(pagina):
     """Extrae la carrera, las filas y la nota de corte de una pagina."""
     lineas = lineas_de(pagina)
     if not lineas:
-        return None, [], None
+        return None, [], None, "", ""
 
     idx, anclas = encontrar_encabezado(lineas)
     if idx is None:
-        return None, [], None
+        return None, [], None, "", ""
+
+    sede, grupo, i_proceso = "", "", None
+    for i, (_, palabras) in enumerate(lineas[:idx]):
+        texto = " ".join(p[0] for p in palabras).strip()
+        if LINEA_PROCESO.search(texto):
+            i_proceso = i
+            m = SEDE.search(texto)
+            if m and m.group(1).strip() not in ROMANOS:
+                sede = m.group(1).strip()
+    # El grupo es la linea siguiente al proceso, si no es ya la carrera.
+    if i_proceso is not None and i_proceso + 1 < idx:
+        candidato = " ".join(p[0] for p in lineas[i_proceso + 1][1]).strip()
+        if candidato and candidato not in RUIDO and i_proceso + 2 <= idx - 1:
+            grupo = candidato
 
     # La carrera es la ultima linea de una sola palabra en mayusculas antes
     # del encabezado. El proceso y la modalidad quedan mas arriba.
@@ -210,7 +239,7 @@ def procesar_pagina(pagina):
         if es_fila_datos(fila):
             filas.append(fila)
 
-    return carrera, filas, corte
+    return carrera, filas, corte, sede, grupo
 
 
 def procesar_pdf(ruta):
@@ -220,7 +249,7 @@ def procesar_pdf(ruta):
     try:
         with pdfplumber.open(ruta) as pdf:
             for pagina in pdf.pages:
-                carrera, filas, corte = procesar_pagina(pagina)
+                carrera, filas, corte, sede, grupo = procesar_pagina(pagina)
                 if not filas:
                     continue
                 if not carrera and not any(f.get("escuela") for f in filas):
@@ -231,15 +260,17 @@ def procesar_pdf(ruta):
                     # en la del sistema de admision es el titulo del bloque.
                     f.update(archivo=nombre,
                              carrera=(f.get("escuela") or carrera or "").strip(),
-                             pagina=pagina.page_number, nota_minima=corte)
+                             pagina=pagina.page_number, nota_minima=corte,
+                             sede=sede, grupo=grupo)
                     fuera.append(f)
     except Exception as e:
         avisos.append(f"error de lectura: {type(e).__name__}: {e}")
     return nombre, fuera, avisos
 
 
-CAMPOS_CSV = ["archivo", "pagina", "carrera", "orden", "codigo", "nombre",
-              "nota_01", "nota_02", "total", "condicion", "opcion", "nota_minima"]
+CAMPOS_CSV = ["archivo", "pagina", "sede", "grupo", "carrera", "orden", "codigo",
+              "nombre", "nota_01", "nota_02", "total", "condicion", "opcion",
+              "nota_minima"]
 
 
 def guardar(ciclo, nombre, filas):
