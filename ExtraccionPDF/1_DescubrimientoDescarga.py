@@ -18,6 +18,11 @@ RAIZ = os.path.dirname(os.path.abspath(__file__))
 CRUDO = os.path.join(RAIZ, "data", "raw")
 CACHE = "/tmp/ucsm/raw"
 BASE = "https://ucsm.edu.pe/wp-content/uploads/admision/resultados/"
+
+# El corpus arranca en el ciclo 2021: antes de esa fecha UCSM no publicaba los
+# examenes generales y los pocos PDFs que existen no traen ni Codigo ni notas
+# desagregadas, asi que no sostienen ninguna de las preguntas del analisis.
+CICLO_MINIMO = "2021"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
@@ -215,6 +220,8 @@ def main():
             continue
         fam, npag, moda, proc, fec, cond = leer_cabecera(datos)
         ciclo = ciclo_de(proc, fec, nombre)
+        if ciclo < CICLO_MINIMO:
+            continue
         tipo = tipo_de(proc, nombre)
         carpeta = os.path.join(CRUDO, ciclo)
         os.makedirs(carpeta, exist_ok=True)

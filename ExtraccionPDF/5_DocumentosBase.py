@@ -29,16 +29,13 @@ CARPETAS = [
     "https://www.ucsm.edu.pe/wp-content/uploads/admision/archivos/",
 ]
 TIPOS = ["VACANTES", "REGLAMENTO", "TEMARIO", "CRONOGRAMA"]
-ANIOS = [str(a) for a in range(2016, 2028)]
+# El corpus arranca en el ciclo 2021, ver ADR-002.
+ANIOS = [str(a) for a in range(2021, 2028)]
 
 # Documentos que rompen la convencion <año>_<TIPO>.pdf y solo aparecen buscando
 # en el indice historico de Wayback sobre todo el dominio. Tapan los huecos de
 # reglamento entre 2022 y 2026 y el cronograma de 2017.
 FUERA_DE_PATRON = {
-    "2016/reglamento_admision.pdf":
-        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/reglamento_admision_2016.pdf",
-    "2017/cronograma.pdf":
-        "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/CronogramaPregrado2017.pdf",
     "2021/reglamento_examen_virtual.pdf":
         "https://ucsm.edu.pe/wp-content/uploads/admision/archivos/REGLAMENTO_EXAMEN_VIRTUAL_ORDINARIO_2021.pdf",
     "2021/reglamento_precatolica.pdf":

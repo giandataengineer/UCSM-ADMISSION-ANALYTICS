@@ -19,15 +19,17 @@ ExtraccionPDF/
   8_AnalisisExploratorio.ipynb   [pendiente]
   data/
     manifest.csv                 223 filas: una por PDF de resultados descubierto
-    auditoria.csv                223 filas: contenido real de cada PDF
+    auditoria.csv                151 filas: contenido real de cada PDF
     carreras_por_ciclo.csv       47 carreras × 9 ciclos
     vacantes.csv                 vacantes 2027 por carrera y modalidad
-    documentos_base.csv          41 documentos normativos indexados
-    raw/<ciclo>/                 223 PDFs de resultados por año de ingreso
+    documentos_base.csv          30 documentos normativos indexados
+    raw/<ciclo>/                 151 PDFs de resultados por ciclo de admisión
     documentos_base/<año>/       vacantes, reglamento, temario, cronograma
   data_extraida/                 [vacío] salida del parser
   data_normalizada/              [vacío] listo para el warehouse
-docs/INVENTARIO.md               tabla detallada de los 223 PDFs de resultados
+docs/INVENTARIO.md               tabla detallada de los 151 PDFs
+docs/ADR-001-paralelismo.md      por qué no se usa PySpark
+docs/ADR-002-ventana-temporal.md por qué el corpus arranca en 2021
 ```
 
 ## Reproducir
@@ -45,7 +47,7 @@ Los PDFs no están versionados. Se reconstruyen con el primer script.
 
 ## El corpus
 
-223 PDFs de resultados, 48.2 MB, ciclos de admisión 2016 a 2027.
+151 PDFs de resultados y 30 documentos normativos, 61.1 MB, ciclos de admisión 2021 a 2027.
 
 El **ciclo** es el año de ingreso declarado dentro del PDF, no el año en que se
 rindió el examen: `EG2023I.pdf` dice *PRIMER EXAMEN ORDINARIO 2023* pero está
@@ -87,26 +89,28 @@ en 12 de 17 de 2025, en 1 de 19 de 2026 y en ninguno de 2027. El análisis de
 cohortes, que es seguir a la misma persona entre procesos, solo es viable
 **2021-2024**.
 
-**67 PDFs traen el denominador.** Es decir, listan `NO INGRESO` además de
+**61 PDFs traen el denominador.** Es decir, listan `NO INGRESO` además de
 `INGRESO`, lo que permite calcular tasas de admisión reales y no solo contar
 ganadores. Concentrados en 2022-2025.
 
 ### Cobertura por ciclo
 
-| Ciclo | PDFs | DEVEXP | Office | Con denominador |
-|---|---|---|---|---|
-| 2016-2018 | 34 | 0 | 34 | 0 |
-| 2019 | 23 | 5 | 18 | 3 |
-| 2020 | 13 | 4 | 9 | 3 |
-| 2021 | 21 | 15 | 6 | 9 |
-| 2022 | 28 | 16 | 12 | 9 |
-| 2023 | 25 | 15 | 10 | 12 |
-| 2024 | 26 | 19 | 5 | 15 |
-| 2025 | 22 | 17 | 4 | 11 |
-| 2026 | 22 | 19 | 3 | 4 |
-| 2027 | 6 | 6 | 0 | 0 |
+| Ciclo | Ordinarios | Precatólica | Distancia | Extraordinarios | Total |
+|---|---|---|---|---|---|
+| 2021 | 3 | 4 | — | 5 | 21 |
+| 2022 | 4 | 7 | — | 5 | 28 |
+| 2023 | 3 | 6 | 3 | 5 | 25 |
+| 2024 | 3 | 3 | 3 | 4 | 27 |
+| 2025 | 3 | 5 | 4 | 1 | 22 |
+| 2026 | 5 | 2 | 3 | 1 | 22 |
+| 2027 | 2 | 1 | — | 1 | 6 |
 
-2027 es el ciclo en curso: se completa conforme UCSM publique.
+Estudios a Distancia no aparece en 2021 ni 2022 porque la modalidad se creó en
+2023. 2027 es el ciclo en curso: se completa conforme UCSM publique.
+
+**Por qué desde 2021 y no desde 2016.** La UCSM no publicó los exámenes
+generales antes de ese ciclo. Verificado con seis métodos independientes; el
+detalle está en `docs/ADR-002-ventana-temporal.md`.
 
 ## Decisiones de arquitectura
 
@@ -133,14 +137,14 @@ publique no habilita a republicarlos consolidados.
 
 ## Base normativa
 
-41 documentos oficiales, 22.9 MB, de 2016 a 2027, en
+30 documentos oficiales de 2021 a 2027, en
 `data/documentos_base/<año>/`:
 
 | Documento | Cobertura | Para qué sirve |
 |---|---|---|
-| `vacantes.pdf` | 2016-2027, completo | Plazas por carrera y modalidad. Es el denominador. |
-| `temario.pdf` | 2016-2027, completo | Qué se evalúa. Explica saltos en las notas. |
-| `reglamento.pdf` | 2016-2022, 2026-2027 | Reglas del proceso. Los PDFs citan sus artículos. |
+| `vacantes.pdf` | 2021-2027, completo | Plazas por carrera y modalidad. Es el denominador. |
+| `temario.pdf` | 2021-2027, completo | Qué se evalúa. Explica saltos en las notas. |
+| `reglamento.pdf` | 2021, 2022, 2024, 2026, 2027 | Reglas del proceso. Los PDFs citan sus artículos. |
 | `cronograma.pdf` | 2022-2027 | Fechas oficiales de cada proceso. |
 
 El cuadro de vacantes reparte las plazas entre cinco vías de ingreso. Para 2027:
@@ -159,7 +163,7 @@ ocupación de plazas por carrera y modalidad.
 
 ## Catálogo de carreras
 
-47 carreras distintas entre 2019 y 2027. La oferta no es fija: **Ingeniería en
+47 carreras distintas entre 2021 y 2027. La oferta no es fija: **Ingeniería en
 Inteligencia Artificial** e **Ingeniería Biomédica** aparecen recién en el ciclo
 2026; **Turismo y Hotelería** dejó de convocarse después de 2021. Una serie
 temporal por carrera tiene que distinguir "no se convocó" de "nadie postuló", y

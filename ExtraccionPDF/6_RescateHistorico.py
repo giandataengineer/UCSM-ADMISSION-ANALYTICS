@@ -22,17 +22,12 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 # destino -> nombre de archivo en el servidor.
 # "resultado" va a data/raw/<ciclo>, "base" va a data/documentos_base/<año>.
 RESCATE = [
-    ("resultado", "2020", "primer-EXAMEN_GENERAL_2020.pdf"),
-    ("resultado", "2020", "segundo-EXAMEN_GENERAL_2020.pdf"),
-    ("resultado", "2020", "tercer-EXAMEN_GENERAL_2020.pdf"),
     ("resultado", "sin_ciclo", "tercio-superior.pdf"),
     ("resultado", "sin_ciclo", "traslado-interno.pdf"),
     ("resultado", "sin_ciclo", "traslado-externo-nacional.pdf"),
     ("resultado", "sin_ciclo", "traslado-externo-internacional.pdf"),
-    ("resultado", "2015", "ingresantes_ucsm_2014_2015.pdf"),
     ("base", "2024", "Vacantes-2024.pdf"),
     ("base", "2023", "ucsm-vacantes-pronabec-2023.pdf"),
-    ("base", "2016", "reglamento_admision_2016.pdf"),
     ("base", "2021", "ucsm-regalemento-admision-virtual.pdf"),
 ]
 
