@@ -58,6 +58,27 @@ def construir(con):
         FROM crudo
         WHERE carrera IS NOT NULL AND carrera <> ''
     """)
+    # El orden de merito no siempre se reinicia por carrera. Hay dos familias:
+    # cuando la carrera es el titulo del bloque, el orden va de 1 a N dentro de
+    # cada carrera; cuando la carrera es una columna de la fila, el orden es
+    # correlativo de todo el documento.
+    #
+    # Distinguirlas no es cosmetico: comparar un orden global contra un conteo
+    # por carrera hacia aparecer 14 545 filas perdidas que no existen.
+    con.execute("""
+        CREATE OR REPLACE TABLE grano AS
+        WITH por_archivo AS (
+            SELECT archivo,
+                   count(*)                       AS filas,
+                   max(orden)                     AS orden_max,
+                   count(DISTINCT carrera)        AS carreras
+            FROM filas WHERE orden IS NOT NULL GROUP BY archivo
+        )
+        SELECT archivo,
+               CASE WHEN carreras > 1 AND orden_max >= filas * 0.9
+                    THEN 'global' ELSE 'por_carrera' END AS tipo
+        FROM por_archivo
+    """)
     return con.execute("SELECT count(*) FROM filas").fetchone()[0]
 
 
@@ -150,10 +171,13 @@ def main():
     # Contraste contra el conteo declarado por el propio documento: el maximo
     # orden de merito de cada carrera dice cuantas filas deberia haber.
     hueco = con.execute("""
-        SELECT archivo, sede, grupo, carrera, max(orden) AS declaradas,
-               count(*) AS extraidas
-        FROM filas WHERE orden IS NOT NULL
-        GROUP BY archivo, sede, grupo, carrera HAVING max(orden) <> count(*)
+        SELECT f.archivo, f.sede, f.grupo,
+               CASE WHEN g.tipo = 'global' THEN '(documento)' ELSE f.carrera END AS ambito,
+               max(f.orden) AS declaradas, count(*) AS extraidas
+        FROM filas f JOIN grano g USING (archivo)
+        WHERE f.orden IS NOT NULL
+        GROUP BY 1, 2, 3, 4
+        HAVING max(f.orden) <> count(*)
     """).fetchall()
     if hueco:
         fallidas += 1

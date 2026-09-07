@@ -44,10 +44,31 @@ CORTE_PALABRA = 2.2
 # Cada tipo de proceso usa su propio vocabulario para el mismo concepto:
 # los ordinarios dicen INGRESO, los de seleccion previa SELECCIONADO, y las
 # listas de aptos APTO. El normalizador los unifica despues.
-CONDICIONES = {"INGRESO", "NO INGRESO", "NSP", "NC",
-               "SELECCIONADO", "NO SELECCIONADO",
-               "APTO", "NO APTO", "OBSERVADO", "RETIRADO",
-               "NIVELACION", "TEST + ENTREVISTA"}
+# El orden importa: los terminos compuestos van antes que los simples, porque
+# la deteccion es por contencion y 'NO INGRESO' contiene 'INGRESO'.
+CONDICIONES = [
+    "INGR NO BENEF", "NO SELECCIONADO", "NO INGRESO", "NO APTO",
+    "TEST + ENTREVISTA", "SELECCIONADO", "NIVELACION", "OBSERVADO",
+    "RECHAZADO", "RETIRADO", "INGRESO", "APTO", "NSP", "NC",
+]
+
+
+def condicion_de(texto):
+    """Extrae la condicion reconocida de dentro del texto de la celda.
+
+    No basta comparar por igualdad: la celda llega con arrastre de columnas
+    vecinas, como 'MEDICINA HUMANA INGRESO' cuando la escuela se derrama, o
+    '84.6500 APTO' cuando lo hace el puntaje. Buscar el termino dentro del
+    texto recupera esas filas en vez de descartarlas.
+
+    Devuelve cadena vacia si no hay ninguno, que es distinto de no tener
+    columna de condicion.
+    """
+    t = (texto or "").upper()
+    for c in CONDICIONES:
+        if c in t:
+            return c
+    return ""
 
 # Encabezado publicado -> nombre de campo. UCSM cambio la etiqueta del examen
 # varias veces sin cambiar su significado.
@@ -184,8 +205,16 @@ def asignar(palabras, anclas):
 
 
 def es_fila_datos(fila):
-    """Una fila real trae orden numerico y condicion valida, o al menos total."""
-    if fila.get("orden", "").isdigit() and fila.get("condicion", "") in CONDICIONES:
+    """Una fila real identifica a una persona y su resultado.
+
+    Vale con orden mas condicion, o con orden mas puntaje. La segunda via
+    cubre los documentos sin columna de condicion, y la primera los que no
+    publican puntaje, como el tercer examen a distancia de 2023.
+    """
+    orden = fila.get("orden", "").isdigit()
+    if orden and condicion_de(fila.get("condicion", "")):
+        return True
+    if orden and len((fila.get("nombre") or "").split()) >= 2:
         return True
     return bool(re.fullmatch(r"\d{1,4}\.\d+", fila.get("total", "")))
 
@@ -237,6 +266,7 @@ def procesar_pagina(pagina):
             continue
         fila = asignar(palabras, anclas)
         if es_fila_datos(fila):
+            fila["condicion"] = condicion_de(fila.get("condicion", ""))
             filas.append(fila)
 
     return carrera, filas, corte, sede, grupo
