@@ -16,3 +16,4 @@ __pycache__/
 
 .venv/
 ExtraccionPDF/data_extraida/*/
+ExtraccionPDF/data_normalizada/postulaciones.csv
