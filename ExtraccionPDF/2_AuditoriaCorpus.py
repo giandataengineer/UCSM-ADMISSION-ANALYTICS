@@ -86,12 +86,43 @@ def auditar(ruta):
     )
 
 
+def inventario():
+    """La fuente de verdad son los archivos en disco, no el manifiesto.
+
+    El script 1 descubre por patron y el 6 rescata archivos sueltos, asi que
+    ningun manifiesto por si solo describe todo el corpus. Recorrer data/raw
+    garantiza que ninguna descarga quede fuera de la auditoria.
+    """
+    meta = {}
+    ruta_man = os.path.join(RAIZ, "data", "manifest.csv")
+    if os.path.exists(ruta_man):
+        for m in csv.DictReader(open(ruta_man, encoding="utf-8")):
+            if m["estado"] == "ok" and m["ruta"]:
+                meta[os.path.basename(m["ruta"])] = m
+
+    base = os.path.join(RAIZ, "data", "raw")
+    fuera = []
+    for ciclo in sorted(os.listdir(base)):
+        carpeta = os.path.join(base, ciclo)
+        if not os.path.isdir(carpeta):
+            continue
+        for archivo in sorted(os.listdir(carpeta)):
+            if not archivo.lower().endswith(".pdf"):
+                continue
+            ruta = os.path.join(carpeta, archivo)
+            m = meta.get(archivo, {})
+            fuera.append(dict(
+                archivo=m.get("archivo", archivo), ciclo=ciclo,
+                tipo=m.get("tipo", ""), proceso=m.get("proceso", ""),
+                fecha_examen=m.get("fecha_examen", ""), paginas=m.get("paginas", ""),
+                ruta=os.path.relpath(ruta, RAIZ)))
+    return fuera
+
+
 def main():
-    man = list(csv.DictReader(open(os.path.join(RAIZ, "data", "manifest.csv"), encoding="utf-8")))
+    man = inventario()
     filas = []
     for i, m in enumerate(man, 1):
-        if m["estado"] != "ok" or not m["ruta"]:
-            continue
         ruta = os.path.join(RAIZ, m["ruta"])
         if not os.path.exists(ruta):
             continue

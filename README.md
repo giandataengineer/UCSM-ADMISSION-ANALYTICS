@@ -19,15 +19,15 @@ ExtraccionPDF/
   8_AnalisisExploratorio.ipynb   [pendiente]
   data/
     manifest.csv                 223 filas: una por PDF de resultados descubierto
-    auditoria.csv                221 filas: contenido real de cada PDF
+    auditoria.csv                223 filas: contenido real de cada PDF
     carreras_por_ciclo.csv       47 carreras × 9 ciclos
     vacantes.csv                 vacantes 2027 por carrera y modalidad
     documentos_base.csv          41 documentos normativos indexados
-    raw/<ciclo>/                 221 PDFs de resultados por año de ingreso
+    raw/<ciclo>/                 223 PDFs de resultados por año de ingreso
     documentos_base/<año>/       vacantes, reglamento, temario, cronograma
   data_extraida/                 [vacío] salida del parser
   data_normalizada/              [vacío] listo para el warehouse
-docs/INVENTARIO.md               tabla detallada de los 221 PDFs de resultados
+docs/INVENTARIO.md               tabla detallada de los 223 PDFs de resultados
 ```
 
 ## Reproducir
@@ -45,7 +45,7 @@ Los PDFs no están versionados. Se reconstruyen con el primer script.
 
 ## El corpus
 
-221 PDFs de resultados, 47.9 MB, 5 577 páginas, ciclos de admisión 2016 a 2027.
+223 PDFs de resultados, 48.2 MB, ciclos de admisión 2016 a 2027.
 
 El **ciclo** es el año de ingreso declarado dentro del PDF, no el año en que se
 rindió el examen: `EG2023I.pdf` dice *PRIMER EXAMEN ORDINARIO 2023* pero está
