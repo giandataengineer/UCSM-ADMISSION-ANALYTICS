@@ -15,7 +15,7 @@ Series encontradas:
 
 Salida: data/documentos_base/<año>/<tipo>.pdf  +  data/documentos_base.csv
 """
-import csv, hashlib, os, re, time, urllib.parse, urllib.request
+import csv, hashlib, json, os, re, time, urllib.error, urllib.parse, urllib.request
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 DESTINO = os.path.join(RAIZ, "data", "documentos_base")
@@ -61,17 +61,17 @@ def intentar(url, intentos=3):
 
 def wayback(nombre):
     """Si el sitio vivo ya no lo tiene, se busca la copia archivada."""
+    u = ("http://archive.org/wayback/available?url=" +
+         urllib.parse.quote(f"ucsm.edu.pe/wp-content/uploads/admision/archivos/{nombre}"))
     try:
-        u = ("http://archive.org/wayback/available?url=" +
-             urllib.parse.quote(f"ucsm.edu.pe/wp-content/uploads/admision/archivos/{nombre}"))
-        import json
         r = json.load(urllib.request.urlopen(u, timeout=40))
-        snap = r.get("archived_snapshots", {}).get("closest", {})
-        if snap.get("available"):
-            return intentar(snap["url"].replace("http://", "https://"))
-    except Exception:
-        pass
-    return None
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"    wayback no respondio por {nombre}: {e}")
+        return None
+    snap = r.get("archived_snapshots", {}).get("closest", {})
+    if not snap.get("available"):
+        return None
+    return intentar(snap["url"].replace("http://", "https://"))
 
 
 def main():

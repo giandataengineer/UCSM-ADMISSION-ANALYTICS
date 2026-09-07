@@ -108,6 +108,18 @@ ganadores. Concentrados en 2022-2025.
 
 2027 es el ciclo en curso: se completa conforme UCSM publique.
 
+## Decisiones de arquitectura
+
+Registradas en `docs/`, con la medición que las sostiene.
+
+**ADR-001 · Paralelismo.** La etapa de extracción usa `ProcessPoolExecutor` con
+8 procesos: 40.8 s en serial contra 9.3 s en paralelo sobre los 221 PDFs.
+PySpark queda descartado porque arrancar la JVM tarda más que el trabajo
+completo, y porque la eficiencia cae a 55% en 8 procesos, señal de que el
+cuello de botella es ancho de banda de memoria local y no cómputo distribuible.
+El umbral que revertiría la decisión está escrito en el ADR. Reproducible con
+`python ExtraccionPDF/bench_paralelismo.py`.
+
 ## Datos personales
 
 Los PDFs traen nombre completo y, hasta 2025, código de documento. Que UCSM los

@@ -12,3 +12,5 @@ ExtraccionPDF/data_extraida/
 
 __pycache__/
 .DS_Store
+
+.venv/
