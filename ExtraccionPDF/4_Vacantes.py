@@ -93,7 +93,7 @@ def extraer(ruta):
 
 
 def main():
-    ruta = os.path.join(RAIZ, "data", "contexto", "vacantes_2027.pdf")
+    ruta = os.path.join(RAIZ, "data", "documentos_base", "2027", "vacantes.pdf")
     filas = extraer(ruta)
     destino = os.path.join(RAIZ, "data", "vacantes.csv")
     with open(destino, "w", newline="", encoding="utf-8") as f:

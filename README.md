@@ -11,17 +11,23 @@ Estado: **corpus construido y auditado**. Falta el parser de tablas.
 ExtraccionPDF/
   1_DescubrimientoDescarga.py    descubre por 3 vías, descarga con throttle
   2_AuditoriaCorpus.py           cuenta qué hay realmente dentro de cada PDF
-  3_ExtraccionTablas.py          [pendiente] reconstrucción de filas por coordenadas
-  4_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
-  5_AnalisisExploratorio.ipynb   [pendiente]
+  3_CatalogoCarreras.py          qué carreras se convocaron en cada ciclo
+  4_Vacantes.py                  cuadro de vacantes por carrera y modalidad
+  5_DocumentosBase.py            reglamentos, temarios, cronogramas y vacantes por año
+  6_ExtraccionTablas.py          [pendiente] reconstrucción de filas por coordenadas
+  7_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
+  8_AnalisisExploratorio.ipynb   [pendiente]
   data/
-    manifest.csv                 222 filas: una por PDF descubierto
-    auditoria.csv                220 filas: contenido real de cada PDF
-    raw/<ciclo>/                 los PDFs, agrupados por año de ingreso
-    contexto/                    vacantes, cronograma, TUO, perfil de ingreso
+    manifest.csv                 223 filas: una por PDF de resultados descubierto
+    auditoria.csv                221 filas: contenido real de cada PDF
+    carreras_por_ciclo.csv       47 carreras × 9 ciclos
+    vacantes.csv                 vacantes 2027 por carrera y modalidad
+    documentos_base.csv          38 documentos normativos indexados
+    raw/<ciclo>/                 221 PDFs de resultados por año de ingreso
+    documentos_base/<año>/       vacantes, reglamento, temario, cronograma
   data_extraida/                 [vacío] salida del parser
   data_normalizada/              [vacío] listo para el warehouse
-docs/INVENTARIO.md               tabla detallada de los 220 PDFs
+docs/INVENTARIO.md               tabla detallada de los 221 PDFs de resultados
 ```
 
 ## Reproducir
@@ -30,6 +36,9 @@ docs/INVENTARIO.md               tabla detallada de los 220 PDFs
 pip install -r requirements.txt
 python ExtraccionPDF/1_DescubrimientoDescarga.py   # ~5 min, 47 MB
 python ExtraccionPDF/2_AuditoriaCorpus.py
+python ExtraccionPDF/3_CatalogoCarreras.py
+python ExtraccionPDF/5_DocumentosBase.py           # 22 MB de normativa
+python ExtraccionPDF/4_Vacantes.py
 ```
 
 Los PDFs no están versionados. Se reconstruyen con el primer script.
@@ -109,6 +118,40 @@ publique no habilita a republicarlos consolidados.
   la trazabilidad entre procesos sin exponer el documento. La sal va en `.env`.
 - `data_extraida/` está en `.gitignore`.
 - Solo se publican agregados por carrera, modalidad y ciclo.
+
+## Base normativa
+
+38 documentos oficiales, 22 MB, uno por año de 2016 a 2027, en
+`data/documentos_base/<año>/`:
+
+| Documento | Cobertura | Para qué sirve |
+|---|---|---|
+| `vacantes.pdf` | 2016-2027, completo | Plazas por carrera y modalidad. Es el denominador. |
+| `temario.pdf` | 2016-2027, completo | Qué se evalúa. Explica saltos en las notas. |
+| `reglamento.pdf` | 2016-2021 y 2027 | Reglas del proceso. Los PDFs citan sus artículos. |
+| `cronograma.pdf` | 2022-2027 | Fechas oficiales de cada proceso. |
+
+El cuadro de vacantes reparte las plazas entre cinco vías de ingreso. Para 2027:
+
+| Modalidad | Vacantes |
+|---|---|
+| Exámenes ordinarios | 2 654 |
+| Centro preuniversitario (CEPRE I-II-III) | 1 434 |
+| Concurso extraordinario | 1 201 |
+| Vacantes PRONABEC | 188 |
+| Traslado interno | 90 |
+| **Total** | **5 567** |
+
+Cruzar esto contra los ingresantes reales de cada proceso da la tasa de
+ocupación de plazas por carrera y modalidad.
+
+## Catálogo de carreras
+
+47 carreras distintas entre 2019 y 2027. La oferta no es fija: **Ingeniería en
+Inteligencia Artificial** e **Ingeniería Biomédica** aparecen recién en el ciclo
+2026; **Turismo y Hotelería** dejó de convocarse después de 2021. Una serie
+temporal por carrera tiene que distinguir "no se convocó" de "nadie postuló", y
+para eso está `carreras_por_ciclo.csv`.
 
 ## Fuente
 

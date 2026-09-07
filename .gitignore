@@ -1,6 +1,6 @@
 # Los PDFs no se versionan: se reconstruyen con 1_DescubrimientoDescarga.py
 ExtraccionPDF/data/raw/
-ExtraccionPDF/data/contexto/
+ExtraccionPDF/data/documentos_base/
 ExtraccionPDF/data/.tmp/
 
 # Warehouse derivado
