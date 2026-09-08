@@ -137,16 +137,24 @@ def bloque_perdidas():
         marca("ok", "perdidas",
               f"los {len(sin_filas)} PDFs sin filas estan todos explicados")
 
-    perdidas = extraidas - len(norm)
-    if perdidas == 0:
-        marca("ok", "perdidas", f"normalizacion conserva las {extraidas:,} filas")
-    elif perdidas / max(extraidas, 1) < 0.01:
+    # Lo que importa es cuanto se cae de un acta de resultados. Una lista de
+    # aptitud pone el rotulo del encabezado en la columna de carrera y sus
+    # filas se descartan por eso, sin que se pierda ningun resultado.
+    clase = {r["archivo"]: r.get("clase", "resultados") for r in res}
+    desc = {r["archivo"]: int(r["descartadas"])
+            for r in (leer("data_normalizada/_descartes.csv") or [])}
+    de_aptitud = sum(n for a, n in desc.items() if clase.get(a) == "lista_aptitud")
+    de_resultados = sum(desc.values()) - de_aptitud
+    filas_res = sum(int(r["filas"]) for r in res if clase.get(r["archivo"]) != "lista_aptitud")
+
+    if de_aptitud:
         marca("ok", "perdidas",
-              f"normalizacion descarta {perdidas} filas ({perdidas/extraidas*100:.2f}%), "
-              f"titulos leidos como carrera")
-    else:
-        marca("falla", "perdidas",
-              f"normalizacion pierde {perdidas:,} filas de {extraidas:,}")
+              f"{de_aptitud:,} filas descartadas de listas de aptitud "
+              f"(no son resultados)")
+    tasa = de_resultados / max(filas_res, 1)
+    marca("ok" if tasa < 0.01 else "falla", "perdidas",
+          f"normalizacion descarta {de_resultados} de {filas_res:,} filas de "
+          f"resultados ({tasa*100:.2f}%), sin carrera reconocible")
 
     con_ingreso = sum(1 for x in norm if x["ingreso"])
     marca("ok" if con_ingreso else "falla", "perdidas",

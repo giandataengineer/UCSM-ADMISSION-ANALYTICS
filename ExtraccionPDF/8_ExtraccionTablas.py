@@ -42,6 +42,12 @@ TOL_FILA = 2.5
 CORTE_PALABRA = 2.2
 # Margen para buscar el hueco real alrededor del borde de una columna.
 CERCA_DEL_BORDE = 8
+# Dos grupos de inicios mas juntos que esto son la misma columna desalineada,
+# no dos columnas distintas. Ajustado contra el corpus: con 15 puntos se
+# fusionaban 'Opc' y 'Nota 01' de los examenes generales, que estan a 12, y se
+# corrompian 2 677 filas. La desalineacion real que hay que absorber es la de
+# 'INGRESO' contra 'NO INGRESO', que son 7.
+FUSION_COLUMNA = 9
 
 # Cada tipo de proceso usa su propio vocabulario para el mismo concepto:
 # los ordinarios dicen INGRESO, los de seleccion previa SELECCIONADO, y las
@@ -56,21 +62,23 @@ CONDICIONES = [
 
 
 def condicion_de(texto):
-    """Extrae la condicion reconocida de dentro del texto de la celda.
+    """Reconoce la condicion dentro del texto de la celda.
 
-    No basta comparar por igualdad: la celda llega con arrastre de columnas
-    vecinas, como 'MEDICINA HUMANA INGRESO' cuando la escuela se derrama, o
-    '84.6500 APTO' cuando lo hace el puntaje. Buscar el termino dentro del
-    texto recupera esas filas en vez de descartarlas.
+    Se compara sin tildes porque la fuente alterna 'INGRESO' e 'INGRESO' con
+    acento segun el documento: en 2022CCI-I todas las filas dicen 'INGRESO'
+    tildado y la pagina entera se descartaba por no reconocerlo.
 
-    Devuelve cadena vacia si no hay ninguno, que es distinto de no tener
-    columna de condicion.
+    Se busca por contenido y no por igualdad porque la celda arrastra texto
+    vecino. El orden de CONDICIONES importa: los terminos compuestos van
+    primero, o 'NO INGRESO' se reconoceria como 'INGRESO'.
     """
-    t = (texto or "").upper()
+    t = unicodedata.normalize("NFKD", (texto or "").upper())
+    t = t.encode("ascii", "ignore").decode()
     for c in CONDICIONES:
         if c in t:
             return c
     return ""
+
 
 # Encabezado publicado -> nombre de campo. UCSM cambio la etiqueta del examen
 # varias veces sin cambiar su significado.
@@ -90,7 +98,7 @@ CAMPOS = {
     "RESULTADO": "condicion", "Resultado": "condicion",
     # Familia Excel/Word: la carrera va como columna, no como titulo de bloque
     "Escuela": "escuela", "ESCUELA PROFESIONAL": "escuela",
-    "N°": "orden", "Nº": "orden",
+    "N°": "orden", "Nº": "orden", "N": "orden", "N.": "orden",
     "DMI": "codigo", "DNI": "codigo",
     "APELLIDOS Y NOMBRES": "nombre",
     # Los documentos del area de salud y los de convenio rotulan en mayusculas.
@@ -100,6 +108,8 @@ CAMPOS = {
     "CONDICIÓN": "condicion", "CONDICION": "condicion",
     "PUNTAJE FINAL": "total", "PUNTAJE": "total",
     "MODALIDAD": "modalidad", "INSTITUCIÓN EDUCATIVA": "institucion",
+    "TIP DOC": "codigo", "TIPO DOC": "codigo",
+    "PROGRAMA INGRESO": "escuela", "PROGRAMA": "escuela",
     "Opc": "opcion", "Opción": "opcion",
     # Los documentos de aptos parten el encabezado en varias lineas y usan
     # rotulos largos propios.
@@ -210,6 +220,12 @@ def encabezados(lineas):
 def parte_un_numero(chars, i):
     """Si cortar en i dejaria un puntaje partido en dos.
 
+    Complementa la condicion principal, que es cortar solo despues de un
+    espacio: dos celdas contiguas siempre dejan uno, y dentro de una palabra no
+    lo hay. Sin esa condicion el corte partia 'KARELIS' en 'KAREL' y 'IS'. Se
+    probo exigir en su lugar una separacion fisica minima y no sirve: el hueco
+    entre celdas de esta fuente es de decimas de punto, igual que entre letras.
+
     En Extraordinario 2025-I los tres componentes se imprimen pegados y sin
     hueco. Cortar por el borde de columna producia nota_01 = '93' y nota_02 =
     '.492000 60.745200' cuando el valor real era 93.492000.
@@ -247,6 +263,7 @@ def partir_en_columnas(palabras, anclas):
             candidatos = [(chars[i + 1]["x0"] - chars[i]["x1"], i + 1)
                           for i in range(len(chars) - 1)
                           if abs(chars[i + 1]["x0"] - borde) <= CERCA_DEL_BORDE
+                          and chars[i]["text"].isspace()
                           and not parte_un_numero(chars, i + 1)]
             # Sin un corte admisible se deja la palabra entera: un campo vacio
             # dice que no se sabe, un numero cortado afirma algo falso.
@@ -289,13 +306,43 @@ def asignar(palabras, anclas):
     if huecos:
         partidas = partir_en_columnas(palabras, huecos)
         if len(partidas) > len(palabras):
-            fila = repartir(partidas, anclas)
+            reparada = repartir(partidas, anclas)
+            # La reparacion se acepta solo si no ensucia una columna de
+            # puntaje. Partir por un espacio que cae justo en el borde manda la
+            # segunda mitad de un nombre a nota_01, y un puntaje que dice
+            # 'RODRIGUEZ CECILIA' es peor que un campo vacio.
+            if letras_en_numericas(reparada) <= letras_en_numericas(fila):
+                fila = reparada
+
+    # El orden de merito es un numero. Si arrastra palabras es porque el
+    # encabezado no declaro una columna intermedia: en EG2021IIsalud los
+    # apellidos van en dos columnas rotuladas en otra linea, asi que caen sobre
+    # el ordinal y la fila se descarta por no identificar a nadie.
+    m = re.match(r"^(\d+)\s+(\S.*)$", fila.get("orden", "") or "")
+    if m and "nombre" in fila:
+        fila["orden"] = m.group(1)
+        fila["nombre"] = f"{m.group(2)} {fila['nombre']}".strip()
     return fila
+
+
+# La fuente escribe estos codigos donde iria el puntaje, asi que una letra ahi
+# no siempre es un error.
+MARCAS = {"NC", "NSP", "NA", "NP", "-"}
+NUMERICAS = ("nota_adicional", "nota_01", "nota_02", "total")
+
+
+def letras_en_numericas(fila):
+    """Cuantas columnas de puntaje traen texto que no es un codigo conocido."""
+    n = 0
+    for campo in NUMERICAS:
+        v = (fila.get(campo) or "").strip()
+        if v and v not in MARCAS and re.search(r"[A-Za-zÑÁÉÍÓÚ]", v):
+            n += 1
+    return n
 
 
 def repartir(palabras, anclas):
     fila = {campo: [] for campo, _, _ in anclas}
-    centros = [(x0 + x1) / 2 for _, x0, x1 in anclas]
     minimo = 0
     for palabra in palabras:
         texto, px0, px1 = palabra[0], palabra[1], palabra[2]
@@ -306,9 +353,16 @@ def repartir(palabras, anclas):
             if solape > mejor_solape:
                 mejor, mejor_solape = i, solape
         if mejor is None:
-            centro = (px0 + px1) / 2
+            # Sin solape se elige por distancia al intervalo del rotulo, no
+            # entre centros. Un nombre corto termina antes de que empiece su
+            # rotulo y queda en tierra de nadie: por centros caia en la columna
+            # anterior, que suele ser mas angosta y estar mas cerca del centro
+            # de la palabra, y la fila entera se descartaba por traer letras en
+            # el codigo. Por intervalo gana la columna cuyo borde esta mas
+            # cerca, que es la que corresponde.
             mejor = min(range(minimo, len(anclas)),
-                        key=lambda i: abs(centro - centros[i]))
+                        key=lambda i: max(0.0, anclas[i][1] - px1,
+                                          px0 - anclas[i][2]))
         fila[anclas[mejor][0]].append(texto)
         minimo = mejor
     return {k: " ".join(v).strip() for k, v in fila.items()}
@@ -379,6 +433,20 @@ def calibrar(lineas, idx, anclas):
     # componentes de nota y el rotulo solo declara dos, y forzar la calibracion
     # ponia el promedio bajo 'total' y rompia la aritmetica en 2 452 filas.
     poblados = [g for g in grupos if len(g) >= 3]
+
+    # Una misma columna puede producir dos grupos cuando sus valores no estan
+    # alineados: en EG2022IIIsalud 'INGRESO' arranca en x=498 y 'NO INGRESO' en
+    # x=491, y esos siete puntos sobraban un grupo y anulaban la calibracion
+    # entera. Se fusionan los grupos adyacentes mas cercanos mientras sobren y
+    # la separacion siga siendo menor que el ancho de una columna real.
+    while len(poblados) > len(anclas):
+        centro = [sum(g) / len(g) for g in poblados]
+        huecos = [(centro[i + 1] - centro[i], i) for i in range(len(centro) - 1)]
+        menor, i = min(huecos)
+        if menor > FUSION_COLUMNA:
+            break
+        poblados[i:i + 2] = [poblados[i] + poblados[i + 1]]
+
     if len(poblados) != len(anclas):
         return anclas
     columnas = sorted(sum(g) / len(g) for g in poblados)
@@ -427,6 +495,38 @@ def actualizar_proceso(tramo, estado):
                 estado["grupo"] = candidato
 
 
+def leer_bloque(lineas, idx, fin, anclas, carrera, estado):
+    """Convierte en filas el tramo que va del encabezado idx hasta fin.
+
+    idx = -1 significa que no hay encabezado en esta pagina y los datos
+    arrancan en la primera linea, que es como continua una tabla larga.
+    """
+    # La calibracion mira solo las filas de este bloque: los de mas abajo
+    # pueden tener otro ancho de columna.
+    anclas_bloque = calibrar(lineas[:fin], idx, anclas)
+
+    bloque, corte = [], None
+    for _, palabras in lineas[idx + 1:fin]:
+        texto = " ".join(p[0] for p in palabras)
+        if texto.startswith("Nota M"):
+            m = re.search(r"(\d+\.\d+)", texto)
+            if m:
+                corte = float(m.group(1))
+            continue
+        if re.match(r"^(NC|NSP)\s*:", texto) or texto.startswith("*"):
+            continue
+        fila = asignar(palabras, anclas_bloque)
+        if es_fila_datos(fila):
+            fila["condicion"] = condicion_de(fila.get("condicion", ""))
+            bloque.append(fila)
+    for f in bloque:
+        f["carrera_bloque"] = carrera
+        f["nota_minima"] = corte
+        f["sede"] = estado["sede"]
+        f["grupo"] = estado["grupo"]
+    return bloque
+
+
 def procesar_pagina(pagina, estado):
     """Extrae las filas de cada bloque de la pagina con su propia carrera."""
     lineas = lineas_de(pagina)
@@ -435,7 +535,14 @@ def procesar_pagina(pagina, estado):
 
     cabezas = encabezados(lineas)
     if not cabezas:
-        return []
+        # Una tabla larga sigue en la pagina siguiente sin repetir el
+        # encabezado: en EG2022Isalud la cabecera esta solo en la primera de
+        # cuatro paginas. Exigirla en cada una descartaba las otras tres
+        # enteras, 141 de 180 filas del documento.
+        if not estado.get("anclas"):
+            return []
+        return leer_bloque(lineas, -1, len(lineas), estado["anclas"],
+                           estado.get("carrera"), estado)
 
     filas = []
     for k, (idx, anclas) in enumerate(cabezas):
@@ -444,40 +551,30 @@ def procesar_pagina(pagina, estado):
         tramo = lineas[desde:idx]
         actualizar_proceso(tramo, estado)
         carrera = titulo_carrera(tramo)
-        # La calibracion mira solo las filas de este bloque: los de mas abajo
-        # pueden tener otro ancho de columna.
-        anclas_bloque = calibrar(lineas[:fin], idx, anclas)
-
-        bloque, corte = [], None
-        for _, palabras in lineas[idx + 1:fin]:
-            texto = " ".join(p[0] for p in palabras)
-            if texto.startswith("Nota M"):
-                m = re.search(r"(\d+\.\d+)", texto)
-                if m:
-                    corte = float(m.group(1))
-                continue
-            if re.match(r"^(NC|NSP)\s*:", texto) or texto.startswith("*"):
-                continue
-            fila = asignar(palabras, anclas_bloque)
-            if es_fila_datos(fila):
-                fila["condicion"] = condicion_de(fila.get("condicion", ""))
-                bloque.append(fila)
-        for f in bloque:
-            f["carrera_bloque"] = carrera
-            f["nota_minima"] = corte
-            f["sede"] = estado["sede"]
-            f["grupo"] = estado["grupo"]
-        filas.extend(bloque)
+        filas.extend(leer_bloque(lineas, idx, fin, anclas, carrera, estado))
+        estado["anclas"], estado["carrera"] = anclas, carrera
 
     return filas
+
+
+# Una lista de aptitud dice quien puede rendir el examen. Se declara en su
+# portada y hay que saberlo antes de normalizar, porque ahi 'APTO' significa
+# elegible y no admitido. Se detecta aqui, que es donde se lee el documento.
+LISTA_APTITUD = re.compile(
+    r"POSTULANTES\s+(NO\s+)?APTOS|LISTA\s+DE\s+POSTULANTES|APTOS\s+PARA\s+RENDIR|"
+    r"EXPEDIENTES\s+RECHAZADOS|RELACION\s+DE\s+POSTULANTES\s+APTOS", re.I)
 
 
 def procesar_pdf(ruta):
     """Recorre un PDF completo y devuelve (filas, incidencias)."""
     fuera, avisos = [], []
     nombre = os.path.basename(ruta)
+    clase = "resultados"
     try:
         with pdfplumber.open(ruta) as pdf:
+            portada = "".join((p.extract_text() or "") for p in pdf.pages[:2])
+            if LISTA_APTITUD.search(portada):
+                clase = "lista_aptitud"
             estado = {"sede": "", "grupo": ""}
             for pagina in pdf.pages:
                 filas = procesar_pagina(pagina, estado)
@@ -499,7 +596,7 @@ def procesar_pdf(ruta):
                     fuera.append(f)
     except Exception as e:
         avisos.append(f"error de lectura: {type(e).__name__}: {e}")
-    return nombre, fuera, avisos
+    return nombre, fuera, avisos, clase
 
 
 CAMPOS_CSV = ["archivo", "pagina", "sede", "grupo", "carrera", "orden", "codigo",
@@ -535,15 +632,15 @@ def main():
     print(f"{len(tareas)} PDFs a procesar con {PROCESOS} procesos\n")
     resumen = []
     with ProcessPoolExecutor(PROCESOS) as ex:
-        for ciclo, (nombre, filas, avisos) in zip(
+        for ciclo, (nombre, filas, avisos, clase) in zip(
                 [t[0] for t in tareas], ex.map(procesar_pdf, [t[1] for t in tareas])):
             if filas:
                 guardar(ciclo, nombre, filas)
             carreras = len({f["carrera"] for f in filas})
             cortes = len({f["nota_minima"] for f in filas if f["nota_minima"]})
-            resumen.append(dict(ciclo=ciclo, archivo=nombre, filas=len(filas),
-                                carreras=carreras, cortes=cortes,
-                                avisos=len(avisos)))
+            resumen.append(dict(ciclo=ciclo, archivo=nombre, clase=clase,
+                                filas=len(filas), carreras=carreras,
+                                cortes=cortes, avisos=len(avisos)))
             marca = "  " if filas else "??"
             print(f" {marca} {ciclo}  {nombre[:40]:<42} {len(filas):>6} filas "
                   f"{carreras:>3} carreras")
@@ -553,8 +650,8 @@ def main():
     os.makedirs(SALIDA, exist_ok=True)
     with open(os.path.join(SALIDA, "_resumen.csv"), "w", newline="",
               encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["ciclo", "archivo", "filas", "carreras",
-                                          "cortes", "avisos"])
+        w = csv.DictWriter(f, fieldnames=["ciclo", "archivo", "clase", "filas",
+                                          "carreras", "cortes", "avisos"])
         w.writeheader()
         w.writerows(resumen)
 

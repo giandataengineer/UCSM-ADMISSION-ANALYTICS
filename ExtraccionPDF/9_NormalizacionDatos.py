@@ -23,7 +23,7 @@ Cuatro conciliaciones, cada una obligada por un cambio real de la fuente:
 
 Salida: data_normalizada/postulaciones.csv
 """
-import csv, glob, hashlib, hmac, os, re, unicodedata
+import csv, difflib, glob, hashlib, hmac, os, re, unicodedata
 from collections import Counter
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
@@ -46,7 +46,14 @@ ABREVIATURAS = [
     (r"^ADM\.\s+", "ADMINISTRACION "),
     (r"^EDUC\.\s+", "EDUCACION "),
     (r"^TEC\.\s+", "TECNOLOGIA "),
+    (r"^MED\.\s+", "MEDICINA "),
+    (r"^ARQ\.\s+", "ARQUITECTURA "),
 ]
+
+# 'APTO' significa dos cosas distintas segun el documento, asi que se traduce
+# con dos diccionarios y no con uno. Ver listas_de_aptitud().
+APTITUD = {"APTO": "apto_para_rendir", "NO APTO": "no_apto",
+           "OBSERVADO": "observado", "RECHAZADO": "rechazado"}
 
 CONDICION = {
     "INGRESO": "ingreso", "SELECCIONADO": "ingreso", "APTO": "ingreso",
@@ -75,6 +82,9 @@ MODALIDAD = {
 def limpiar(s):
     s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
     s = re.sub(r"\(V\s*\d*\)?", "", s)          # sufijo de version del plan
+    # En 2023CCI-I el puntaje se imprime a continuacion de la carrera y sin
+    # separador de celda, asi que llega pegado al nombre.
+    s = re.sub(r"\s+\d+[.,]\d+\s*$", "", s)
     s = re.sub(r"\s+", " ", s.upper()).strip()
     for patron, expansion in ABREVIATURAS:
         s = re.sub(patron, expansion, s)
@@ -130,8 +140,48 @@ def catalogo_carreras(filas):
             mapa[forma] = forma
             continue
         candidatas = [o for o in oficiales if o.startswith(forma)]
-        mapa[forma] = candidatas[0] if len(candidatas) == 1 else forma
+        if len(candidatas) == 1:
+            mapa[forma] = candidatas[0]
+            continue
+        # La fuente trae erratas propias: 'INGENIERIA BIIOTECNOLOGICA' con dos
+        # ies, 'INGENIERIA BIOTECNOLOGIA' sin la ca. No son truncados, asi que
+        # el prefijo no las resuelve. Se acepta la carrera del catalogo mas
+        # parecida solo con un umbral alto, que a esta distancia solo alcanza
+        # una errata de un par de letras y nunca otra carrera.
+        cerca = difflib.get_close_matches(forma, oficiales, n=1, cutoff=0.92)
+        mapa[forma] = cerca[0] if cerca else forma
     return mapa
+
+
+def listas_de_aptitud(crudas):
+    """Documentos que dicen quien puede rendir el examen, no quien ingreso.
+
+    En un acta de resultados 'APTO' se opone a 'NO INGRESO' y quiere decir
+    admitido. En una lista previa se opone a 'NO APTO' y solo dice que la
+    persona reune los requisitos para presentarse. Es la misma palabra sobre
+    dos hechos distintos, y tratarlos igual sumaba 414 admisiones inexistentes.
+
+    La distincion sale del vocabulario que usa cada documento y no del nombre
+    del archivo: hay listas de aptitud que no se llaman 'Aptos' y actas que si.
+    """
+    vocabulario = {}
+    for x in crudas:
+        vocabulario.setdefault(x["archivo"], set()).add(
+            limpiar(x.get("condicion", "")))
+    por_vocabulario = {
+        archivo for archivo, v in vocabulario.items()
+        if "NO APTO" in v
+        or ("APTO" in v and not {"INGRESO", "NO INGRESO", "SELECCIONADO"} & v)}
+
+    # El vocabulario no alcanza cuando el documento no publica columna de
+    # condicion, que es el caso de las listas de no aptos. Para esos vale lo
+    # que el propio PDF declara en su portada, que el parser ya registro.
+    ruta = os.path.join(ENTRADA, "_resumen.csv")
+    por_portada = set()
+    if os.path.exists(ruta):
+        por_portada = {r["archivo"] for r in csv.DictReader(open(ruta, encoding="utf-8"))
+                       if r.get("clase") == "lista_aptitud"}
+    return por_vocabulario | por_portada
 
 
 def seudonimo(codigo):
@@ -190,24 +240,27 @@ def main():
             x["carrera_limpia"] = limpiar(x.get("carrera", ""))
             crudas.append(x)
 
+    aptitud = listas_de_aptitud(crudas)
     mapa = catalogo_carreras(crudas)
     oficiales = set(catalogo_oficial())
     resueltas = set(mapa.values()) & oficiales
 
-    filas, descartadas = [], 0
+    filas, descartadas = [], Counter()
     for x in crudas:
         carrera = mapa.get(x["carrera_limpia"], x["carrera_limpia"])
         # Fuera del catalogo y sin resolver: es ruido de extraccion, no una
         # carrera que UCSM haya convocado.
         if carrera and carrera not in oficiales and carrera not in resueltas:
-            descartadas += 1
+            descartadas[x["archivo"]] += 1
             continue
         if not carrera or NO_ES_CARRERA.search(carrera) or texto_corrupto(carrera):
-            descartadas += 1
+            descartadas[x["archivo"]] += 1
             continue
         m = manifiesto.get(x["archivo"], {})
-        cond = CONDICION.get(limpiar(x.get("condicion", "")), "")
-        modalidad = m.get("tipo", "")
+        es_aptitud = x["archivo"] in aptitud
+        tabla = APTITUD if es_aptitud else CONDICION
+        cond = tabla.get(limpiar(x.get("condicion", "")), "")
+        modalidad = "lista_aptos" if es_aptitud else m.get("tipo", "")
         filas.append(dict(
             ciclo=x["ciclo"], archivo=x["archivo"],
             proceso=m.get("proceso", ""),
@@ -238,10 +291,23 @@ def main():
 
     resueltos = sum(1 for k, v in mapa.items() if k != v)
     print(f"filas normalizadas : {len(filas):,}")
-    print(f"descartadas        : {descartadas} (titulos leidos como carrera)")
+    print(f"descartadas        : {sum(descartadas.values())} "
+          f"(sin carrera reconocible)")
     print(f"carreras canonicas : {len({f['carrera'] for f in filas})}")
     print(f"truncados resueltos: {resueltos}")
     print(f"con seudonimo      : {sum(1 for f in filas if f['postulante']):,}")
+    print(f"listas de aptitud  : {len(aptitud)} documentos, "
+          f"{sum(1 for f in filas if f['modalidad'] == 'lista_aptos'):,} filas "
+          f"(no cuentan como admision)")
+    # Se registra por archivo para que la auditoria pueda separar lo que se
+    # cae de un acta de resultados, que es una perdida, de lo que se cae de una
+    # lista de aptitud, cuya columna de carrera trae texto del encabezado.
+    with open(os.path.join(SALIDA, "_descartes.csv"), "w", newline="",
+              encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["archivo", "descartadas"])
+        w.writerows(sorted(descartadas.items()))
+
     print(f"\nsalida: data_normalizada/postulaciones.csv")
     return filas
 

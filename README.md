@@ -153,7 +153,7 @@ detalle está en `docs/ADR-002-ventana-temporal.md`.
 
 ## Procesamiento
 
-Once etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
+Doce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 
 | Etapa | Script | Salida |
 |---|---|---|
@@ -164,39 +164,72 @@ Once etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Base normativa | `5_DocumentosBase.py` | reglamentos, temarios, cronogramas |
 | Rescate histórico | `6_RescateHistorico.py` | archivos sin convención de nombre |
 | Instructivos | `7_RequisitosIngresantes.py` | 22 documentos por proceso |
-| **Extracción de tablas** | `8_ExtraccionTablas.py` | **66 069 filas** por coordenadas, bloque a bloque |
-| Normalización (Silver) | `9_NormalizacionDatos.py` | 65 715 filas, 47 carreras, seudonimizadas |
+| **Extracción de tablas** | `8_ExtraccionTablas.py` | **71 627 filas** por coordenadas, bloque a bloque |
+| Normalización (Silver) | `9_NormalizacionDatos.py` | 69 652 filas, 47 carreras, seudonimizadas |
 | Agregados (Gold) | `10_Agregados.py` | 6 CSV para Tableau |
 | Reconciliación | `11_Validacion.py` | 10 pruebas en DuckDB |
+| Contraste independiente | `14_ContrasteIndependiente.py` | segundo método, página a página |
 | Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
 
 ### Verificación
 
-Tres suites, 20 pruebas, todas en verde. Ninguna se ajustó para pasar: cada vez
-que una falló, se corrigió el parser o se documentó por qué la fuente es así.
+Cuatro suites. Ninguna se ajustó para pasar: cada vez que una falló, se
+corrigió el parser o se documentó por qué la fuente es así.
 
-`11_Validacion.py` contrasta cada fila contra las redundancias que el propio
-PDF publica. Si el parser asignara mal una columna, la aritmética dejaría de
-cerrar sola. Dos pruebas van más allá y **abren el PDF de origen**: cuando el
-orden de mérito salta un número, se comprueba si el ordinal tampoco está en el
-documento. Los nueve casos resultaron ser omisiones de la fuente, que retira
-gente de una lista ya ordenada sin renumerar.
+| Suite | Qué pregunta | Resultado |
+|---|---|---|
+| `11_Validacion.py` | ¿La salida es fiel a las redundancias del PDF? | 10/10 |
+| `13_PruebasCalidad.py` | ¿Las capas derivadas son coherentes? | 10/10 |
+| `14_ContrasteIndependiente.py` | ¿Un segundo método cuenta lo mismo? | **4 974/4 974 páginas** |
+| `12_Auditoria.py` | ¿El conjunto se sostiene? | 27 conformes, 0 fallas |
 
-`13_PruebasCalidad.py` mira las capas derivadas: integridad referencial, que la
-fecha del examen caiga en la ventana de su ciclo, que Gold sume lo mismo que
-Silver, que el seudónimo no colisione y que reejecutar produzca el mismo
-archivo byte a byte.
+Las tres primeras miden cosas distintas. `11_Validacion.py` usa las
+redundancias que el propio documento publica: si el parser asignara mal una
+columna, la aritmética dejaría de cerrar sola. Dos de sus pruebas **abren el
+PDF de origen**: cuando el orden de mérito salta un número, comprueban si el
+ordinal tampoco está en el documento. Los nueve casos resultaron ser omisiones
+de la fuente, que retira gente de una lista ya ordenada sin renumerar.
+
+`13_PruebasCalidad.py` mira más arriba: integridad referencial, que la fecha del
+examen caiga en la ventana de su ciclo, que Gold sume lo mismo que Silver, que
+el seudónimo no colisione, y que reejecutar produzca el mismo archivo byte a
+byte.
+
+`14_ContrasteIndependiente.py` responde la pregunta que las otras dos no pueden.
+Ambas leen los datos por el mismo camino, así que un error consistente en toda
+una página las pasa de largo. Esta cuenta las filas **sin usar el parser**: donde
+él reconstruye la tabla por coordenadas de carácter, ella toma el texto plano y
+lo mide con expresiones regulares. Si los dos caminos llegan al mismo número en
+cada una de las 4 974 páginas, el desacuerdo tendría que ser una coincidencia.
+
+Arrancó en 97.58% y cada punto que faltaba era un hallazgo real, entre ellos
+5 523 filas que se perdían porque una tabla continúa en la página siguiente sin
+repetir el encabezado. También corrigió a la propia prueba tres veces: cuando
+dos métodos difieren, el equivocado puede ser cualquiera de los dos. El detalle
+está en `docs/ADR-008-contraste-independiente.md`.
 
 `12_Auditoria.py` revisa el conjunto: que cada etapa conserve lo que recibió,
-que no salga ningún dato personal en lo versionado, y **que todo PDF sin filas
-tenga una explicación verificada**. Los 15 que no producen datos son 9 listas
-de aptitud previas al examen, 5 instructivos y 1 duplicado; la auditoría los
-clasifica leyendo el propio documento y falla si aparece uno sin explicar.
+que no salga ningún dato personal en lo versionado, y que **todo PDF sin filas
+tenga una explicación verificada**. Los 15 que no producen datos son 9 listas de
+aptitud, 5 instructivos y 1 duplicado; la auditoría los clasifica leyendo el
+propio documento y falla si aparece uno sin explicar.
 
-Esa última prueba fue la que más valió. Reportar "35 PDFs sin filas" mezclaba
-documentos que nunca iban a tener filas con tablas que sí había que arreglar.
-Al separarlos quedaron a la vista 12 PDFs de resultados de 2021 a 2023 que no
-se estaban leyendo, y se recuperaron 1 009 filas.
+### «Apto» no es «ingresó»
+
+El hallazgo que ninguna prueba de integridad podía dar, porque todos los
+números cerraban.
+
+La UCSM publica dos clases de documento que se parecen. Uno lista quién puede
+rendir el examen; el otro, quién ingresó. Los dos usan la palabra `APTO`: en un
+acta se opone a `NO INGRESO` y significa admitido; en una lista previa se opone
+a `NO APTO` y solo significa que la persona reúne los requisitos para
+presentarse.
+
+Traducir las dos con el mismo diccionario convertía en ingresantes a **414
+personas que solo estaban habilitadas para dar el examen**. Cada fila era fiel a
+su PDF; el error estaba en el modelo. Ahora la clase del documento decide qué
+significa la palabra, y las 2 048 filas de las 28 listas de aptitud quedan fuera
+del conteo de admisiones sin salir del conjunto de datos.
 
 ## Decisiones de arquitectura
 

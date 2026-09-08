@@ -6,25 +6,29 @@ ok,perdidas,1 PDFs sin filas por ser duplicado de otro PDF del mismo proceso
 ok,perdidas,"5 PDFs sin filas por ser instructivo o requisitos, sin tabla de personas"
 ok,perdidas,9 PDFs sin filas por ser lista de aptitud previa al examen
 ok,perdidas,los 15 PDFs sin filas estan todos explicados
-ok,perdidas,"normalizacion descarta 354 filas (0.54%), titulos leidos como carrera"
-ok,perdidas,"59,019 filas con resultado binario (90% del total)"
-ok,privacidad,ningun DNI ni nombre en los 38 archivos versionados
+ok,perdidas,"1,945 filas descartadas de listas de aptitud (no son resultados)"
+ok,perdidas,"normalizacion descarta 30 de 67,634 filas de resultados (0.04%), sin carrera reconocible"
+ok,perdidas,"60,960 filas con resultado binario (88% del total)"
+ok,privacidad,ningun DNI ni nombre en los 39 archivos versionados
 ok,privacidad,data/raw/ esta en .gitignore
 ok,privacidad,data_extraida/ esta en .gitignore
 ok,privacidad,postulaciones.csv esta en .gitignore
-ok,cobertura,"ciclo 2021:  8,447 filas, 58.8% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2022: 11,523 filas, 48.7% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2023: 14,329 filas, 61.1% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2024: 12,956 filas, 55.5% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2021:  9,137 filas, 55.4% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2022: 13,072 filas, 44.8% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2023: 15,445 filas, 56.9% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2024: 13,538 filas, 55.8% rechazados (denominador fiable)"
 ok,cobertura,"ciclo 2025: 11,550 filas, 47.3% rechazados (denominador fiable)"
 aviso,cobertura,"ciclo 2026:  5,213 filas,  9.6% rechazados (solo ingresantes)"
 aviso,cobertura,"ciclo 2027:  1,697 filas,  0.0% rechazados (solo ingresantes)"
 ok,cobertura,47 carreras normalizadas contra 47 del catalogo
 ok,documentacion,README cita PDFs de resultados = 151
-ok,documentacion,README cita filas normalizadas = 65 715
+ok,documentacion,README cita filas normalizadas = 69 652
 ok,documentacion,decision registrada: ADR-001-paralelismo.md
 ok,documentacion,decision registrada: ADR-002-ventana-temporal.md
 ok,documentacion,decision registrada: ADR-003-hallazgos-validacion.md
 ok,documentacion,decision registrada: ADR-004-cambio-de-escala.md
 ok,documentacion,decision registrada: ADR-005-parseo-por-bloque.md
 ok,documentacion,decision registrada: ADR-006-huecos-de-la-fuente.md
+ok,documentacion,decision registrada: ADR-007-rotulos-en-mayusculas.md
+ok,documentacion,decision registrada: ADR-008-contraste-independiente.md
+ok,documentacion,decision registrada: ADR-009-apto-no-es-ingreso.md

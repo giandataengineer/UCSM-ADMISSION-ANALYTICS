@@ -84,11 +84,15 @@ def construir(con):
             SELECT archivo, sede, grupo, carrera, min(orden) AS primero
             FROM filas WHERE orden IS NOT NULL GROUP BY 1, 2, 3, 4
         )
-        SELECT archivo,
-               CASE WHEN count(*) FILTER (WHERE primero = 1) = count(*)
-                    THEN 'por_carrera' ELSE 'global' END AS tipo
-        FROM bloque GROUP BY archivo
-    """)
+        SELECT b.archivo,
+               CASE WHEN count(*) FILTER (WHERE b.primero = 1) = count(*)
+                    THEN 'por_carrera' ELSE 'global' END AS tipo,
+               any_value(coalesce(r.clase, 'resultados')) AS clase
+        FROM bloque b
+        LEFT JOIN read_csv_auto('{resumen}', header = true, all_varchar = true) r
+               ON r.archivo = b.archivo
+        GROUP BY b.archivo
+    """.format(resumen=os.path.join(EXTRAIDA, "_resumen.csv").replace("\\", "/")))
     return con.execute("SELECT count(*) FROM filas").fetchone()[0]
 
 
@@ -149,6 +153,7 @@ def huecos_de_fuente(con):
         WITH t AS (SELECT f.archivo, f.sede, f.grupo, f.carrera, max(f.orden) AS m
                    FROM filas f JOIN grano g USING (archivo)
                    WHERE f.orden IS NOT NULL AND g.tipo = 'por_carrera'
+                     AND g.clase = 'resultados'
                    GROUP BY 1, 2, 3, 4),
         esperado AS (SELECT archivo, sede, grupo, carrera, generate_series AS o
                      FROM t, generate_series(1, t.m))
@@ -224,16 +229,24 @@ PRUEBAS = [
 
 
 
+    # Solo donde la numeracion reinicia por carrera. En un documento con orden
+    # correlativo de todo el archivo cada carrera arranca donde le toque, y en
+    # una lista de aptitud no hay orden de merito: su columna numerada es otra
+    # cosa. Exigirles esto hacia fallar 17 filas que estaban bien.
     ("secuencia: el orden de merito arranca en 1", """
-        SELECT archivo, carrera, min(orden) AS primer_orden
-        FROM filas WHERE orden IS NOT NULL AND grupo IS NOT NULL
-        GROUP BY archivo, sede, grupo, carrera HAVING min(orden) <> 1
+        SELECT f.archivo, f.carrera, min(f.orden) AS primer_orden
+        FROM filas f JOIN grano g USING (archivo)
+        WHERE f.orden IS NOT NULL AND f.grupo IS NOT NULL
+          AND g.tipo = 'por_carrera' AND g.clase = 'resultados'
+        GROUP BY f.archivo, f.sede, f.grupo, f.carrera HAVING min(f.orden) <> 1
     """),
 
     ("unicidad: nadie repetido en el mismo archivo y carrera", """
-        SELECT archivo, sede, grupo, carrera, orden, count(*) AS veces
-        FROM filas WHERE orden IS NOT NULL AND grupo IS NOT NULL
-        GROUP BY archivo, sede, grupo, carrera, orden HAVING count(*) > 1
+        SELECT f.archivo, f.sede, f.grupo, f.carrera, f.orden, count(*) AS veces
+        FROM filas f JOIN grano g USING (archivo)
+        WHERE f.orden IS NOT NULL AND f.grupo IS NOT NULL
+          AND g.tipo = 'por_carrera' AND g.clase = 'resultados'
+        GROUP BY 1, 2, 3, 4, 5 HAVING count(*) > 1
     """),
 
     # Un archivo puede cubrir varios subprocesos, cada uno con su minimo.
@@ -303,6 +316,7 @@ def main():
         SELECT f.archivo, f.sede, f.grupo, max(f.orden), count(*)
         FROM filas f JOIN grano g USING (archivo)
         WHERE f.orden IS NOT NULL AND g.tipo = 'global'
+          AND g.clase = 'resultados'
         GROUP BY 1, 2, 3
     """).fetchall():
         if declaradas != extraidas:
@@ -312,6 +326,7 @@ def main():
         SELECT f.archivo, f.sede, f.grupo, f.carrera, max(f.orden), count(*)
         FROM filas f JOIN grano g USING (archivo)
         WHERE f.orden IS NOT NULL AND g.tipo = 'por_carrera'
+          AND g.clase = 'resultados'
         GROUP BY 1, 2, 3, 4
     """).fetchall():
         if declaradas - omitidos.get((archivo, sede, grupo, carrera), 0) != extraidas:
