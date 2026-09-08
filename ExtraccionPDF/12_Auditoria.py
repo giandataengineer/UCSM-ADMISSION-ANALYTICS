@@ -77,17 +77,65 @@ def bloque_cadena():
               f"{len(fallidos)} PDFs descubiertos que no se pudieron descargar")
 
 
+# Un PDF sin filas no es lo mismo que un PDF mal leido. La fuente publica junto
+# a los resultados otros documentos que no son tablas de resultados, y hace
+# falta separarlos para que el aviso signifique algo: sin esta distincion la
+# auditoria reportaba 35 PDFs "sin filas" mezclando listas de aptitud con
+# tablas que si habia que arreglar. Al declararlos, los 12 que si eran
+# resultados quedaron a la vista y se recuperaron.
+MOTIVOS = [
+    ("lista de aptitud previa al examen",
+     ("LISTA DE POSTULANTES APTOS", "POSTULANTES APTOS", "NO APTOS",
+      "APTOS PARA RENDIR", "EXPEDIENTES RECHAZADOS")),
+    ("instructivo o requisitos, sin tabla de personas",
+     ("PASOS PARA REVISAR", "Revisar el promedio", "REQUISITOS",
+      "Estimado postulante")),
+]
+
+# Verificado en la auditoria: sus 145 personas ya estan en TercioSuperior2022,
+# que ademas publica los 226 no ingresantes que este omite.
+REDUNDANTES = {"TercioSuperior2022final.pdf": "duplicado de otro PDF del mismo proceso"}
+
+
+def clasificar_sin_filas(archivos):
+    """Agrupa por que cada PDF no produjo filas, leyendo el propio documento."""
+    import pdfplumber
+    fuera = {}
+    for nombre in archivos:
+        if nombre in REDUNDANTES:
+            fuera.setdefault(REDUNDANTES[nombre], []).append(nombre)
+            continue
+        rutas = glob.glob(os.path.join(RAIZ, "data", "raw", "*", nombre))
+        texto = ""
+        if rutas:
+            with pdfplumber.open(rutas[0]) as pdf:
+                texto = "".join((p.extract_text() or "") for p in pdf.pages[:2])
+        clase = next((c for c, marcas in MOTIVOS
+                      if any(m.upper() in texto.upper() for m in marcas)),
+                     "sin explicar")
+        fuera.setdefault(clase, []).append(nombre)
+    return fuera
+
+
 def bloque_perdidas():
     print("\nPERDIDAS ENTRE ETAPAS")
     res = leer("data_extraida/_resumen.csv") or []
     extraidas = sum(int(r["filas"]) for r in res)
     norm = leer("data_normalizada/postulaciones.csv") or []
 
-    sin_filas = [r for r in res if int(r["filas"]) == 0]
-    pct = len(sin_filas) / len(res) * 100 if res else 0
-    nivel = "aviso" if pct < 40 else "falla"
-    marca(nivel, "perdidas",
-          f"{len(sin_filas)} de {len(res)} PDFs no producen filas ({pct:.0f}%)")
+    sin_filas = [r["archivo"] for r in res if int(r["filas"]) == 0]
+    clases = clasificar_sin_filas(sin_filas)
+    sin_explicar = clases.pop("sin explicar", [])
+    for clase, cuales in sorted(clases.items()):
+        marca("ok", "perdidas",
+              f"{len(cuales)} PDFs sin filas por ser {clase}")
+    if sin_explicar:
+        marca("falla", "perdidas",
+              f"{len(sin_explicar)} PDFs sin filas y sin explicacion: "
+              f"{', '.join(sin_explicar[:3])}")
+    else:
+        marca("ok", "perdidas",
+              f"los {len(sin_filas)} PDFs sin filas estan todos explicados")
 
     perdidas = extraidas - len(norm)
     if perdidas == 0:

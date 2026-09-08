@@ -2,24 +2,29 @@ nivel,bloque,hallazgo
 ok,cadena,auditoria cubre los 151 PDFs en disco
 ok,cadena,el parser proceso los 151 PDFs
 aviso,cadena,2 PDFs descubiertos que no se pudieron descargar
-aviso,perdidas,35 de 151 PDFs no producen filas (23%)
-ok,perdidas,"normalizacion descarta 266 filas (0.41%), titulos leidos como carrera"
-ok,perdidas,"58,150 filas con resultado binario (90% del total)"
-ok,privacidad,ningun DNI ni nombre en los 36 archivos versionados
+ok,perdidas,1 PDFs sin filas por ser duplicado de otro PDF del mismo proceso
+ok,perdidas,"5 PDFs sin filas por ser instructivo o requisitos, sin tabla de personas"
+ok,perdidas,9 PDFs sin filas por ser lista de aptitud previa al examen
+ok,perdidas,los 15 PDFs sin filas estan todos explicados
+ok,perdidas,"normalizacion descarta 354 filas (0.54%), titulos leidos como carrera"
+ok,perdidas,"59,019 filas con resultado binario (90% del total)"
+ok,privacidad,ningun DNI ni nombre en los 38 archivos versionados
 ok,privacidad,data/raw/ esta en .gitignore
 ok,privacidad,data_extraida/ esta en .gitignore
 ok,privacidad,postulaciones.csv esta en .gitignore
-ok,cobertura,"ciclo 2021:  8,245 filas, 59.7% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2022: 11,064 filas, 50.5% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2023: 14,173 filas, 61.4% rechazados (denominador fiable)"
-ok,cobertura,"ciclo 2024: 12,852 filas, 55.8% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2021:  8,447 filas, 58.8% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2022: 11,523 filas, 48.7% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2023: 14,329 filas, 61.1% rechazados (denominador fiable)"
+ok,cobertura,"ciclo 2024: 12,956 filas, 55.5% rechazados (denominador fiable)"
 ok,cobertura,"ciclo 2025: 11,550 filas, 47.3% rechazados (denominador fiable)"
 aviso,cobertura,"ciclo 2026:  5,213 filas,  9.6% rechazados (solo ingresantes)"
 aviso,cobertura,"ciclo 2027:  1,697 filas,  0.0% rechazados (solo ingresantes)"
 ok,cobertura,47 carreras normalizadas contra 47 del catalogo
 ok,documentacion,README cita PDFs de resultados = 151
-aviso,documentacion,README no cita el valor vigente de filas normalizadas (64 794)
+ok,documentacion,README cita filas normalizadas = 65 715
 ok,documentacion,decision registrada: ADR-001-paralelismo.md
 ok,documentacion,decision registrada: ADR-002-ventana-temporal.md
 ok,documentacion,decision registrada: ADR-003-hallazgos-validacion.md
 ok,documentacion,decision registrada: ADR-004-cambio-de-escala.md
+ok,documentacion,decision registrada: ADR-005-parseo-por-bloque.md
+ok,documentacion,decision registrada: ADR-006-huecos-de-la-fuente.md

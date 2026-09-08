@@ -74,27 +74,63 @@ En 2026 UCSM cambió la convención: de `EG2026I.pdf` pasaron a
 
 ## Lo que limita el análisis
 
-**Dos familias de PDF.** 104 archivos vienen de Excel/Word con object streams y 117
-del generador del sistema de admisión, que usa fuentes subset con ToUnicode.
-Son dos parsers distintos y el más laborioso cubre la mayoría del corpus.
+Estos límites son de la fuente, no del procesamiento. Están aquí porque
+determinan qué preguntas tienen respuesta y cuáles no.
 
-**Siete esquemas distintos.** El más completo es
-`Condición | Código | Nombre | Nota 01 | Nota 02 | Ord. | Total` (52 archivos).
-El más pobre es `Condición | Nombre | Ord. | Total` (26 archivos). El
-normalizador tiene que detectar el esquema leyendo los encabezados, nunca
-asumirlo.
+**Dos familias de PDF.** 108 archivos salen del generador del sistema de
+admisión, que usa fuentes subset con ToUnicode, y 43 de Excel o Word con object
+streams. Se leen distinto, así que el parser reconoce el esquema por sus
+rótulos en vez de asumirlo.
 
-**El esquema rico empieza en 2019.** Los 34 archivos de 2016 a 2018 son todos
-de Office, sin `Código` ni notas desagregadas.
+**Ocho esquemas distintos.** El más completo es
+`Condición | Código | Nombre | Nota 01 | Nota 02 | Ord. | Total`, en 53
+archivos. El más pobre es `Condición | Nombre | Ord. | Total`, en 26. Otros
+54 no exponen un encabezado uniforme y se resuelven por coordenadas.
 
-**El `Código` desaparece en 2026.** Presente en 12 de 12 PDFs legibles de 2021,
-en 12 de 17 de 2025, en 1 de 19 de 2026 y en ninguno de 2027. El análisis de
-cohortes, que es seguir a la misma persona entre procesos, solo es viable
-**2021-2024**.
+**El `Código` desaparece progresivamente.** Está en el 97% de las filas de 2021
+y en el 100% de 2023 y 2024, cae al 81% en 2025, al 11% en 2026 y a cero en
+2027. Seguir a la misma persona entre procesos, que es lo que habilita el
+análisis de cohortes, solo es viable **hasta 2025**.
 
-**61 PDFs traen el denominador.** Es decir, listan `NO INGRESO` además de
-`INGRESO`, lo que permite calcular tasas de admisión reales y no solo contar
-ganadores. Concentrados en 2022-2025.
+### Por qué la serie empieza en 2021
+
+Porque antes la UCSM no publicaba estos resultados en la web. No es una
+decisión de alcance: es donde empieza la fuente.
+
+Se verificó con seis métodos independientes, entre ellos el índice CDX del
+Internet Archive sobre el dominio completo, el índice de Common Crawl y el
+rastreo de las convenciones de nombre que la universidad fue usando. Ninguno
+devuelve resultados de exámenes generales anteriores al ciclo 2021. Lo que sí
+existe de antes son reglamentos y temarios, que no son resultados.
+
+Los 91 PDFs previos a 2021 que se habían descargado en la exploración inicial
+se eliminaron por eso. El detalle está en `docs/ADR-002-ventana-temporal.md`.
+
+### Desde 2026 solo se publica a quien ingresa
+
+Hasta 2025 los PDFs listaban a todos los postulantes con su condición, así que
+se podía calcular la tasa de admisión real. A partir de 2026 la universidad
+cambió de criterio y publica únicamente a los admitidos.
+
+| Ciclo | Ingresantes | No ingresantes | Tasa calculable |
+|---|---|---|---|
+| 2021 | 3 033 | 4 333 | sí |
+| 2022 | 5 117 | 4 865 | sí |
+| 2023 | 4 832 | 7 590 | sí |
+| 2024 | 5 741 | 7 149 | sí |
+| 2025 | 4 977 | 4 472 | sí |
+| **2026** | **4 715** | **498** | **no** |
+| **2027** | **1 697** | **0** | **no** |
+
+De los 22 PDFs de 2026 apenas 4 traen rechazados, y ninguno de los 6 de 2027.
+No faltan archivos: están los 28 y cubren los nueve tipos de proceso. Lo que
+falta es el dato, porque el documento dejó de traerlo.
+
+La consecuencia es concreta. **De 2026 en adelante se puede decir cuántos
+entraron y con qué puntaje, pero no qué tan difícil fue entrar**, porque no se
+conoce el número de postulantes. Los agregados marcan esos ciclos con
+`denominador_fiable = 0` para que ningún tablero los grafique como si la
+exigencia hubiera bajado.
 
 ### Cobertura por ciclo
 
@@ -128,23 +164,39 @@ Once etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Base normativa | `5_DocumentosBase.py` | reglamentos, temarios, cronogramas |
 | Rescate histórico | `6_RescateHistorico.py` | archivos sin convención de nombre |
 | Instructivos | `7_RequisitosIngresantes.py` | 22 documentos por proceso |
-| **Extracción de tablas** | `8_ExtraccionTablas.py` | **65 060 filas** por coordenadas, bloque a bloque |
-| Normalización (Silver) | `9_NormalizacionDatos.py` | 64 794 filas, 47 carreras, seudonimizadas |
+| **Extracción de tablas** | `8_ExtraccionTablas.py` | **66 069 filas** por coordenadas, bloque a bloque |
+| Normalización (Silver) | `9_NormalizacionDatos.py` | 65 715 filas, 47 carreras, seudonimizadas |
 | Agregados (Gold) | `10_Agregados.py` | 6 CSV para Tableau |
 | Reconciliación | `11_Validacion.py` | 10 pruebas en DuckDB |
 | Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
 
 ### Verificación
 
+Tres suites, 20 pruebas, todas en verde. Ninguna se ajustó para pasar: cada vez
+que una falló, se corrigió el parser o se documentó por qué la fuente es así.
+
 `11_Validacion.py` contrasta cada fila contra las redundancias que el propio
-PDF publica: si el parser asignara mal una columna, la aritmética dejaría de
-cerrar. Aprueban cinco de diez pruebas y las otras cinco se reportan en rojo,
-cuantificadas. Una suite ajustada para pasar no sirve de nada; el detalle está
-en `docs/ADR-003-hallazgos-validacion.md`.
+PDF publica. Si el parser asignara mal una columna, la aritmética dejaría de
+cerrar sola. Dos pruebas van más allá y **abren el PDF de origen**: cuando el
+orden de mérito salta un número, se comprueba si el ordinal tampoco está en el
+documento. Los nueve casos resultaron ser omisiones de la fuente, que retira
+gente de una lista ya ordenada sin renumerar.
+
+`13_PruebasCalidad.py` mira las capas derivadas: integridad referencial, que la
+fecha del examen caiga en la ventana de su ciclo, que Gold sume lo mismo que
+Silver, que el seudónimo no colisione y que reejecutar produzca el mismo
+archivo byte a byte.
 
 `12_Auditoria.py` revisa el conjunto: que cada etapa conserve lo que recibió,
-que no se filtre información personal a lo versionado, y que las cifras del
-README existan de verdad.
+que no salga ningún dato personal en lo versionado, y **que todo PDF sin filas
+tenga una explicación verificada**. Los 15 que no producen datos son 9 listas
+de aptitud previas al examen, 5 instructivos y 1 duplicado; la auditoría los
+clasifica leyendo el propio documento y falla si aparece uno sin explicar.
+
+Esa última prueba fue la que más valió. Reportar "35 PDFs sin filas" mezclaba
+documentos que nunca iban a tener filas con tablas que sí había que arreglar.
+Al separarlos quedaron a la vista 12 PDFs de resultados de 2021 a 2023 que no
+se estaban leyendo, y se recuperaron 1 009 filas.
 
 ## Decisiones de arquitectura
 

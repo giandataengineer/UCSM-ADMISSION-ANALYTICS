@@ -93,6 +93,13 @@ CAMPOS = {
     "N°": "orden", "Nº": "orden",
     "DMI": "codigo", "DNI": "codigo",
     "APELLIDOS Y NOMBRES": "nombre",
+    # Los documentos del area de salud y los de convenio rotulan en mayusculas.
+    # Sin declararlos no se reconocia su encabezado y 12 PDFs de resultados
+    # entre 2021 y 2023 no producian ni una fila.
+    "NOMBRE": "nombre", "NOMBRES": "nombre",
+    "CONDICIÓN": "condicion", "CONDICION": "condicion",
+    "PUNTAJE FINAL": "total", "PUNTAJE": "total",
+    "MODALIDAD": "modalidad", "INSTITUCIÓN EDUCATIVA": "institucion",
     "Opc": "opcion", "Opción": "opcion",
     # Los documentos de aptos parten el encabezado en varias lineas y usan
     # rotulos largos propios.
