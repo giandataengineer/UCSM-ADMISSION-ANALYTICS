@@ -3,7 +3,7 @@
 Extracción y análisis de los resultados de admisión de la Universidad Católica de
 Santa María, publicados como PDFs por la Dirección de Admisión.
 
-Estado: **corpus construido y auditado**. Falta el parser de tablas.
+Estado: **pipeline completo y auditado**, 14 etapas, cuatro suites de verificación en verde.
 
 ## Estructura
 
@@ -17,19 +17,24 @@ ExtraccionPDF/
   6_RescateHistorico.py          archivos fuera de convención de nombre
   7_RequisitosIngresantes.py     instructivos por proceso
   8_ExtraccionTablas.py          reconstrucción de filas por coordenadas
-  9_NormalizacionDatos.py        [pendiente] esquema único + seudonimización
-  10_AnalisisExploratorio.ipynb  [pendiente]
+  9_NormalizacionDatos.py        esquema único + seudonimización (Silver)
+  10_Agregados.py                6 CSV agregados (Gold), fuente del tablero
+  11_Validacion.py               reconciliación contra las redundancias del PDF
+  12_Auditoria.py                integridad del conjunto: cadena, pérdidas, privacidad
+  13_PruebasCalidad.py           coherencia entre capas derivadas
+  14_ContrasteIndependiente.py   segundo método de conteo, página a página
   data/
-    manifest.csv                 223 filas: una por PDF de resultados descubierto
+    manifest.csv                 153 filas: una por PDF de resultados descubierto
     auditoria.csv                151 filas: contenido real de cada PDF
-    carreras_por_ciclo.csv       47 carreras × 9 ciclos
+    carreras_por_ciclo.csv       47 carreras × 7 ciclos
     vacantes.csv                 vacantes 2027 por carrera y modalidad
     documentos_base.csv          30 documentos normativos indexados
     raw/<ciclo>/                 151 PDFs de resultados por ciclo de admisión
     documentos_base/<año>/       vacantes, reglamento, temario, cronograma
     requisitos/<ciclo>/          instructivos de ingresantes por proceso
-  data_extraida/                 [vacío] salida del parser
-  data_normalizada/              [vacío] listo para el warehouse
+  data_extraida/                 71 627 filas por coordenadas, una carpeta por ciclo
+  data_normalizada/              69 652 filas normalizadas + data_normalizada/gold/
+docs/tablero.html                tablero interactivo sobre la capa Gold
 docs/INVENTARIO.md               tabla detallada de los 151 PDFs
 docs/ADR-001-paralelismo.md      por qué no se usa PySpark
 docs/ADR-002-ventana-temporal.md por qué el corpus arranca en 2021
@@ -44,9 +49,18 @@ python ExtraccionPDF/2_AuditoriaCorpus.py
 python ExtraccionPDF/3_CatalogoCarreras.py
 python ExtraccionPDF/5_DocumentosBase.py           # 22.9 MB de normativa
 python ExtraccionPDF/4_Vacantes.py
+python ExtraccionPDF/8_ExtraccionTablas.py         # ~9 s en paralelo, ADR-001
+python ExtraccionPDF/9_NormalizacionDatos.py       # Silver: seudonimizado
+python ExtraccionPDF/10_Agregados.py               # Gold: 6 CSV, fuente del tablero
+python ExtraccionPDF/11_Validacion.py              # 10/10
+python ExtraccionPDF/13_PruebasCalidad.py          # 10/10
+python ExtraccionPDF/14_ContrasteIndependiente.py  # 4 974/4 974 páginas
+python ExtraccionPDF/12_Auditoria.py               # 27 conformes, 0 fallas
 ```
 
-Los PDFs no están versionados. Se reconstruyen con el primer script.
+Los PDFs no están versionados. Se reconstruyen con el primer script. `.env` necesita
+`UCSM_SAL` antes de correr `9_NormalizacionDatos.py`; sin ella usa una sal de
+desarrollo y el seudónimo no es reproducible entre máquinas.
 
 ## El corpus
 
@@ -153,7 +167,7 @@ detalle está en `docs/ADR-002-ventana-temporal.md`.
 
 ## Procesamiento
 
-Doce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
+Catorce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 
 | Etapa | Script | Salida |
 |---|---|---|
@@ -166,10 +180,11 @@ Doce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Instructivos | `7_RequisitosIngresantes.py` | 22 documentos por proceso |
 | **Extracción de tablas** | `8_ExtraccionTablas.py` | **71 627 filas** por coordenadas, bloque a bloque |
 | Normalización (Silver) | `9_NormalizacionDatos.py` | 69 652 filas, 47 carreras, seudonimizadas |
-| Agregados (Gold) | `10_Agregados.py` | 6 CSV para Tableau |
+| Agregados (Gold) | `10_Agregados.py` | 6 CSV, fuente del tablero |
 | Reconciliación | `11_Validacion.py` | 10 pruebas en DuckDB |
-| Contraste independiente | `14_ContrasteIndependiente.py` | segundo método, página a página |
 | Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
+| Calidad entre capas | `13_PruebasCalidad.py` | 10 pruebas de coherencia Silver ↔ Gold |
+| Contraste independiente | `14_ContrasteIndependiente.py` | segundo método, página a página |
 
 ### Verificación
 
@@ -230,6 +245,16 @@ personas que solo estaban habilitadas para dar el examen**. Cada fila era fiel a
 su PDF; el error estaba en el modelo. Ahora la clase del documento decide qué
 significa la palabra, y las 2 048 filas de las 28 listas de aptitud quedan fuera
 del conteo de admisiones sin salir del conjunto de datos.
+
+## Tablero
+
+`docs/tablero.html` es un tablero interactivo sobre los seis CSV de
+`data_normalizada/gold/`: demanda por carrera, evolución de la nota de corte,
+vías de ingreso, perfil de puntajes y la tabla de cobertura por ciclo. Es un
+archivo estático, sin dependencias ni cuenta externa; se abre directo en el
+navegador y solo lee los agregados, nunca `postulaciones.csv`. Los datos que
+trae son una fotografía del último `10_Agregados.py`: se regenera copiando el
+archivo de nuevo si la capa Gold cambia.
 
 ## Decisiones de arquitectura
 
