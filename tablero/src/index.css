@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  /* Verde institucional UCSM y su rampa */
+  --color-ucsm-900: #0d2f1c;
+  --color-ucsm-800: #123d28;
+  --color-ucsm-700: #17512f;
+  --color-ucsm-600: #1f6b42;
+  --color-ucsm-500: #2a8756;
+  --color-ucsm-400: #48a973;
+  --color-ucsm-300: #7cc79c;
+  --color-ucsm-200: #b4e2c8;
+  --color-ucsm-100: #ddf2e6;
+
+  --color-oro-500: #c8a24a;
+  --color-oro-300: #e3caa0;
+
+  --color-tinta: #10201a;
+  --color-tinta-media: #45564a;
+  --color-tinta-suave: #7c8c79;
+
+  --color-lienzo: #f2f5f0;
+  --color-panel: #ffffff;
+  --color-hueso: #e7ece3;
+
+  --color-alza: #1f8a4c;
+  --color-baja: #b23b32;
+  --color-neutro: #c2ccc2;
+
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tab-num { font-variant-numeric: tabular-nums; }
+
+/* Barra de scroll discreta dentro de paneles */
+.scroll-fino::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-fino::-webkit-scrollbar-thumb {
+  background: var(--color-hueso);
+  border-radius: 99px;
+}
+.scroll-fino::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
