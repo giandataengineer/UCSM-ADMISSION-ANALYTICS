@@ -1,0 +1,8 @@
+.al-wrap { position: relative; }
+.al-scroll { overflow-y: auto; max-height: 100%; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.al-nobar { scrollbar-width: none; }
+.al-nobar::-webkit-scrollbar { display: none; }
+.al-item { cursor: pointer; }
+.al-fade { position: absolute; left: 0; right: 0; height: 34px; pointer-events: none; transition: opacity .2s ease; }
+.al-fade-top { top: 0; background: linear-gradient(to bottom, var(--color-panel), transparent); }
+.al-fade-bottom { bottom: 0; background: linear-gradient(to top, var(--color-panel), transparent); }

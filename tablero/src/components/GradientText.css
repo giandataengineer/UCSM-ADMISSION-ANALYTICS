@@ -1,0 +1,14 @@
+.animated-gradient-text {
+  position: relative; display: flex; max-width: fit-content;
+  flex-direction: row; align-items: center; justify-content: center;
+  border-radius: 1.25rem; font-weight: 600; overflow: hidden;
+}
+.animated-gradient-text.with-border { padding: 0.35rem 0.75rem; }
+.gradient-overlay { position: absolute; inset: 0; border-radius: inherit; z-index: 0; pointer-events: none; }
+.gradient-overlay::before {
+  content: ''; position: absolute; border-radius: inherit;
+  width: calc(100% - 2px); height: calc(100% - 2px);
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background-color: var(--color-ucsm-900, #0d2f1c); z-index: -1;
+}
+.text-content { display: inline-block; position: relative; z-index: 2; background-clip: text; -webkit-background-clip: text; color: transparent; }
