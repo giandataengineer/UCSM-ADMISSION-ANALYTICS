@@ -12,6 +12,7 @@ import './App.css';
 
 const mil = n => (n == null ? '—' : n.toLocaleString('es-PE'));
 const LINKEDIN = 'https://www.linkedin.com/in/giandataengineer/';
+const CICLO_EN_CURSO = CICLOS[CICLOS.length - 1];
 
 function bajar(url, nombre) {
   const a = document.createElement('a');
@@ -268,7 +269,8 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
       <div className="tablero">
         <div className="kpis">
           <TarjetaKpi icono="postulaciones" rotulo="Postulaciones" ciclo={ciclo} valor={k.postulaciones} variacion={k.deltaPost}
-            chispa={<Chispa serie={serie} campo="postulaciones" ciclo={ciclo} />} />
+            chispa={<Chispa serie={serie} campo="postulaciones" ciclo={ciclo} />}
+            alcance={ciclo === CICLO_EN_CURSO ? 'proceso abierto: la cifra crece con cada acta que la UCSM publique' : null} />
           <TarjetaKpi icono="ingresantes" rotulo="Ingresantes" ciclo={ciclo} valor={k.ingresantes} variacion={k.deltaIng} retraso={0.05}
             chispa={<Chispa serie={serie} campo="ingresantes" ciclo={ciclo} />} />
           <TarjetaKpi icono="tasa" rotulo="% Ingreso" ciclo={ciclo} valor={k.tasa} sufijo="%" decimales={2} variacion={k.deltaTasa} retraso={0.1}
@@ -287,7 +289,9 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
           <label className="filtro">
             <span>Año:</span>
             <select value={ciclo} onChange={e => setCiclo(e.target.value)}>
-              {CICLOS.map(c => <option key={c} value={c}>{c}</option>)}
+              {CICLOS.map(c => (
+                <option key={c} value={c}>{c}{c === CICLO_EN_CURSO ? ' (en curso)' : ''}</option>
+              ))}
             </select>
           </label>
           <label className="filtro">
