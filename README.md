@@ -283,6 +283,8 @@ del conteo de admisiones sin salir del conjunto de datos.
 No hay backend, ni base de datos, ni consultas en vivo: el navegador carga los
 agregados y todo el filtrado ocurre en el cliente.
 
+**En línea:** [ucsm-resultados.vercel.app](https://ucsm-resultados.vercel.app)
+
 ```bash
 cd tablero
 npm install
