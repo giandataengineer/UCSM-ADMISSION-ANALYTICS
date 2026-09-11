@@ -13,7 +13,7 @@
     radial-gradient(120% 76% at 100% 0%, #ffffff 0%, transparent 58%),
     var(--color-hueso);
 }
-.lienzo { flex: 1; min-height: 0; padding: 12px 14px 4px; }
+.lienzo { flex: 1; min-height: 0; padding: 1.5% 1.6% 0.6%; }
 .lienzo-interior { height: 100%; min-height: 0; }
 .hoja { height: 100%; min-height: 0; }
 
@@ -56,12 +56,13 @@
    ============================================================ */
 .hoja-home {
   display: grid;
-  grid-template-columns: clamp(240px, 18.5vw, 296px) minmax(0, 1fr);
+  grid-template-columns: minmax(208px, 16.76%) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-areas:
     'lateral tablero'
     'lateral nota';
-  gap: 8px 14px;
+  column-gap: 1.3%;
+  row-gap: 8px;
 }
 .hoja-home > .lateral { grid-area: lateral; }
 .hoja-home > .tablero { grid-area: tablero; }
@@ -74,10 +75,10 @@
   background: linear-gradient(168deg, #02503a 0%, #01422e 52%, #012c1f 100%);
   border: 1px solid rgba(14, 216, 94, .22);
   border-radius: 28px;
-  padding: clamp(14px, 2vh, 24px) 18px clamp(12px, 1.8vh, 20px);
+  padding: 2.4% 6% 2.2%;
   color: var(--color-hueso);
   display: flex; flex-direction: column;
-  gap: clamp(8px, 1.3vh, 16px);
+  gap: 1.4%;
   box-shadow: 0 24px 48px -26px rgba(1, 66, 46, .95);
   overflow: hidden;
 }
@@ -115,28 +116,28 @@
 
 /* El escudo va directo sobre el verde, en linea blanca, sin recuadro */
 .lateral-escudo {
-  flex: 0 1 auto; min-height: 0;
+  flex: 0 0 22%; min-height: 0; justify-content: center;
   display: flex; flex-direction: column; align-items: center;
   gap: 2px;
 }
 .lateral-escudo img {
-  width: clamp(104px, 19vh, 190px);
-  height: clamp(104px, 19vh, 190px);
+  width: auto; max-width: 92%;
+  height: 78%;
   object-fit: contain;
   display: block;
   image-rendering: -webkit-optimize-contrast;
   filter: drop-shadow(0 8px 22px rgba(14, 216, 94, .35));
 }
 .lateral-sigla {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
   font-family: var(--font-marca);
-  font-size: clamp(23px, 3.5vh, 35px);
+  font-size: clamp(20px, 3.2vh, 34px);
   font-weight: 600; letter-spacing: .05em; line-height: 1;
   color: var(--color-vivo);
 }
 
 /* ---------- Pastillas de area: forma de etiqueta, no rectangulo ---------- */
-.lateral-areas { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: clamp(5px, .85vh, 10px); }
+.lateral-areas { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 2.2%; }
 .area-pastilla {
   position: relative;
   flex: 1 1 0; min-height: 0;
@@ -144,7 +145,7 @@
   border: 0;
   border-radius: 6px 20px 20px 6px;
   border-left: 3px solid var(--color-vivo);
-  padding: clamp(6px, .9vh, 11px) 13px;
+  padding: 2.5% 7%;
   background: linear-gradient(135deg, #078644 0%, #02503a 70%);
   color: var(--color-hueso);
   font: inherit; text-align: left; cursor: pointer;
@@ -196,7 +197,8 @@
 .boton-analisis {
   flex: none;
   border: 0; border-radius: 999px;
-  padding: clamp(8px, 1.3vh, 13px) 18px;
+  flex: 0 0 6.4%;
+  padding: 0 18px;
   background: var(--color-vivo);
   color: var(--color-hondo);
   font-family: var(--font-display);
@@ -209,26 +211,22 @@
 
 .lateral-linkedin {
   flex: none;
-  display: flex; align-items: center; gap: 11px;
-  padding: clamp(7px, 1vh, 11px) 12px;
-  border: 1px solid rgba(14, 216, 94, .4);
-  border-radius: 10px;
-  background: rgba(1, 66, 46, .55);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0;
   color: #ffffff; text-decoration: none;
-  font-family: var(--font-titulo);
-  font-size: clamp(11px, 1.4vh, 14px); font-weight: 600; letter-spacing: .03em; line-height: 1.15;
-  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+  font-family: var(--font-marca);
+  font-size: clamp(13px, 1.9vh, 20px); font-weight: 700;
+  letter-spacing: .03em; line-height: 1.05; text-transform: uppercase;
+  transition: color .16s ease;
 }
 .lateral-linkedin svg {
-  width: clamp(26px, 3.4vh, 34px); height: clamp(26px, 3.4vh, 34px); flex: none;
-  padding: 5px; border-radius: 5px;
+  width: clamp(30px, 3.6vh, 44px); height: clamp(30px, 3.6vh, 44px); flex: none;
+  padding: 6px; border-radius: 4px;
+  transition: background .16s ease, transform .16s ease;
   background: var(--color-vivo); color: var(--color-hondo);
 }
-.lateral-linkedin:hover {
-  background: rgba(14, 216, 94, .16);
-  border-color: var(--color-vivo);
-  transform: translateY(-1px);
-}
+.lateral-linkedin:hover svg { background: #ffffff; transform: translateY(-1px); }
+.lateral-linkedin:hover { color: var(--color-vivo); }
 
 /* ============================================================
    Columna del tablero
@@ -236,11 +234,11 @@
 .tablero {
   height: 100%; min-height: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: clamp(8px, 1.2vh, 14px);
+  grid-template-rows: minmax(0, 13fr) auto minmax(0, 38fr) minmax(0, 34.9fr);
+  row-gap: 2.6%;
 }
 
-.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2.2vw, 30px); }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: clamp(20px, 11.6%, 170px); }
 .kpi {
   position: relative; overflow: hidden;
   background: var(--color-papel);
@@ -350,8 +348,8 @@
 .fila-media {
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(220px, 21vw, 300px);
-  gap: 14px;
+  grid-template-columns: minmax(0, 68.3fr) minmax(0, 27.1fr);
+  column-gap: 4.6%;
 }
 
 /* ---------- Tarjetas ---------- */
