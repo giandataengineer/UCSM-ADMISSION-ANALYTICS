@@ -1,0 +1,139 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--hondo:#01422e;--vivo:#0ed85e;--hueso:#f7f9ec;--piedra:#7c9d8d;--piedra2:#d2ddcf;--oro:#c8a24a}
+body{width:1600px;height:900px;background:var(--hueso);font-family:"IBM Plex Mono",monospace;color:var(--hondo);position:relative;overflow:hidden}
+.cab{position:absolute;top:36px;left:56px;display:flex;align-items:center;gap:20px;z-index:3}
+.escudo{width:92px;height:92px;object-fit:contain}
+h1{font-family:Gabarito,sans-serif;font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.sub{margin-top:6px;font-size:14px;color:var(--piedra)}
+.marcas{position:absolute;top:48px;right:56px;display:flex;gap:8px;z-index:3}
+.marca{border:1.5px solid var(--piedra2);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;background:#fff}
+.marca.on{background:var(--hondo);color:var(--vivo);border-color:var(--hondo)}
+svg.lineas{position:absolute;inset:0;width:1600px;height:900px;z-index:1}
+.tabla{position:absolute;background:#fff;border:1px solid var(--piedra2);border-radius:9px;z-index:2;
+ box-shadow:0 10px 24px -18px rgba(1,66,46,.5);overflow:hidden}
+.tabla h2{background:linear-gradient(180deg,#eef2e8,#e4eadd);border-bottom:1px solid var(--piedra2);
+ font-family:Gabarito,sans-serif;font-size:14px;font-weight:700;padding:8px 12px;letter-spacing:.01em}
+.tabla.eje h2{background:linear-gradient(180deg,var(--hondo),#02503a);color:var(--vivo)}
+.tabla ul{list-style:none;padding:5px 0}
+.tabla li{display:flex;align-items:center;gap:7px;padding:2.5px 12px;font-size:12px;line-height:1.5;color:#2d6350}
+.k{width:11px;height:11px;flex:none}
+.sp{width:11px;flex:none}
+.cap{position:absolute;bottom:34px;left:56px;right:56px;display:flex;justify-content:space-between;
+ font-family:Gabarito,sans-serif;font-size:14px;color:var(--piedra);z-index:3}
+.cap b{color:var(--hondo);font-weight:700}
+.leyenda{position:absolute;bottom:80px;left:56px;display:flex;gap:18px;font-family:Gabarito,sans-serif;font-size:12.5px;color:var(--piedra);z-index:3}
+.leyenda span{display:flex;align-items:center;gap:6px}
+.pt{width:10px;height:10px;border-radius:2px;display:inline-block}
+</style></head><body>
+
+<div class="cab">
+  <img class="escudo" src="ucsm.png" alt="">
+  <div><h1>MODELO DE DATOS</h1>
+  <p class="sub">Capa Silver y capa Gold · admisión UCSM 2021-2027</p></div>
+</div>
+<div class="marcas"><span class="marca on">Python</span><span class="marca">pdfplumber</span><span class="marca">DuckDB</span></div>
+
+<svg class="lineas">
+  <defs>
+    <marker id="pata" markerWidth="13" markerHeight="13" refX="12" refY="6.5" orient="auto">
+      <path d="M13 6.5H3M13 6.5 3 1M13 6.5 3 12" stroke="#7c9d8d" stroke-width="1.3" fill="none"/>
+    </marker>
+    <marker id="uno" markerWidth="10" markerHeight="13" refX="1" refY="6.5" orient="auto">
+      <path d="M5 1v11M8 1v11" stroke="#7c9d8d" stroke-width="1.3" fill="none"/>
+    </marker>
+  </defs>
+  <g stroke="#7c9d8d" stroke-width="1.3" fill="none" marker-start="url(#uno)" marker-end="url(#pata)">
+    <path d="M392 262H520v52h88"/>
+    <path d="M392 596H520v-162h88"/>
+    <path d="M962 268h120v-58h96"/>
+    <path d="M962 372h150v88h68"/>
+    <path d="M962 452h96v242h84"/>
+    <path d="M786 604v96"/>
+  </g>
+</svg>
+
+<div class="tabla eje" style="left:608px;top:196px;width:356px">
+  <h2>postulaciones · Silver</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>postulante</li>
+    <li><span class="sp"></span>ciclo</li><li><span class="sp"></span>proceso</li>
+    <li><span class="sp"></span>modalidad</li><li><span class="sp"></span>fecha_examen</li>
+    <li><span class="sp"></span>carrera</li><li><span class="sp"></span>orden_merito</li>
+    <li><span class="sp"></span>nota_01</li><li><span class="sp"></span>nota_02</li>
+    <li><span class="sp"></span>total</li><li><span class="sp"></span>percentil</li>
+    <li><span class="sp"></span>escala</li><li><span class="sp"></span>condicion</li>
+    <li><span class="sp"></span>ingreso</li><li><span class="sp"></span>nota_minima</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:96px;top:196px;width:296px">
+  <h2>admision_por_carrera</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>ciclo + carrera</li>
+    <li><span class="sp"></span>postulaciones</li><li><span class="sp"></span>ingresantes</li>
+    <li><span class="sp"></span>tasa_ingreso</li><li><span class="sp"></span>denominador_fiable</li>
+    <li><span class="sp"></span>nota_corte_ordinario</li><li><span class="sp"></span>escala</li>
+    <li><span class="sp"></span>puntaje_min</li><li><span class="sp"></span>puntaje_max</li>
+    <li><span class="sp"></span>puntaje_mediana</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:96px;top:530px;width:296px">
+  <h2>comparador_modalidad</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>ciclo + carrera + modalidad</li>
+    <li><span class="sp"></span>postulaciones</li><li><span class="sp"></span>ingresantes</li>
+    <li><span class="sp"></span>tasa_ingreso</li><li><span class="sp"></span>nota_corte</li>
+    <li><span class="sp"></span>puntaje_mediana</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:1178px;top:152px;width:300px">
+  <h2>distribucion_puntajes</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>ciclo + carrera + tramo</li>
+    <li><span class="sp"></span>tramo_desde</li><li><span class="sp"></span>tramo_hasta</li>
+    <li><span class="sp"></span>resultado</li><li><span class="sp"></span>postulantes</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:1178px;top:402px;width:300px">
+  <h2>ocupacion_vacantes</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>ciclo + carrera</li>
+    <li><span class="sp"></span>vacantes</li><li><span class="sp"></span>ingresantes</li>
+    <li><span class="sp"></span>ocupacion</li><li><span class="sp"></span>plazas_libres</li>
+    <li><span class="sp"></span>estado</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:1178px;top:636px;width:300px">
+  <h2>cercanos_al_corte</h2>
+  <ul>
+    <li><svg class="k" viewBox="0 0 24 24" fill="#c8a24a"><path d="M14 2a8 8 0 0 0-7.7 10.2L2 16.5V22h5.5v-3H10v-2.5h2.3l1.5-1.5A8 8 0 1 0 14 2Zm3.5 5.5a1.8 1.8 0 1 1-1.8-1.8 1.8 1.8 0 0 1 1.8 1.8Z"/></svg>ciclo + carrera</li>
+    <li><span class="sp"></span>no_ingresantes</li><li><span class="sp"></span>a_menos_de_un_punto</li>
+    <li><span class="sp"></span>porcentaje</li>
+  </ul>
+</div>
+
+<div class="tabla" style="left:640px;top:700px;width:292px">
+  <h2>trayectoria_postulante</h2>
+  <ul>
+    <li><span class="sp"></span>postulaciones</li><li><span class="sp"></span>ingreso_alguna_vez</li>
+    <li><span class="sp"></span>personas</li>
+  </ul>
+</div>
+
+<div class="leyenda">
+  <span><i class="pt" style="background:#01422e"></i>Capa Silver, fila por postulación</span>
+  <span><i class="pt" style="background:#d2ddcf"></i>Capa Gold, agregados que consume el tablero</span>
+</div>
+<div class="cap">
+  <span><b>69 652 filas</b> · 47 carreras · 7 ciclos · seudónimo HMAC-SHA256</span>
+  <span>ucsm-resultados.vercel.app</span>
+</div>
+</body></html>

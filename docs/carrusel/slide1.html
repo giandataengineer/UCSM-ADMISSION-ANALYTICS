@@ -1,0 +1,67 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--hondo:#01422e;--vivo:#0ed85e;--hueso:#f7f9ec;--v500:#099c4b;--v300:#0dc959;--piedra:#7c9d8d;--piedra2:#d2ddcf}
+body{width:1600px;height:900px;background:radial-gradient(120% 78% at 100% 0%,#fff 0%,transparent 58%),var(--hueso);
+ font-family:"Schibsted Grotesk",sans-serif;color:var(--hondo);padding:52px 60px;display:flex;flex-direction:column}
+.cab{display:flex;align-items:center;gap:26px;margin-bottom:44px}
+.escudo{width:122px;height:122px;flex:none;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(1,66,46,.22))}
+h1{font-family:Gabarito,sans-serif;font-size:60px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.sub{margin-top:9px;font-size:17px;color:var(--piedra);letter-spacing:.02em}
+.fila{flex:1;display:grid;grid-template-columns:repeat(4,1fr);align-items:stretch;gap:0}
+.paso{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 30px}
+.caja{flex:1;width:100%;border:2.5px dashed var(--hondo);border-radius:26px;background:#fff;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:26px}
+.paso:not(:last-child)::after{content:"";position:absolute;right:-16px;top:44%;width:34px;height:12px;
+ background:var(--hondo);clip-path:polygon(0 30%,62% 30%,62% 0,100% 50%,62% 100%,62% 70%,0 70%)}
+.rot{margin-top:20px;font-family:Gabarito,sans-serif;font-size:22px;font-weight:700;text-align:center;line-height:1.2}
+.num{position:absolute;top:-13px;left:30px;width:30px;height:30px;border-radius:50%;background:var(--hondo);color:var(--vivo);
+ display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;z-index:2}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.chip{border:1.5px solid var(--piedra2);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--hondo);background:var(--hueso)}
+.chip.on{background:var(--hondo);color:var(--vivo);border-color:var(--hondo)}
+svg.ic{width:64px;height:64px}
+.dato{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--piedra)}
+.pie{margin-top:38px;display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--piedra)}
+.pie b{color:var(--hondo);font-family:Gabarito,sans-serif;font-weight:700}
+</style></head><body>
+<div class="cab">
+  <img class="escudo" src="ucsm.png" alt="">
+  <div><h1>RESUMEN DE PROYECTO</h1>
+  <p class="sub">Examen de Admisión UCSM · 7 ciclos · 2021 a 2027 · 47 carreras</p></div>
+</div>
+<div class="fila">
+  <div class="paso"><span class="num">1</span><div class="caja">
+    <svg class="ic" viewBox="0 0 64 64" fill="none" stroke="#01422e" stroke-width="2.6" stroke-linejoin="round">
+      <path d="M14 8h22l12 12v36H14z"/><path d="M36 8v12h12"/><path d="M21 34h20M21 42h20M21 26h10"/></svg>
+    <div class="chips"><span class="chip on">PDF</span><span class="chip">CSV</span><span class="chip">Wayback CDX</span></div>
+    <p class="dato">151 documentos · 8 esquemas</p></div>
+    <p class="rot">Orígenes<br>de datos</p></div>
+  <div class="paso"><span class="num">2</span><div class="caja">
+    <svg class="ic" viewBox="0 0 64 64" fill="none" stroke="#01422e" stroke-width="2.6">
+      <ellipse cx="32" cy="16" rx="18" ry="7"/><path d="M14 16v16c0 3.9 8 7 18 7s18-3.1 18-7V16"/>
+      <path d="M14 32v16c0 3.9 8 7 18 7s18-3.1 18-7V32"/></svg>
+    <div class="chips"><span class="chip on">Python</span><span class="chip">pdfplumber</span><span class="chip">DuckDB</span></div>
+    <p class="dato">71 627 → 69 652 filas</p></div>
+    <p class="rot">Transformación<br>de datos</p></div>
+  <div class="paso"><span class="num">3</span><div class="caja">
+    <svg class="ic" viewBox="0 0 64 64" fill="none" stroke="#01422e" stroke-width="2.6">
+      <rect x="4" y="6" width="20" height="15" rx="2"/><rect x="40" y="6" width="20" height="15" rx="2"/>
+      <rect x="22" y="40" width="20" height="17" rx="2"/><path d="M14 21v9h36v-9M32 30v10"/></svg>
+    <div class="chips"><span class="chip on">Bronze</span><span class="chip">Silver</span><span class="chip">Gold</span></div>
+    <p class="dato">SQL · 6 tablas Gold</p></div>
+    <p class="rot">Modelado<br>de datos</p></div>
+  <div class="paso"><span class="num">4</span><div class="caja">
+    <svg class="ic" viewBox="0 0 64 64" fill="none" stroke="#01422e" stroke-width="2.6" stroke-linecap="round">
+      <rect x="5" y="9" width="54" height="44" rx="4"/><path d="M14 44v-13M25 44V22M36 44v-9M47 44V17"/></svg>
+    <div class="chips"><span class="chip on">React</span><span class="chip">Vite</span><span class="chip">Vercel</span></div>
+    <p class="dato">2 hojas · SVG a mano</p></div>
+    <p class="rot">Visualización<br>de datos</p></div>
+</div>
+<div class="pie">
+  <span><b>16 etapas reproducibles</b> · 5 suites de verificación · 9 ADR</span>
+  <span>ucsm-resultados.vercel.app</span>
+</div>
+</body></html>
