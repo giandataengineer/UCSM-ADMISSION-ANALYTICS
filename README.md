@@ -43,6 +43,7 @@ ExtraccionPDF/
   13_PruebasCalidad.py           coherencia entre capas derivadas
   14_ContrasteIndependiente.py   segundo método de conteo, página a página
   15_PayloadTablero.py           serializa Gold + cuartiles en un JSON único
+  16_PruebasTablero.py           contrasta el payload contra Gold y Silver
   data/
     manifest.csv                 153 filas: una por PDF de resultados descubierto
     auditoria.csv                151 filas: contenido real de cada PDF
@@ -82,6 +83,7 @@ python ExtraccionPDF/13_PruebasCalidad.py          # 10/10
 python ExtraccionPDF/14_ContrasteIndependiente.py  # 4 974/4 974 páginas
 python ExtraccionPDF/12_Auditoria.py               # 27 conformes, 0 fallas
 python ExtraccionPDF/15_PayloadTablero.py          # regenera el payload del tablero
+python ExtraccionPDF/16_PruebasTablero.py          # 15/15
 ```
 
 Los PDFs no están versionados. Se reconstruyen con el primer script. `.env` necesita
@@ -193,7 +195,7 @@ detalle está en `docs/ADR-002-ventana-temporal.md`.
 
 ## Procesamiento
 
-Quince etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
+Dieciséis etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 
 | Etapa | Script | Salida |
 |---|---|---|
@@ -212,6 +214,7 @@ Quince etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Calidad entre capas | `13_PruebasCalidad.py` | 10 pruebas de coherencia Silver ↔ Gold |
 | Contraste independiente | `14_ContrasteIndependiente.py` | segundo método, página a página |
 | Payload del tablero | `15_PayloadTablero.py` | un JSON con agregados y cuartiles |
+| Pruebas del tablero | `16_PruebasTablero.py` | 15 contrastes del payload contra Gold y Silver |
 
 ### Verificación
 
@@ -224,6 +227,7 @@ corrigió el parser o se documentó por qué la fuente es así.
 | `13_PruebasCalidad.py` | ¿Las capas derivadas son coherentes? | 10/10 |
 | `14_ContrasteIndependiente.py` | ¿Un segundo método cuenta lo mismo? | **4 974/4 974 páginas** |
 | `12_Auditoria.py` | ¿El conjunto se sostiene? | 27 conformes, 0 fallas |
+| `16_PruebasTablero.py` | ¿El tablero muestra lo que dice la fuente? | **15/15** |
 
 Las tres primeras miden cosas distintas. `11_Validacion.py` usa las
 redundancias que el propio documento publica: si el parser asignara mal una
@@ -338,6 +342,23 @@ fuerza la carga el verde.
 Tipografía: Instrument Serif en los títulos, Bricolage Grotesque en las cifras y
 rótulos, Instrument Sans en el texto corrido, IBM Plex Mono en las columnas de
 números.
+
+### El tablero no inventa nada
+
+`16_PruebasTablero.py` recalcula desde cero cada cifra que el tablero enseña y la
+compara con Gold y Silver. No mira el código de la interfaz: mira el JSON que la
+interfaz consume.
+
+Comprueba, entre otras cosas, que cada fila cuadre con el agregado, que la
+variación interanual reproduzca la división, que la caja de cuartiles se sostenga
+sobre los puntajes individuales de los ingresantes, que la ocupación de vacantes
+cruce sin pérdidas, y que **las 235 combinaciones de carrera y ciclo que el
+catálogo marca como convocadas tengan su fila**. Ninguna falta.
+
+Las 47 carreras no se convocan todos los años: 47 × 7 dan 329 combinaciones
+posibles y solo existen 244. Cuando se filtra por una carrera y un año sin actas,
+el tablero lo dice y nombra los ciclos donde sí la hay, en vez de devolver una
+pantalla vacía.
 
 ### Privacidad del payload
 

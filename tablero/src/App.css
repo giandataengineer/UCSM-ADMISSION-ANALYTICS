@@ -13,42 +13,9 @@
     radial-gradient(120% 76% at 100% 0%, #ffffff 0%, transparent 58%),
     var(--color-hueso);
 }
-.lienzo { flex: 1; min-height: 0; padding: 1.5% 1.6% 0.6%; }
+.lienzo { flex: 1; min-height: 0; padding: 1.5% 1.6%; }
 .lienzo-interior { height: 100%; min-height: 0; }
 .hoja { height: 100%; min-height: 0; }
-
-/* ---------- Pestanas de hoja ---------- */
-.pestanas {
-  display: flex; align-items: stretch;
-  height: 32px; flex: none;
-  background: var(--color-piedra-200);
-  border-top: 1px solid var(--color-piedra-300);
-  padding-left: 4px;
-  font-family: var(--font-display);
-}
-.pestanas-nav {
-  display: flex; align-items: center; gap: 9px;
-  padding: 0 12px 0 6px;
-  color: var(--color-piedra-500); font-size: 10px; letter-spacing: .08em;
-}
-.pestana {
-  border: 1px solid var(--color-piedra-300); border-bottom: 0; border-left: 0;
-  background: var(--color-piedra-300);
-  color: var(--color-hondo);
-  font: inherit; font-size: 11px; font-weight: 600; letter-spacing: .06em;
-  padding: 0 20px; cursor: pointer;
-  transition: background .15s ease, color .15s ease;
-}
-.pestana:first-of-type { border-left: 1px solid var(--color-piedra-300); }
-.pestana:hover { background: var(--color-menta-200); color: var(--color-hondo); }
-.pestana-activa {
-  background: var(--color-papel);
-  color: var(--color-hondo);
-  box-shadow: inset 0 2px 0 var(--color-vivo);
-}
-.pestanas-pie { margin-left: auto; display: flex; align-items: center; padding: 0 14px; font-size: 10.5px; }
-.pestanas-pie a { color: var(--color-piedra-500); text-decoration: none; }
-.pestanas-pie a:hover { color: var(--color-v600); text-decoration: underline; }
 
 /* ============================================================
    Hoja HOME. La columna verde ocupa toda la altura; la nota al pie
@@ -75,7 +42,7 @@
   background: linear-gradient(168deg, #02503a 0%, #01422e 52%, #012c1f 100%);
   border: 1px solid rgba(14, 216, 94, .22);
   border-radius: 28px;
-  padding: 4.2% 6% 2.4%;
+  padding: 9% 6% 2.8%;
   color: var(--color-hueso);
   display: flex; flex-direction: column;
   gap: 1.4%;
@@ -221,22 +188,25 @@
 
 .lateral-linkedin {
   flex: none;
-  display: flex; align-items: center; gap: 11px;
-  padding: 3.8% 8%;
-  justify-content: flex-start;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  align-self: center;
+  justify-content: center;
+  padding: 7px;
+  aspect-ratio: 1;
+  width: clamp(88px, 11vh, 118px);
   border: 1px solid rgba(14, 216, 94, .38);
-  border-radius: 13px;
+  border-radius: 16px;
   background: linear-gradient(135deg, rgba(14, 216, 94, .12), rgba(1, 66, 46, .5));
-  color: #ffffff; text-decoration: none;
+  color: #ffffff; text-decoration: none; text-align: center;
   font-family: var(--font-firma);
-  font-size: clamp(15px, 2.05vh, 22px); font-weight: 800;
-  letter-spacing: -.015em; line-height: 1.05;
+  font-size: clamp(12px, 1.55vh, 16px); font-weight: 700;
+  letter-spacing: -.01em; line-height: 1.1;
   transition: border-color .2s ease, background .2s ease, transform .2s ease;
 }
-.lateral-linkedin span { display: block; }
+.lateral-linkedin span { display: block; flex: none; padding-bottom: 2px; }
 .lateral-linkedin svg {
-  width: clamp(30px, 3.6vh, 42px); height: clamp(30px, 3.6vh, 42px); flex: none;
-  padding: 6px; border-radius: 7px;
+  align-self: stretch; width: 100%; height: auto; aspect-ratio: 1; flex: none;
+  padding: 17%; border-radius: 12px;
   box-shadow: 0 4px 12px -4px rgba(14, 216, 94, .6);
   transition: transform .25s cubic-bezier(.16,1,.3,1);
   background: var(--color-vivo); color: var(--color-hondo);
@@ -634,15 +604,13 @@
   .fila-media { grid-template-columns: 1fr; }
   .tarjeta { min-height: 260px; }
   .hoja-analisis { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: 'pendiente' 'top' 'anillo' 'cajas'; }
-  .pestanas { position: sticky; bottom: 0; }
 }
 @media (max-width: 720px) {
   .kpis { grid-template-columns: 1fr; }
   .filtros { flex-wrap: wrap; gap: 12px; }
-  .pestana { padding: 0 12px; font-size: 10px; }
 }
 
 @media print {
-  .pestanas, .barra-exportar, .boton-analisis, .boton-volver { display: none; }
+  .barra-exportar, .boton-analisis, .boton-volver { display: none; }
   .tableau { height: auto; overflow: visible; }
 }

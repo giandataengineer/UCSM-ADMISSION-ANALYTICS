@@ -6,7 +6,7 @@ import {
   Piruletas, BarrasCabeza, TablaDetalle, Pendiente, TopCarreras, Anillo, Cajas, COLOR_AREA
 } from './components/charts';
 import {
-  CICLOS, AREAS, kpis, filasDe, porArea, serieCiclos, pendiente, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe, baseCompleta
+  CICLOS, AREAS, kpis, filasDe, porArea, serieCiclos, pendiente, areaDe, hayCarreraEn, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe, baseCompleta
 } from './lib/data';
 import './App.css';
 
@@ -197,6 +197,26 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
   const totalPost = areasRes.reduce((s, a) => s + a.postulaciones, 0);
 
   const serie = useMemo(() => serieCiclos(area), [area]);
+
+  // Catalogo del area elegida, no solo del ciclo: asi la carrera filtrada
+  // sobrevive al cambio de ano aunque ese ano no la haya convocado.
+  const catalogo = useMemo(() => {
+    const vistas = new Set();
+    for (const c of CICLOS) for (const f of filasDe(c, area)) vistas.add(f.carrera);
+    return [...vistas].sort();
+  }, [area]);
+
+  // Ciclos en los que esa carrera si tiene actas, para orientar cuando no hay nada.
+  const ciclosDeCarrera = useMemo(
+    () => (carrera ? CICLOS.filter(c => hayCarreraEn(c, carrera)) : []),
+    [carrera]
+  );
+
+  /* Los dos filtros no deben pelearse: solo se suelta la carrera si queda fuera del area. */
+  const elegirArea = cod => {
+    setArea(cod);
+    if (cod && carrera && areaDe(carrera) !== cod) setCarrera(null);
+  };
   const conPuntaje = filas.filter(f => f.entroMin != null).slice(0, 8)
     .map(f => ({ carrera: f.carrera, min: f.entroMin, max: f.entroMax, n: f.ingCaja }));
   const topPost = filas.slice(0, 7).map(f => ({ carrera: f.carrera, postulaciones: f.postulaciones }));
@@ -205,7 +225,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
   return (
     <div className="hoja hoja-home">
       <aside className="lateral">
-        <p className="lateral-titulo">Resultado</p>
+        <p className="lateral-titulo">Resultados</p>
         <p className="lateral-subtitulo">del examen de admision</p>
 
         <div className="lateral-escudo">
@@ -222,7 +242,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
                 key={a.cod}
                 type="button"
                 className={`area-pastilla ${activa ? 'area-activa' : ''}`}
-                onClick={() => { setArea(activa ? null : a.cod); setCarrera(null); }}
+                onClick={() => elegirArea(activa ? null : a.cod)}
                 aria-pressed={activa}
               >
                 <span className="area-titulo">{a.cod}: {a.nombre}</span>
@@ -241,7 +261,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85V21h-4V9Z" />
           </svg>
-          <span>Gian<br />Cruz</span>
+          <span>Gian Cruz</span>
         </a>
       </aside>
 
@@ -261,18 +281,18 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
             <span>Carrera:</span>
             <select value={carrera ?? ''} onChange={e => setCarrera(e.target.value || null)}>
               <option value="">Todas</option>
-              {todas.map(f => <option key={f.carrera} value={f.carrera}>{f.carrera}</option>)}
+              {catalogo.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
           <label className="filtro">
             <span>Año:</span>
-            <select value={ciclo} onChange={e => { setCiclo(e.target.value); setCarrera(null); }}>
+            <select value={ciclo} onChange={e => setCiclo(e.target.value)}>
               {CICLOS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
           <label className="filtro">
             <span>Area:</span>
-            <select value={area ?? ''} onChange={e => { setArea(e.target.value || null); setCarrera(null); }}>
+            <select value={area ?? ''} onChange={e => elegirArea(e.target.value || null)}>
               <option value="">Todo</option>
               {AREAS.map(a => <option key={a.cod} value={a.cod}>{a.cod}: {a.nombre}</option>)}
             </select>
@@ -308,7 +328,14 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
         </div>
 
         <section className="tarjeta tarjeta-tabla">
-          <TablaDetalle filas={filas} ciclo={ciclo} maxPost={maxPost} activa={carrera} onCarrera={setCarrera} />
+          {carrera && !hayCarreraEn(ciclo, carrera) ? (
+            <p className="vacio">
+              {carrera} no se convoco en el proceso {ciclo}.
+              <br />Si aparece en {ciclosDeCarrera.join(', ')}.
+            </p>
+          ) : (
+            <TablaDetalle filas={filas} ciclo={ciclo} maxPost={maxPost} activa={carrera} onCarrera={setCarrera} />
+          )}
         </section>
 
       </div>
@@ -420,25 +447,6 @@ export default function App() {
         </motion.div>
       </div>
 
-      <div className="pestanas" role="tablist" aria-label="Hojas del tablero">
-        <div className="pestanas-nav" aria-hidden="true">
-          <span>⏮</span><span>◀</span><span>▶</span><span>⏭</span>
-        </div>
-        {HOJAS.map(h => (
-          <button
-            key={h.id}
-            role="tab"
-            aria-selected={hoja === h.id}
-            className={`pestana ${hoja === h.id ? 'pestana-activa' : ''}`}
-            onClick={() => setHoja(h.id)}
-          >
-            {h.nombre}
-          </button>
-        ))}
-        <div className="pestanas-pie">
-          <a href={LINKEDIN} target="_blank" rel="noreferrer">linkedin.com/in/giandataengineer</a>
-        </div>
-      </div>
     </div>
   );
 }

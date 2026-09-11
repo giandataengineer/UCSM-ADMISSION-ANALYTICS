@@ -34,6 +34,13 @@ const filas = gold.porCarrera.map(f => ({
 
 export const nombreArea = cod => AREAS.find(a => a.cod === cod)?.nombre ?? 'Sin clasificar';
 
+/** Area a la que pertenece una carrera, para no romper un filtro contra otro. */
+export const areaDe = carrera => filas.find(f => f.carrera === carrera)?.area ?? null;
+
+/** Si la carrera se convoco en ese ciclo. Cambiar de ano no debe borrar el filtro. */
+export const hayCarreraEn = (ciclo, carrera) =>
+  filas.some(f => f.ciclo === ciclo && f.carrera === carrera);
+
 /** Filas de un ciclo, opcionalmente acotadas a un area. */
 export function filasDe(ciclo, area = null) {
   return filas.filter(f => f.ciclo === ciclo && (!area || f.area === area));

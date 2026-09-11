@@ -37,14 +37,14 @@
 
   --color-papel: #ffffff;
 
-  /* Un solo sistema geometrico; el contraste lo dan el peso y el tamano */
-  --font-titulo: "Manrope", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Manrope", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  /* Gabarito para titulos y cifras, Schibsted Grotesk para el texto corrido */
+  --font-titulo: "Gabarito", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Gabarito", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   /* La sigla del escudo va en la grotesca del logo, no en la serif */
   --font-marca: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-firma: "Bricolage Grotesque", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-firma: "Gabarito", "Archivo", "Helvetica Neue", Arial, sans-serif;
 }
 
 html, body, #root { height: 100%; }
