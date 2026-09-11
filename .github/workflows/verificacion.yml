@@ -1,0 +1,43 @@
+name: verificacion
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  datos:
+    name: contraste del payload contra la capa Gold
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # La suite no necesita dependencias: solo csv y json de la libreria
+      # estandar. La capa Silver no se versiona por privacidad, asi que las
+      # pruebas que la requieren se omiten y el reporte lo dice.
+      - name: Pruebas del tablero
+        run: python ExtraccionPDF/16_PruebasTablero.py
+
+  tablero:
+    name: build del tablero
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tablero
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tablero/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: El payload no puede crecer sin control
+        run: |
+          BYTES=$(wc -c < src/data/gold.json)
+          echo "payload: $BYTES bytes"
+          test "$BYTES" -lt 400000

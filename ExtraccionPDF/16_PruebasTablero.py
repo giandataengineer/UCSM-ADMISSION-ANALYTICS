@@ -13,10 +13,18 @@ GOLD = os.path.join(RAIZ, "ExtraccionPDF", "data_normalizada", "gold")
 SILVER = os.path.join(RAIZ, "ExtraccionPDF", "data_normalizada", "postulaciones.csv")
 PAYLOAD = os.path.join(RAIZ, "tablero", "src", "data", "gold.json")
 
-fallas, pruebas = [], []
+fallas, pruebas, omitidas = [], [], []
+
+# La capa Silver no se versiona: lleva puntajes individuales. Cuando no esta
+# presente, las pruebas que dependen de ella se omiten y se dice cuales, en
+# vez de fingir que pasaron.
+HAY_SILVER = os.path.exists(SILVER)
 
 
-def revisa(nombre, ok, detalle=""):
+def revisa(nombre, ok, detalle="", necesita_silver=False):
+    if necesita_silver and not HAY_SILVER:
+        omitidas.append(nombre)
+        return
     pruebas.append((nombre, ok, detalle))
     if not ok:
         fallas.append(f"{nombre}: {detalle}")
@@ -81,7 +89,8 @@ revisa("la variacion interanual cuadra", not mal, "; ".join(mal[:3]))
 
 # 5. La caja de cuartiles describe solo a ingresantes, calculada de nuevo
 vals = defaultdict(list)
-with open(SILVER, encoding="utf-8") as f:
+if HAY_SILVER:
+  with open(SILVER, encoding="utf-8") as f:
     for r in csv.DictReader(f):
         if r["ingreso"] != "1":
             continue
@@ -101,7 +110,7 @@ for clave, caja in p["caja"].items():
         malc.append(f'{clave} rango {caja["min"]}-{caja["max"]} vs {v[0]:.1f}-{v[-1]:.1f}')
     if not (caja["min"] <= caja["q1"] <= caja["med"] <= caja["q3"] <= caja["max"]):
         malc.append(f"{clave} cuartiles desordenados")
-revisa("la caja describe a los ingresantes", not malc, "; ".join(malc[:3]))
+revisa("la caja describe a los ingresantes", not malc, "; ".join(malc[:3]), necesita_silver=True)
 
 # 6. Ningun puntaje del tablero es menor al minimo de un ingresante real
 bajos = [c for c, caja in p["caja"].items() if caja["min"] < 0]
@@ -195,4 +204,6 @@ print(f"{'PRUEBA':<44} RESULTADO")
 for nombre, ok, detalle in pruebas:
     print(f"  {nombre:<42} {'conforme' if ok else 'FALLA  ' + detalle}")
 print(f"\n{len(pruebas) - len(fallas)}/{len(pruebas)} conformes")
+if omitidas:
+    print(f"omitidas por falta de la capa Silver ({len(omitidas)}): {', '.join(omitidas)}")
 raise SystemExit(1 if fallas else 0)

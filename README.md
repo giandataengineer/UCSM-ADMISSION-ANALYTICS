@@ -1,5 +1,12 @@
 <h1>Admisión UCSM en Datos</h1>
 
+[![verificacion](https://github.com/giandataengineer/UCSM-ADMISSION-ANALYTICS/actions/workflows/verificacion.yml/badge.svg)](https://github.com/giandataengineer/UCSM-ADMISSION-ANALYTICS/actions/workflows/verificacion.yml)
+[![tablero en vivo](https://img.shields.io/badge/tablero-en%20vivo-0ed85e?style=flat)](https://ucsm-resultados.vercel.app)
+[![licencia](https://img.shields.io/badge/licencia-MIT-01422e?style=flat)](LICENSE)
+![python](https://img.shields.io/badge/Python-3.12-01422e?style=flat)
+![duckdb](https://img.shields.io/badge/DuckDB-1.1-01422e?style=flat)
+![react](https://img.shields.io/badge/React-19-01422e?style=flat)
+
 **Siete ciclos de admisión de la Universidad Católica de Santa María, reconstruidos
 desde 151 PDFs oficiales, verificados página a página y publicados como un tablero
 que abre sin servidor.**
@@ -61,6 +68,8 @@ tablero/                         aplicación React del tablero
   src/App.jsx                    las dos hojas y las pestañas
   src/data/gold.json             payload que genera la etapa 15
 docs/tablero.html                versión previa en un solo archivo HTML
+docs/DICCIONARIO.md              significado de cada columna de la capa Gold
+docs/modelo_datos.dbml           modelo entidad-relacion para dbdiagram.io
 docs/INVENTARIO.md               tabla detallada de los 151 PDFs
 docs/ADR-001-paralelismo.md      por qué no se usa PySpark
 docs/ADR-002-ventana-temporal.md por qué el corpus arranca en 2021
@@ -431,6 +440,11 @@ Inteligencia Artificial** e **Ingeniería Biomédica** aparecen recién en el ci
 2026; **Turismo y Hotelería** dejó de convocarse después de 2021. Una serie
 temporal por carrera tiene que distinguir "no se convocó" de "nadie postuló", y
 para eso está `carreras_por_ciclo.csv`.
+
+## Licencia
+
+Código bajo MIT. Los resultados de admisión son documentos públicos de la UCSM y
+no son propiedad de este proyecto. Detalle en [LICENSE](LICENSE).
 
 ## Fuente
 
