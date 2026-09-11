@@ -9,7 +9,7 @@ ok,perdidas,los 15 PDFs sin filas estan todos explicados
 ok,perdidas,"1,945 filas descartadas de listas de aptitud (no son resultados)"
 ok,perdidas,"normalizacion descarta 30 de 67,634 filas de resultados (0.04%), sin carrera reconocible"
 ok,perdidas,"60,960 filas con resultado binario (88% del total)"
-ok,privacidad,ningun DNI ni nombre en los 39 archivos versionados
+ok,privacidad,ningun DNI ni nombre en los 84 archivos versionados
 ok,privacidad,data/raw/ esta en .gitignore
 ok,privacidad,data_extraida/ esta en .gitignore
 ok,privacidad,postulaciones.csv esta en .gitignore

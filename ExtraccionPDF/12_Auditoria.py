@@ -33,6 +33,14 @@ DNI = re.compile(r"(?<![0-9A-Za-z])\d{8}(?![0-9A-Za-z])")
 # Tres o mas palabras en mayusculas seguidas: la forma de un nombre completo.
 NOMBRE = re.compile(r"\b[A-ZÑÁÉÍÓÚ]{3,}(?: [A-ZÑÁÉÍÓÚ]{3,}){2,}\b")
 
+# Un nombre de persona no lleva preposiciones ni conjunciones de tres o mas
+# letras. Sin esto, rotulos como "ANALISIS POR CARRERA" se marcan como nombre.
+FUNCIONALES = {
+    "POR", "PARA", "CON", "SIN", "SOBRE", "ENTRE", "DESDE", "HASTA", "SEGUN",
+    "ANTE", "TRAS", "DURANTE", "MEDIANTE", "LOS", "LAS", "DEL", "UNA", "UNO",
+    "QUE", "MAS", "SUS", "ESTE", "ESTA", "ESOS", "ESAS", "TODO", "TODA",
+}
+
 hallazgos = []
 
 
@@ -196,7 +204,9 @@ def bloque_privacidad():
         dnis = DNI.findall(texto)
         # Una cadena en mayusculas solo es sospechosa si no es un nombre de
         # carrera ni de proceso ya conocido por el propio corpus.
-        nombres = [n for n in NOMBRE.findall(texto) if n.upper() not in conocidos]
+        nombres = [n for n in NOMBRE.findall(texto)
+                   if n.upper() not in conocidos
+                   and not (set(n.upper().split()) & FUNCIONALES)]
         if dnis or nombres:
             sospechosos.append((rel, len(dnis), len(nombres), nombres[:2]))
 

@@ -162,9 +162,12 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
             <th className="col-anio">Año</th>
             <th className="col-area">Area</th>
             <th>Carrera</th>
-            <th className="der">Ingreso mas alto</th>
+            <th className="der">Ingresantes</th>
+            <th className="der">% ingreso</th>
             <th className="der">Ingreso mas bajo</th>
-            <th className="der">% incremento de postulaciones</th>
+            <th className="der">Mediana</th>
+            <th className="der">Ingreso mas alto</th>
+            <th className="der">% incremento</th>
             <th>Postulaciones</th>
             <th title="Provisional: mezcla la seleccion del centro preuniversitario con la admision ordinaria">
               Ocupacion de vacantes <abbr className="prov">prov.</abbr>
@@ -186,8 +189,13 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
                 <span className="chip-area" style={{ background: COLOR_AREA[f.area], color: f.area === 'A' || f.area === 'E' ? '#0d2f1c' : '#fff' }}>{f.area}</span>
               </td>
               <td className="td-carrera">{f.carrera}</td>
-              <td className="der tab-num">{dec(f.entroMax)}</td>
+              <td className="der tab-num">{mil(f.ingresantes)}</td>
+              <td className="der tab-num">
+                {f.fiable && f.tasa != null ? `${f.tasa.toFixed(1)}%` : <span className="sin-dato">sin base</span>}
+              </td>
               <td className="der tab-num">{dec(f.entroMin)}</td>
+              <td className="der tab-num">{dec(f.entroMed)}</td>
+              <td className="der tab-num">{dec(f.entroMax)}</td>
               <td className="der"><Flecha valor={f.delta} /></td>
               <td>
                 <span className="celda-barra">

@@ -190,7 +190,14 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
   const filas = useMemo(
     () => (carrera ? todas.filter(f => f.carrera === carrera) : todas).map(f => {
       const c = cajaDe(f.clave);
-      return { ...f, ocupacion: vacantesDe(f.clave)?.[0] ?? null, entroMin: c?.min ?? null, entroMax: c?.max ?? null, ingCaja: c?.n ?? null };
+      return {
+        ...f,
+        ocupacion: vacantesDe(f.clave)?.[0] ?? null,
+        entroMin: c?.min ?? null,
+        entroMed: c?.med ?? null,
+        entroMax: c?.max ?? null,
+        ingCaja: c?.n ?? null
+      };
     }),
     [todas, carrera]
   );
