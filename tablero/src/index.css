@@ -1,34 +1,45 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Paleta institucional UCSM.
+   Los tres colores base estan muestreados del logo oficial:
+   verde hondo #01422E, verde vivo #0ED85E y hueso #F7F9EC.
+   Todo lo demas son mezclas de esos tres. No entra ningun otro tono.
+   ============================================================ */
 @theme {
-  /* Verde institucional UCSM y su rampa */
-  --color-ucsm-900: #0d2f1c;
-  --color-ucsm-800: #123d28;
-  --color-ucsm-700: #17512f;
-  --color-ucsm-600: #1f6b42;
-  --color-ucsm-500: #2a8756;
-  --color-ucsm-400: #48a973;
-  --color-ucsm-300: #7cc79c;
-  --color-ucsm-200: #b4e2c8;
-  --color-ucsm-100: #ddf2e6;
+  --color-hondo: #01422e;
+  --color-vivo: #0ed85e;
+  --color-hueso: #f7f9ec;
 
-  --color-oro-500: #c8a24a;
-  --color-oro-300: #e3caa0;
+  /* hondo -> vivo */
+  --color-v900: #01422e;
+  --color-v800: #035935;
+  --color-v700: #056f3c;
+  --color-v600: #078644;
+  --color-v500: #099c4b;
+  --color-v400: #0bb352;
+  --color-v300: #0dc959;
+  --color-v200: #0ed85e;
 
-  --color-tinta: #10201a;
-  --color-tinta-media: #45564a;
-  --color-tinta-suave: #7c8c79;
+  /* vivo -> hueso */
+  --color-menta-400: #62de89;
+  --color-menta-300: #82e8a5;
+  --color-menta-200: #bcf0c8;
+  --color-menta-100: #dbf5db;
 
-  --color-lienzo: #f2f5f0;
-  --color-panel: #ffffff;
-  --color-hueso: #e7ece3;
+  /* hondo -> hueso: los neutros tibios del tablero */
+  --color-piedra-700: #2d6350;
+  --color-piedra-600: #4b7967;
+  --color-piedra-500: #7c9d8d;
+  --color-piedra-400: #afc2b3;
+  --color-piedra-300: #d2ddcf;
+  --color-piedra-200: #e9edd8;
 
-  --color-alza: #1f8a4c;
-  --color-baja: #b23b32;
-  --color-neutro: #c2ccc2;
+  --color-papel: #ffffff;
 
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Source Serif 4", Georgia, serif;
+  --font-display: "Bricolage Grotesque", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-titulo: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 
@@ -36,20 +47,18 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--color-lienzo);
-  color: var(--color-tinta);
+  background: var(--color-hueso);
+  color: var(--color-hondo);
   font-family: var(--font-body);
+  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
 }
 
-.tab-num { font-variant-numeric: tabular-nums; }
+.tab-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
-/* Barra de scroll discreta dentro de paneles */
-.scroll-fino::-webkit-scrollbar { width: 8px; height: 8px; }
-.scroll-fino::-webkit-scrollbar-thumb {
-  background: var(--color-hueso);
-  border-radius: 99px;
-}
+.scroll-fino::-webkit-scrollbar { width: 9px; height: 9px; }
+.scroll-fino::-webkit-scrollbar-thumb { background: var(--color-piedra-300); border-radius: 99px; }
+.scroll-fino::-webkit-scrollbar-thumb:hover { background: var(--color-piedra-400); }
 .scroll-fino::-webkit-scrollbar-track { background: transparent; }
 
 @media (prefers-reduced-motion: reduce) {

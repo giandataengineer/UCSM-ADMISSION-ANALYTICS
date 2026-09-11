@@ -1,16 +1,113 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { toPng } from 'html-to-image';
 import Counter from './components/Counter';
 import {
   Piruletas, BarrasCabeza, TablaDetalle, Pendiente, TopCarreras, Anillo, Cajas, COLOR_AREA
 } from './components/charts';
 import {
-  CICLOS, AREAS, kpis, filasDe, porArea, pendiente, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe
+  CICLOS, AREAS, kpis, filasDe, porArea, pendiente, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe, baseCompleta
 } from './lib/data';
 import './App.css';
 
 const mil = n => (n == null ? '—' : n.toLocaleString('es-PE'));
 const LINKEDIN = 'https://www.linkedin.com/in/giandataengineer/';
+
+function bajar(url, nombre) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombre;
+  a.click();
+}
+
+/** Comillas dobles y separadores dentro del valor romperian el CSV. */
+function aCsv(filas) {
+  if (!filas.length) return '';
+  const cols = Object.keys(filas[0]);
+  const celda = v => {
+    const t = String(v ?? '');
+    return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  };
+  return [cols.join(','), ...filas.map(f => cols.map(c => celda(f[c])).join(','))].join('\n');
+}
+
+function descargarCsv(filas, nombre) {
+  const url = URL.createObjectURL(new Blob(['\uFEFF' + aCsv(filas)], { type: 'text/csv;charset=utf-8' }));
+  bajar(url, nombre);
+  URL.revokeObjectURL(url);
+}
+
+/** Exporta a PNG lo que se ve, al doble de resolucion. */
+async function descargarImagen(nombre) {
+  const nodo = document.querySelector('.lienzo-interior');
+  if (!nodo) return;
+  const url = await toPng(nodo, {
+    pixelRatio: 2,
+    backgroundColor: '#f2f5f0',
+    filter: n => !(n.classList && n.classList.contains('barra-exportar'))
+  });
+  bajar(url, nombre);
+}
+
+/* Los tres controles de exportacion, iguales en las dos hojas. */
+function BarraExportar({ nombreBase, filasVisibles }) {
+  const [ocupado, setOcupado] = useState(null);
+
+  const conEstado = (clave, fn) => async () => {
+    setOcupado(clave);
+    try { await fn(); } finally { setOcupado(null); }
+  };
+
+  return (
+    <span className="barra-exportar">
+      <button
+        type="button"
+        title="Descargar la base procesada completa: 244 filas, los 7 ciclos y las 47 carreras"
+        aria-label="Descargar la base procesada completa en CSV"
+        onClick={conEstado('csv', () => descargarCsv(baseCompleta(), 'admision_ucsm_2021_2027.csv'))}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="12" cy="5.6" rx="7.4" ry="2.8" />
+          <path d="M4.6 5.6v6.8c0 1.55 3.31 2.8 7.4 2.8s7.4-1.25 7.4-2.8V5.6" />
+          <path d="M4.6 12.4v5.2c0 1.55 3.31 2.8 7.4 2.8" />
+          <path d="M17.4 15.6v5.2m0 0 2.4-2.4m-2.4 2.4-2.4-2.4" />
+        </svg>
+        {ocupado === 'csv' && <span className="punto-ocupado" />}
+      </button>
+
+      <button
+        type="button"
+        title="Guardar esta hoja en PDF con el dialogo de impresion"
+        aria-label="Guardar la hoja en PDF"
+        onClick={() => window.print()}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 9V3h7l3 3v3" />
+          <path d="M7 19H5.4A2.4 2.4 0 0 1 3 16.6v-3.4A2.4 2.4 0 0 1 5.4 10.8h13.2A2.4 2.4 0 0 1 21 13.2v3.4a2.4 2.4 0 0 1-2.4 2.4H17" />
+          <path d="M7 15h10v6H7z" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        title="Guardar como imagen PNG lo que se ve en pantalla"
+        aria-label="Guardar la vista como imagen PNG"
+        onClick={conEstado('png', () => descargarImagen(`${nombreBase}.png`))}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2.4" />
+          <circle cx="8.6" cy="10" r="1.6" />
+          <path d="m3.6 17.4 4.6-4.3 3.5 3.1 3.3-3.1 5.4 5" />
+        </svg>
+        {ocupado === 'png' && <span className="punto-ocupado" />}
+      </button>
+      <span className="visualmente-oculto" aria-live="polite">
+        {ocupado === 'csv' ? 'Preparando el CSV' : ocupado === 'png' ? 'Generando la imagen' : ''}
+      </span>
+      <span hidden>{filasVisibles?.length}</span>
+    </span>
+  );
+}
 
 const ICONO = {
   postulaciones: <><circle cx="9" cy="8" r="3.2" /><circle cx="16.6" cy="9.2" r="2.4" /><path d="M3.4 19c0-3.2 2.6-5.2 5.6-5.2s5.6 2 5.6 5.2" /><path d="M16.4 14c2.5.2 4.4 2 4.4 5" /></>,
@@ -25,7 +122,7 @@ function Variacion({ valor, invertir = false }) {
   return <span className={`kpi-var ${bueno ? 'alza' : 'baja'}`}>{sube ? '▲' : '▼'}{Math.abs(valor).toFixed(2)}%</span>;
 }
 
-function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decimales = 0, retraso = 0 }) {
+function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decimales = 0, alcance, retraso = 0 }) {
   return (
     <motion.article className="kpi" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: retraso }}>
       <span className="kpi-medalla" aria-hidden="true">
@@ -37,6 +134,7 @@ function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decim
         {valor != null && sufijo}
       </p>
       <Variacion valor={variacion} />
+      {alcance && <p className="kpi-alcance">{alcance}</p>}
     </motion.article>
   );
 }
@@ -59,20 +157,8 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
 
   const conPuntaje = filas.filter(f => f.entroMin != null).slice(0, 8)
     .map(f => ({ carrera: f.carrera, min: f.entroMin, max: f.entroMax, n: f.ingCaja }));
-  const topPost = filas.slice(0, 7).map(f => ({ carrera: f.carrera, postulaciones: f.postulaciones }));
+  const topPost = filas.slice(0, 6).map(f => ({ carrera: f.carrera, postulaciones: f.postulaciones }));
   const maxPost = Math.max(...filas.map(f => f.postulaciones), 1);
-
-  const descargar = () => {
-    const cab = ['ciclo', 'area', 'carrera', 'postulaciones', 'ingresantes', 'puntaje_max', 'puntaje_min', 'variacion_pct', 'ocupacion_pct'];
-    const cuerpo = filas.map(f => [ciclo, f.area, f.carrera, f.postulaciones, f.ingresantes, f.max ?? '', f.min ?? '', f.delta ?? '', f.ocupacion ?? '']);
-    const csv = [cab, ...cuerpo].map(r => r.join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `admision_ucsm_${ciclo}${area ? '_area' + area : ''}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="hoja hoja-home">
@@ -81,7 +167,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
         <p className="lateral-subtitulo">del examen de admision</p>
 
         <div className="lateral-escudo">
-          <img src="/img/ucsm-verde.png" alt="Escudo de la Universidad Catolica de Santa Maria" width="500" height="500" />
+          <img src="/img/ucsm-vivo.png" alt="Escudo de la Universidad Catolica de Santa Maria" width="1200" height="1200" />
           <p className="lateral-sigla">UCSM</p>
         </div>
 
@@ -121,7 +207,8 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
         <div className="kpis">
           <TarjetaKpi icono="postulaciones" rotulo="Postulaciones" ciclo={ciclo} valor={k.postulaciones} variacion={k.deltaPost} />
           <TarjetaKpi icono="ingresantes" rotulo="Ingresantes" ciclo={ciclo} valor={k.ingresantes} variacion={k.deltaIng} retraso={0.05} />
-          <TarjetaKpi icono="tasa" rotulo="% Ingreso" ciclo={ciclo} valor={k.tasa} sufijo="%" decimales={2} variacion={k.deltaTasa} retraso={0.1} />
+          <TarjetaKpi icono="tasa" rotulo="% Ingreso" ciclo={ciclo} valor={k.tasa} sufijo="%" decimales={2} variacion={k.deltaTasa} retraso={0.1}
+            alcance={k.tasa == null ? 'las actas de este ciclo no publican el total de postulantes' : `sobre las ${k.carrerasFiables} de ${k.carreras} carreras con denominador fiable`} />
         </div>
 
         <div className="filtros">
@@ -152,14 +239,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
               <span className="visualmente-oculto">Quitar el filtro de carrera</span>
             </button>
           )}
-          <span className="filtros-acciones">
-            <button type="button" onClick={descargar} title="Descargar los datos visibles en CSV" aria-label="Descargar CSV">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 20h16" /></svg>
-            </button>
-            <button type="button" onClick={() => window.print()} title="Imprimir o guardar en PDF" aria-label="Imprimir">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 9V3h10v6M7 19H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 15h10v6H7v-6Z" /></svg>
-            </button>
-          </span>
+          <BarraExportar nombreBase={`admision-ucsm-${ciclo}${area ? "-area" + area : ""}`} filasVisibles={filas} />
         </div>
 
         <div className="fila-media">
@@ -186,14 +266,16 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
           <TablaDetalle filas={filas} ciclo={ciclo} maxPost={maxPost} activa={carrera} onCarrera={setCarrera} />
         </section>
 
+      </div>
+
         <p className="nota-pie">
           {area ? nombreArea(area) : 'Todas las areas'} · escala {escalaDe(ciclo) === 'vigente' ? 'vigente desde 2024' : 'anterior a 2024'}.
           Los puntajes de antes y despues de 2024 no son comparables entre si. El % de ingreso se calcula solo sobre las{' '}
-          {k.carrerasFiables} de {k.carreras} carreras cuyas actas publican el total de postulantes. El rango de puntaje
+          {k.carrerasFiables} de {k.carreras} carreras cuyas actas publican el total de postulantes. La ocupacion de vacantes va marcada como provisional
+          porque mezcla la seleccion del centro preuniversitario con la admision ordinaria. El rango de puntaje
           describe a los ingresantes: el minimo sobre todos los postulantes llega a cero porque hay examenes en blanco,
           y ese numero no dice nada del corte.
-        </p>
-      </div>
+      </p>
     </div>
   );
 }
@@ -212,16 +294,19 @@ function Analisis({ ciclo, area, setArea, carrera, setCarrera, volver }) {
 
   return (
     <div className="hoja hoja-analisis">
-      <button type="button" className="boton-volver" onClick={volver} aria-label="Volver al tablero principal">
+      <div className="analisis-acciones">
+        <BarraExportar nombreBase={`admision-ucsm-analisis-${ciclo}`} />
+        <button type="button" className="boton-volver" onClick={volver} aria-label="Volver al tablero principal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 9h11a5 5 0 0 1 0 10H9" /><path d="M8 4 3.5 9 8 13.5" />
-        </svg>
-      </button>
+            <path d="M4 9h11a5 5 0 0 1 0 10H9" /><path d="M8 4 3.5 9 8 13.5" />
+          </svg>
+        </button>
+      </div>
 
       <section className="tarjeta tarjeta-pendiente">
         <header className="tarjeta-cab"><h2>Incremento de postulaciones por año y carrera</h2></header>
         {pend.datos.length
-          ? <Pendiente datos={pend.datos} antes={pend.prev} despues={pend.ciclo} />
+          ? <Pendiente datos={pend.datos} antes={pend.prev} despues={pend.ciclo} activa={carrera} onCarrera={setCarrera} />
           : <p className="vacio">{ciclo} es el primer proceso de la serie: no hay año anterior con que compararlo.</p>}
       </section>
 
@@ -249,16 +334,23 @@ function Analisis({ ciclo, area, setArea, carrera, setCarrera, volver }) {
 }
 
 /* ---------------- Marco tipo Tableau ---------------- */
+const HOJAS = [
+  { id: 'home', nombre: 'HOME' },
+  { id: 'analisis', nombre: 'ANALISIS POR CARRERA' }
+];
+
 export default function App() {
-  const [hoja, setHoja] = useState('home');
+  // La hoja vive en el hash, asi cada una tiene enlace propio.
+  const [hoja, setHojaEstado] = useState(
+    () => (HOJAS.some(h => h.id === window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'home')
+  );
+  const setHoja = id => {
+    window.location.hash = id;
+    setHojaEstado(id);
+  };
   const [ciclo, setCiclo] = useState('2025');
   const [area, setArea] = useState(null);
   const [carrera, setCarrera] = useState(null);
-
-  const hojas = [
-    { id: 'home', nombre: 'HOME' },
-    { id: 'analisis', nombre: 'ANALISIS POR CARRERA' }
-  ];
 
   return (
     <div className="tableau">
@@ -287,7 +379,7 @@ export default function App() {
         <div className="pestanas-nav" aria-hidden="true">
           <span>⏮</span><span>◀</span><span>▶</span><span>⏭</span>
         </div>
-        {hojas.map(h => (
+        {HOJAS.map(h => (
           <button
             key={h.id}
             role="tab"

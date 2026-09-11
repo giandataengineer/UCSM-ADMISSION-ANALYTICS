@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 
-export const VERDE = '#17512f';
-export const VERDE_MEDIO = '#2a8756';
-export const GRIS = '#c4cbc4';
-export const COLOR_AREA = { A: '#b4e2c8', B: '#0d2f1c', C: '#48a973', D: '#17512f', E: '#c2ccc2' };
-export const COLOR_MODALIDAD = ['#0d2f1c', '#1f6b42', '#2a8756', '#7cc79c', '#c8a24a', '#aab6ab'];
+/* Solo mezclas de los tres colores del logo: #01422E, #0ED85E, #F7F9EC. */
+export const VERDE = '#01422e';
+export const VERDE_MEDIO = '#099c4b';
+export const GRIS = '#afc2b3';
+export const COLOR_AREA = { A: '#0dc959', B: '#01422e', C: '#099c4b', D: '#035935', E: '#afc2b3' };
+export const COLOR_MODALIDAD = ['#01422e', '#056f3c', '#099c4b', '#0bb352', '#62de89', '#afc2b3'];
 
 const mil = n => (n == null ? '—' : n.toLocaleString('es-PE'));
 const dec = n => (n == null ? '—' : n.toLocaleString('es-PE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
@@ -29,8 +30,8 @@ function useGlobo() {
 /* ============ Puntajes maximos y minimos (piruletas verticales) ============ */
 export function Piruletas({ datos, ciclo, activa, onCarrera }) {
   const [enlazar, Globo] = useGlobo();
-  const ancho = 1180, alto = 430;
-  const base = alto - 26, techo = 96;
+  const ancho = 1180, alto = 340;
+  const base = alto - 22, techo = 96;
   const max = Math.max(...datos.map(d => d.max), 1);
   const grupo = (ancho - 40) / Math.max(datos.length, 1);
   const y = v => base - (v / max) * (base - techo);
@@ -61,8 +62,8 @@ export function Piruletas({ datos, ciclo, activa, onCarrera }) {
               )}
             >
               <rect x={cx - grupo / 2} y="0" width={grupo} height={alto} fill="transparent" />
-              <text x={cx} y="34" textAnchor="middle" className="piru-carrera">{corta(d.carrera, 22)}</text>
-              <text x={cx} y="50" textAnchor="middle" className="piru-anio">{ciclo}</text>
+              <text x={cx} y="16" textAnchor="middle" className="piru-carrera">{corta(d.carrera, 22)}</text>
+              <text x={cx} y="30" textAnchor="middle" className="piru-anio">{ciclo}</text>
 
               <rect x={xMin - 5} y={y(d.min)} width="10" height={base - y(d.min)} fill={GRIS} />
               <circle cx={xMin} cy={y(d.min)} r={r} fill={GRIS} />
@@ -135,11 +136,13 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
             <th className="col-anio">Año</th>
             <th className="col-area">Area</th>
             <th>Carrera</th>
-            <th className="der">Puntaje maximo</th>
-            <th className="der">Puntaje minimo</th>
-            <th className="der">% incremento de postulantes</th>
+            <th className="der">Ingreso mas alto</th>
+            <th className="der">Ingreso mas bajo</th>
+            <th className="der">% incremento de postulaciones</th>
             <th>Postulaciones</th>
-            <th>% vacantes cubiertas</th>
+            <th title="Provisional: mezcla la seleccion del centro preuniversitario con la admision ordinaria">
+              Ocupacion de vacantes <abbr className="prov">prov.</abbr>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -164,17 +167,20 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
                 </span>
               </td>
               <td>
-                {f.ocupacion == null ? (
-                  <span className="sin-dato">no publicado</span>
-                ) : (
-                  <span className="celda-vac">
-                    <span className="celda-vac-num tab-num">{f.ocupacion.toFixed(2)}%</span>
-                    <span className="celda-vac-pista">
-                      <span className="celda-vac-relleno" style={{ width: `${Math.min(f.ocupacion, 100)}%` }} />
-                      <span className="celda-vac-marca" style={{ left: `${Math.min(f.ocupacion, 100)}%` }} />
-                    </span>
+                <span className={`celda-vac ${f.ocupacion == null ? 'celda-vac-vacia' : ''}`}>
+                  <span className="celda-vac-num tab-num">
+                    {f.ocupacion == null ? <span className="sin-dato">no publicado</span> : `${f.ocupacion.toFixed(2)}%`}
                   </span>
-                )}
+                  <span className="celda-vac-pista" title="Escala fija de 0 a 100 %">
+                    {f.ocupacion != null && (
+                      <>
+                        <span className="celda-vac-relleno" style={{ width: `${Math.min(f.ocupacion, 100)}%` }} />
+                        {f.ocupacion > 100 && <span className="celda-vac-exceso" />}
+                        <span className="celda-vac-marca" style={{ left: `${Math.min(f.ocupacion, 100)}%` }} />
+                      </>
+                    )}
+                  </span>
+                </span>
               </td>
             </tr>
           ))}
@@ -185,54 +191,59 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
 }
 
 /* ============ Pendiente entre dos ciclos ============ */
-export function Pendiente({ datos, antes, despues }) {
-  const filaAlto = 96, izq = 132, ancho = 620;
-  const alto = datos.length * filaAlto + 40;
-  const xa = izq + 60, xb = ancho - 96;
-
+/* En HTML, no en un SVG fijo: las filas se reparten la altura de la tarjeta
+   y los rotulos conservan su tamano real en vez de encogerse con el lienzo. */
+export function Pendiente({ datos, antes, despues, activa, onCarrera }) {
   return (
-    <svg viewBox={`0 0 ${ancho} ${alto}`} className="grafico-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label={`Postulaciones ${antes} contra ${despues}`}>
+    <div className="pend">
       {datos.map((d, i) => {
-        const y0 = 34 + i * filaAlto;
-        const banda = y0 + 22;
         const max = Math.max(d.antes, d.despues, 1);
-        const ya = banda + 40 - (d.antes / max) * 34;
-        const yb = banda + 40 - (d.despues / max) * 34;
+        const y = v => 64 - (v / max) * 44;
+        const sube = d.despues >= d.antes;
         return (
-          <g key={d.carrera}>
-            <text x="8" y={banda + 24} className="pend-carrera">
-              {corta(d.carrera, 18).split(' ').slice(0, 2).join(' ')}
-            </text>
-            <text x="8" y={banda + 38} className="pend-carrera">
-              {corta(d.carrera, 18).split(' ').slice(2).join(' ')}
-            </text>
-            <rect x={xa - 52} y={banda + 6} width="104" height="48" fill="#e8ebe7" />
-            <rect x={xb - 52} y={banda + 6} width="104" height="48" fill="#e8ebe7" />
-            <text x={xa} y={y0 + 2} textAnchor="middle" className="pend-valor tab-num">{mil(d.antes)}</text>
-            <text x={xa} y={y0 + 16} textAnchor="middle" className="pend-anio">{antes}</text>
-            <text x={xb} y={y0 + 2} textAnchor="middle" className="pend-valor tab-num">{mil(d.despues)}</text>
-            <text x={xb} y={y0 + 16} textAnchor="middle" className="pend-anio">{despues}</text>
-            <motion.line
-              x1={xa} y1={ya} x2={xb} y2={yb}
-              stroke={VERDE} strokeWidth="2.6" strokeLinecap="round"
-              initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
-              transition={{ duration: 0.6, delay: i * 0.05 }}
-            />
-            <circle cx={xa} cy={ya} r="4.5" fill={VERDE} />
-            <circle cx={xb} cy={yb} r="4.5" fill={VERDE} />
-          </g>
+          <button
+            type="button"
+            key={d.carrera}
+            className={`pend-fila ${activa && activa !== d.carrera ? 'apagado' : ''}`}
+            onClick={() => onCarrera?.(activa === d.carrera ? null : d.carrera)}
+            title={`${d.carrera}: ${mil(d.antes)} en ${antes} → ${mil(d.despues)} en ${despues}`}
+          >
+            <span className="pend-nombre">{corta(d.carrera, 26)}</span>
+            <span className="pend-lienzo">
+              <span className="pend-bloque pend-bloque-izq" />
+              <span className="pend-bloque pend-bloque-der" />
+              <span className="pend-cifra pend-cifra-izq">
+                <b className="tab-num">{mil(d.antes)}</b>
+                <i>{antes}</i>
+              </span>
+              <span className="pend-cifra pend-cifra-der">
+                <b className="tab-num">{mil(d.despues)}</b>
+                <i>{despues}</i>
+              </span>
+              <svg viewBox="0 0 200 80" preserveAspectRatio="none" className="pend-linea" aria-hidden="true">
+                <motion.line
+                  x1="26" y1={y(d.antes)} x2="174" y2={y(d.despues)}
+                  stroke={sube ? VERDE : '#7c9d8d'} strokeWidth="2.2" strokeLinecap="round"
+                  vectorEffect="non-scaling-stroke"
+                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
+                />
+                <circle cx="26" cy={y(d.antes)} r="3.6" fill={VERDE} vectorEffect="non-scaling-stroke" />
+                <circle cx="174" cy={y(d.despues)} r="3.6" fill={VERDE} vectorEffect="non-scaling-stroke" />
+              </svg>
+            </span>
+          </button>
         );
       })}
-      <text x={xa} y={alto - 6} textAnchor="middle" className="pend-anio">{antes}</text>
-      <text x={xb} y={alto - 6} textAnchor="middle" className="pend-anio">{despues}</text>
-    </svg>
+      <div className="pend-eje"><span>{antes}</span><span>{despues}</span></div>
+    </div>
   );
 }
 
 /* ============ Top de carreras ============ */
 export function TopCarreras({ datos, activa, onCarrera }) {
   const max = Math.max(...datos.map(d => d.postulaciones), 1);
-  const filaAlto = 38, izq = 240, ancho = 700;
+  const filaAlto = 38, izq = 268, ancho = 940;
   const alto = datos.length * filaAlto + 34;
   return (
     <svg viewBox={`0 0 ${ancho} ${alto}`} className="grafico-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Carreras mas demandadas">
@@ -301,7 +312,7 @@ export function Anillo({ datos, total, campo = 'postulaciones', activa, onArea }
           <path
             d={a.d}
             fill={COLOR_AREA[a.cod]}
-            stroke={activa === a.cod ? '#0d2f1c' : 'transparent'}
+            stroke={activa === a.cod ? '#01422e' : 'transparent'}
             strokeWidth="2.5"
             opacity={(hov && hov !== a.cod) || (activa && activa !== a.cod) ? 0.38 : 1}
             style={{ transition: 'opacity .18s' }}
@@ -319,7 +330,7 @@ export function Anillo({ datos, total, campo = 'postulaciones', activa, onArea }
 /* ============ Cajas de puntaje de ingresantes ============ */
 export function Cajas({ datos, activa, onCarrera }) {
   const [enlazar, Globo] = useGlobo();
-  const ancho = 1180, alto = 480, base = alto - 58, techo = 24;
+  const ancho = 1180, alto = 400, base = alto - 52, techo = 20;
   const todos = datos.flatMap(d => [d.caja.min, d.caja.max]);
   const lo = Math.min(...todos), hi = Math.max(...todos);
   const grupo = (ancho - 60) / Math.max(datos.length, 1);
@@ -350,12 +361,12 @@ export function Cajas({ datos, activa, onCarrera }) {
             )}
             >
               <rect x={cx - grupo / 2} y="0" width={grupo} height={alto} fill="transparent" />
-              <line x1={cx} y1={y(c.min)} x2={cx} y2={y(c.max)} stroke="#8f9b90" strokeWidth="1" />
-              <line x1={cx - bw / 2} y1={y(c.max)} x2={cx + bw / 2} y2={y(c.max)} stroke="#546156" strokeWidth="1.4" />
-              <line x1={cx - bw / 2} y1={y(c.min)} x2={cx + bw / 2} y2={y(c.min)} stroke="#546156" strokeWidth="1.4" />
-              <rect x={cx - bw / 2} y={y(c.q3)} width={bw} height={Math.max(y(c.q1) - y(c.q3), 2)} fill="#dfe4de" />
-              <rect x={cx - bw / 2} y={y(c.med)} width={bw} height={Math.max(y(c.q1) - y(c.med), 2)} fill="#c3ccc3" />
-              <line x1={cx - bw / 2} y1={y(c.med)} x2={cx + bw / 2} y2={y(c.med)} stroke="#7d8a7f" strokeWidth="1.4" />
+              <line x1={cx} y1={y(c.min)} x2={cx} y2={y(c.max)} stroke="#afc2b3" strokeWidth="1" />
+              <line x1={cx - bw / 2} y1={y(c.max)} x2={cx + bw / 2} y2={y(c.max)} stroke="#4b7967" strokeWidth="1.4" />
+              <line x1={cx - bw / 2} y1={y(c.min)} x2={cx + bw / 2} y2={y(c.min)} stroke="#4b7967" strokeWidth="1.4" />
+              <rect x={cx - bw / 2} y={y(c.q3)} width={bw} height={Math.max(y(c.q1) - y(c.q3), 2)} fill="#d2ddcf" />
+              <rect x={cx - bw / 2} y={y(c.med)} width={bw} height={Math.max(y(c.q1) - y(c.med), 2)} fill="#afc2b3" />
+              <line x1={cx - bw / 2} y1={y(c.med)} x2={cx + bw / 2} y2={y(c.med)} stroke="#2d6350" strokeWidth="1.4" />
               {c.puntos.map((p, j) => (
                 <circle
                   key={j}

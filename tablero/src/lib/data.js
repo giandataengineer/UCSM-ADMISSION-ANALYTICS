@@ -161,3 +161,30 @@ export function cajasDe(ciclo, area = null, limite = 10) {
     .filter(f => f.caja)
     .slice(0, limite);
 }
+
+/** Toda la capa procesada en filas planas, para la descarga completa. */
+export function baseCompleta() {
+  return filas.map(f => ({
+    ciclo: f.ciclo,
+    area: f.area,
+    area_nombre: nombreArea(f.area),
+    carrera: f.carrera,
+    postulaciones: f.postulaciones,
+    ingresantes: f.ingresantes,
+    tasa_ingreso_pct: f.fiable ? f.tasa : '',
+    denominador_fiable: f.fiable ? 'si' : 'no',
+    escala: f.escala,
+    variacion_postulaciones_pct: f.delta ?? '',
+    ingreso_mas_bajo: gold.caja[f.clave]?.min ?? '',
+    ingreso_q1: gold.caja[f.clave]?.q1 ?? '',
+    ingreso_mediana: gold.caja[f.clave]?.med ?? '',
+    ingreso_q3: gold.caja[f.clave]?.q3 ?? '',
+    ingreso_mas_alto: gold.caja[f.clave]?.max ?? '',
+    ingresantes_con_puntaje: gold.caja[f.clave]?.n ?? '',
+    ocupacion_vacantes_pct: gold.vacantes[f.clave]?.[0] ?? '',
+    ocupacion_estado: gold.vacantes[f.clave]?.[1] ?? '',
+    ...Object.fromEntries(
+      MODALIDADES.map((m, i) => [`ingresantes_${m}`, gold.porModalidad[f.clave]?.[i] ?? 0])
+    )
+  }));
+}

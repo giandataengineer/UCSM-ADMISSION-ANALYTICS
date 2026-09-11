@@ -5,7 +5,7 @@ Lee la capa Gold (agregados) y, solo para la caja de cuartiles, la capa Silver
 (puntajes individuales ya seudonimizados). Escribe un unico JSON en
 tablero/src/data/gold.json; el navegador no toca ningun CSV.
 """
-import csv, json, os, re
+import csv, json, os, re, unicodedata
 from collections import defaultdict
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,6 +50,17 @@ def num(v, entero=False):
         return int(float(v)) if entero else round(float(v), 2)
     except ValueError:
         return None
+
+
+def clave_carrera(nombre):
+    """Normaliza el nombre para cruzar tablas.
+
+    admision_por_carrera.csv escribe MAYUSCULAS sin tilde y ocupacion_vacantes.csv
+    Capitalizado con tilde. Sin esto el cruce no encuentra nada.
+    """
+    t = unicodedata.normalize("NFKD", nombre or "")
+    t = "".join(c for c in t if not unicodedata.combining(c))
+    return " ".join(t.upper().split())
 
 
 def leer(nombre):
@@ -156,12 +167,21 @@ for clave, vals in puntajes.items():
         "puntos": puntos,
     }
 
+carreras_norm = {clave_carrera(c): c for c in carreras}
 vacantes = {}
+vacantes_sin_cruce = []
 with open(os.path.join(GOLD, "ocupacion_vacantes.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         v = num(r["ocupacion"])
-        if v is not None:
-            vacantes[f'{r["ciclo"]}|{r["carrera"]}'] = [v, r["estado"]]
+        if v is None:
+            continue
+        oficial = carreras_norm.get(clave_carrera(r["carrera"]))
+        if oficial is None:
+            # El cuadro de vacantes trae nombres truncados ("Medicina Veterinaria y").
+            # No se adivina a que carrera corresponden: se reportan y se dejan fuera.
+            vacantes_sin_cruce.append(f'{r["ciclo"]}|{r["carrera"]}')
+            continue
+        vacantes[f'{r["ciclo"]}|{oficial}'] = [v, r["estado"]]
 
 payload = {
     "ciclos": ciclos,
@@ -187,5 +207,7 @@ print(f"porCarrera  : {len(porCarrera)} filas")
 print(f"modalidades : {len(porModalidad)} combinaciones")
 print(f"distrib     : {len(distribOut)} combinaciones")
 print(f"caja        : {len(caja)} combinaciones")
-print(f"vacantes    : {len(vacantes)} combinaciones")
+print(f"vacantes    : {len(vacantes)} cruzadas, {len(vacantes_sin_cruce)} sin cruce")
+for x in vacantes_sin_cruce:
+    print(f"  sin cruce : {x}")
 print(f"bytes       : {os.path.getsize(SALIDA):,}")

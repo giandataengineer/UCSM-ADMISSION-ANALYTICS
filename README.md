@@ -1,9 +1,28 @@
-# Admisión UCSM en Datos
+<h1>Admisión UCSM en Datos</h1>
 
-Extracción y análisis de los resultados de admisión de la Universidad Católica de
-Santa María, publicados como PDFs por la Dirección de Admisión.
+**Siete ciclos de admisión de la Universidad Católica de Santa María, reconstruidos
+desde 151 PDFs oficiales, verificados página a página y publicados como un tablero
+que abre sin servidor.**
 
-Estado: **pipeline completo y auditado**, 14 etapas, cuatro suites de verificación en verde.
+`2021 → 2027` · `71 627 filas extraídas` · `47 carreras` · `4 974 / 4 974 páginas contrastadas` · `0 fallas de auditoría` · `9 ADR`
+
+|  |  |
+|---|---|
+| **Entra** | 151 PDFs de resultados y 30 documentos normativos. Dos generadores distintos, ocho esquemas de tabla, nombres de archivo que cambian de convención a mitad de la serie. |
+| **Sale** | Seis CSV agregados y un tablero de dos hojas, interactivo, estático, sin backend ni cuenta externa. |
+| **Se sostiene en** | Cuatro suites de verificación. Un segundo método de conteo, escrito aparte del parser, coincide con él en el 100.00 % de las páginas. |
+
+![Hoja principal del tablero: indicadores, rango de puntaje de ingreso por carrera y tabla de detalle](docs/img/tablero-home.png)
+
+### Lo que este conjunto de datos permite responder
+
+- **Cuánto creció o cayó la demanda de cada carrera**, ciclo a ciclo, sin mezclar años.
+- **Con qué puntaje se entra realmente** a cada programa, separando a quien ingresó del resto.
+- **Por qué vía entra la gente**: examen ordinario, centro preuniversitario, a distancia, alto rendimiento, beca.
+- **Qué tan cerca del corte se quedaron** los que no entraron.
+- **Qué no se puede responder y por qué**, que en esta fuente es la mitad del trabajo.
+
+Estado: **pipeline completo y auditado**, 15 etapas, cuatro suites de verificación en verde.
 
 ## Estructura
 
@@ -23,6 +42,7 @@ ExtraccionPDF/
   12_Auditoria.py                integridad del conjunto: cadena, pérdidas, privacidad
   13_PruebasCalidad.py           coherencia entre capas derivadas
   14_ContrasteIndependiente.py   segundo método de conteo, página a página
+  15_PayloadTablero.py           serializa Gold + cuartiles en un JSON único
   data/
     manifest.csv                 153 filas: una por PDF de resultados descubierto
     auditoria.csv                151 filas: contenido real de cada PDF
@@ -34,7 +54,12 @@ ExtraccionPDF/
     requisitos/<ciclo>/          instructivos de ingresantes por proceso
   data_extraida/                 71 627 filas por coordenadas, una carpeta por ciclo
   data_normalizada/              69 652 filas normalizadas + data_normalizada/gold/
-docs/tablero.html                tablero interactivo sobre la capa Gold
+tablero/                         aplicación React del tablero
+  src/lib/data.js                selectores: KPI, series, áreas, cuartiles
+  src/components/charts.jsx      los siete gráficos, en SVG propio
+  src/App.jsx                    las dos hojas y las pestañas
+  src/data/gold.json             payload que genera la etapa 15
+docs/tablero.html                versión previa en un solo archivo HTML
 docs/INVENTARIO.md               tabla detallada de los 151 PDFs
 docs/ADR-001-paralelismo.md      por qué no se usa PySpark
 docs/ADR-002-ventana-temporal.md por qué el corpus arranca en 2021
@@ -56,6 +81,7 @@ python ExtraccionPDF/11_Validacion.py              # 10/10
 python ExtraccionPDF/13_PruebasCalidad.py          # 10/10
 python ExtraccionPDF/14_ContrasteIndependiente.py  # 4 974/4 974 páginas
 python ExtraccionPDF/12_Auditoria.py               # 27 conformes, 0 fallas
+python ExtraccionPDF/15_PayloadTablero.py          # regenera el payload del tablero
 ```
 
 Los PDFs no están versionados. Se reconstruyen con el primer script. `.env` necesita
@@ -167,7 +193,7 @@ detalle está en `docs/ADR-002-ventana-temporal.md`.
 
 ## Procesamiento
 
-Catorce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
+Quince etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 
 | Etapa | Script | Salida |
 |---|---|---|
@@ -185,6 +211,7 @@ Catorce etapas, todas reproducibles. Los PDFs no se versionan: se reconstruyen.
 | Auditoría integral | `12_Auditoria.py` | cadena, pérdidas, privacidad |
 | Calidad entre capas | `13_PruebasCalidad.py` | 10 pruebas de coherencia Silver ↔ Gold |
 | Contraste independiente | `14_ContrasteIndependiente.py` | segundo método, página a página |
+| Payload del tablero | `15_PayloadTablero.py` | un JSON con agregados y cuartiles |
 
 ### Verificación
 
@@ -248,13 +275,75 @@ del conteo de admisiones sin salir del conjunto de datos.
 
 ## Tablero
 
-`docs/tablero.html` es un tablero interactivo sobre los seis CSV de
-`data_normalizada/gold/`: demanda por carrera, evolución de la nota de corte,
-vías de ingreso, perfil de puntajes y la tabla de cobertura por ciclo. Es un
-archivo estático, sin dependencias ni cuenta externa; se abre directo en el
-navegador y solo lee los agregados, nunca `postulaciones.csv`. Los datos que
-trae son una fotografía del último `10_Agregados.py`: se regenera copiando el
-archivo de nuevo si la capa Gold cambia.
+`tablero/` es una aplicación React que lee un único JSON generado por la etapa 15.
+No hay backend, ni base de datos, ni consultas en vivo: el navegador carga los
+agregados y todo el filtrado ocurre en el cliente.
+
+```bash
+cd tablero
+npm install
+npm run dev        # desarrollo
+npm run build      # estático, listo para publicar en cualquier hosting
+```
+
+**Dos hojas, con pestañas al pie como un dashboard publicado.** Todo cabe en una
+pantalla: nada desplaza la página, y solo la tabla de detalle tiene scroll propio.
+
+| Hoja | Qué muestra |
+|---|---|
+| **HOME** | Tres indicadores con su variación interanual, barra de filtros, rango de puntaje de ingreso por carrera, postulaciones por carrera y tabla de detalle con ocupación de vacantes. |
+| **ANÁLISIS POR CARRERA** | Pendiente de postulaciones entre dos ciclos, diez carreras más demandadas, reparto por área y caja de cuartiles del puntaje de los ingresantes. |
+
+Los cinco paneles están enlazados: un clic en cualquier gráfico, en la tabla o en
+el anillo de áreas filtra a los demás, y el filtro activo se puede quitar desde la
+barra superior. Lo que está en pantalla se descarga en CSV.
+
+![Hoja de análisis por carrera: pendiente entre ciclos, carreras más demandadas, reparto por área y cajas de cuartiles](docs/img/tablero-analisis.png)
+
+Los gráficos son SVG escrito a mano, sin librería de charts, para que el color, la
+escala y las etiquetas salgan de los mismos tokens que el resto de la interfaz.
+Cada hoja tiene enlace propio: `#home` y `#analisis`.
+
+### El rango de puntaje describe a los ingresantes
+
+Un detalle que parece cosmético y no lo es. El mínimo sobre **todos** los
+postulantes de Medicina Humana en 2025 es `1.11`, y está en el PDF: alguien rindió
+el examen y sacó eso. Pero graficarlo junto al máximo sugiere que se entró con ese
+puntaje, y es falso.
+
+| Medicina Humana | Todos los postulantes | Solo ingresantes |
+|---|---|---|
+| 2024 | 1.07 → 280.8 | **132 → 280.8** |
+| 2025 | 1.11 → 243.3 | **71 → 243.3** |
+
+El tablero grafica la segunda columna, que es la que responde la pregunta que la
+gente trae. La distribución completa sigue disponible en la capa Gold.
+
+### Identidad visual
+
+Todo el color del tablero sale de tres valores muestreados del logo oficial de la
+universidad, y nada mas:
+
+| Token | Hex | Dónde manda |
+|---|---|---|
+| Verde hondo | `#01422E` | columna institucional, marcas de máximo, texto principal |
+| Verde vivo | `#0ED85E` | escudo, acentos, barras de avance |
+| Hueso | `#F7F9EC` | fondo del lienzo y relleno de los medidores |
+
+Los demás tonos del tablero son mezclas de esos tres, declaradas como tokens en
+`src/index.css`. No entra ningún color ajeno a la marca: por eso una caída
+interanual no se pinta de rojo, sino que la dirección la carga la flecha y la
+fuerza la carga el verde.
+
+Tipografía: Instrument Serif en los títulos, Bricolage Grotesque en las cifras y
+rótulos, Instrument Sans en el texto corrido, IBM Plex Mono en las columnas de
+números.
+
+### Privacidad del payload
+
+El JSON se arma desde Gold y, solo para los cuartiles, desde la capa Silver. De
+ahí salen agregados y 40 puntos muestreados por cuantiles: ningún identificador,
+ni siquiera el seudónimo, cruza al cliente.
 
 ## Decisiones de arquitectura
 
