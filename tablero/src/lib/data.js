@@ -42,10 +42,14 @@ export function filasDe(ciclo, area = null) {
 export function serieCiclos(area = null) {
   return CICLOS.map(c => {
     const fs = filasDe(c, area);
+    const conf = fs.filter(f => f.fiable);
+    const postF = conf.reduce((s, f) => s + f.postulaciones, 0);
+    const ingF = conf.reduce((s, f) => s + f.ingresantes, 0);
     return {
       ciclo: c,
       postulaciones: fs.reduce((s, f) => s + f.postulaciones, 0),
-      ingresantes: fs.reduce((s, f) => s + f.ingresantes, 0)
+      ingresantes: fs.reduce((s, f) => s + f.ingresantes, 0),
+      tasa: postF ? +((ingF / postF) * 100).toFixed(2) : null
     };
   });
 }

@@ -37,13 +37,14 @@
 
   --color-papel: #ffffff;
 
-  /* Tipografia editorial: nada de sans de sistema */
-  --font-titulo: "Fraunces", "Iowan Old Style", "Palatino", Georgia, serif;
-  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
-  --font-body: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  /* Un solo sistema geometrico; el contraste lo dan el peso y el tamano */
+  --font-titulo: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Manrope", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   /* La sigla del escudo va en la grotesca del logo, no en la serif */
   --font-marca: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-firma: "Bricolage Grotesque", "Archivo", "Helvetica Neue", Arial, sans-serif;
 }
 
 html, body, #root { height: 100%; }
@@ -59,8 +60,7 @@ body {
 
 .tab-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
-/* Fraunces es variable: se fija el eje optico para que el texto chico no engorde */
-.fr-suave { font-variation-settings: "SOFT" 20, "WONK" 1; }
+
 
 .scroll-fino::-webkit-scrollbar { width: 9px; height: 9px; }
 .scroll-fino::-webkit-scrollbar-thumb { background: var(--color-piedra-300); border-radius: 99px; }

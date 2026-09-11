@@ -6,7 +6,7 @@ import {
   Piruletas, BarrasCabeza, TablaDetalle, Pendiente, TopCarreras, Anillo, Cajas, COLOR_AREA
 } from './components/charts';
 import {
-  CICLOS, AREAS, kpis, filasDe, porArea, pendiente, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe, baseCompleta
+  CICLOS, AREAS, kpis, filasDe, porArea, serieCiclos, pendiente, cajasDe, cajaDe, vacantesDe, nombreArea, escalaDe, baseCompleta
 } from './lib/data';
 import './App.css';
 
@@ -122,7 +122,47 @@ function Variacion({ valor, invertir = false }) {
   return <span className={`kpi-var ${bueno ? 'alza' : 'baja'}`}>{sube ? '▲' : '▼'}{Math.abs(valor).toFixed(2)}%</span>;
 }
 
-function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decimales = 0, alcance, retraso = 0 }) {
+/* Serie de los siete ciclos, compacta, dentro del propio indicador. */
+function Chispa({ serie, campo, ciclo }) {
+  const datos = serie.filter(d => d[campo] != null);
+  if (datos.length < 2) return null;
+  const vals = datos.map(d => d[campo]);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const ancho = 120, alto = 20;
+  const x = i => (i / (datos.length - 1)) * (ancho - 6) + 3;
+  const y = v => alto - 3 - ((v - lo) / (hi - lo || 1)) * (alto - 7);
+  const linea = datos.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(d[campo]).toFixed(1)}`).join(' ');
+  const iAct = datos.findIndex(d => d.ciclo === ciclo);
+
+  return (
+    <svg viewBox={`0 0 ${ancho} ${alto}`} className="chispa" aria-hidden="true">
+      <defs>
+        <linearGradient id={`chispa-${campo}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0ed85e" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#0ed85e" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${linea}L${x(datos.length - 1)} ${alto}L${x(0)} ${alto}Z`} fill={`url(#chispa-${campo})`} />
+      <motion.path
+        d={linea} fill="none" stroke="var(--color-v400)" strokeWidth="1.7"
+        strokeLinecap="round" strokeLinejoin="round"
+        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+        transition={{ duration: 0.85, ease: 'easeOut' }}
+      />
+      {iAct >= 0 && (
+        <motion.circle
+          cx={x(iAct)} cy={y(datos[iAct][campo])} r="2.9"
+          fill="var(--color-hondo)" stroke="var(--color-papel)" strokeWidth="1.5"
+          initial={{ scale: 0 }} animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 14, delay: 0.55 }}
+          style={{ transformOrigin: `${x(iAct)}px ${y(datos[iAct][campo])}px` }}
+        />
+      )}
+    </svg>
+  );
+}
+
+function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decimales = 0, alcance, chispa, retraso = 0 }) {
   return (
     <motion.article className="kpi" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: retraso }}>
       <span className="kpi-medalla" aria-hidden="true">
@@ -134,6 +174,7 @@ function TarjetaKpi({ icono, rotulo, ciclo, valor, sufijo = '', variacion, decim
         {valor != null && sufijo}
       </p>
       <Variacion valor={variacion} />
+      {chispa}
       {alcance && <p className="kpi-alcance">{alcance}</p>}
     </motion.article>
   );
@@ -155,9 +196,10 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
   const areasRes = useMemo(() => porArea(ciclo), [ciclo]);
   const totalPost = areasRes.reduce((s, a) => s + a.postulaciones, 0);
 
+  const serie = useMemo(() => serieCiclos(area), [area]);
   const conPuntaje = filas.filter(f => f.entroMin != null).slice(0, 8)
     .map(f => ({ carrera: f.carrera, min: f.entroMin, max: f.entroMax, n: f.ingCaja }));
-  const topPost = filas.slice(0, 6).map(f => ({ carrera: f.carrera, postulaciones: f.postulaciones }));
+  const topPost = filas.slice(0, 7).map(f => ({ carrera: f.carrera, postulaciones: f.postulaciones }));
   const maxPost = Math.max(...filas.map(f => f.postulaciones), 1);
 
   return (
@@ -205,9 +247,12 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
 
       <div className="tablero">
         <div className="kpis">
-          <TarjetaKpi icono="postulaciones" rotulo="Postulaciones" ciclo={ciclo} valor={k.postulaciones} variacion={k.deltaPost} />
-          <TarjetaKpi icono="ingresantes" rotulo="Ingresantes" ciclo={ciclo} valor={k.ingresantes} variacion={k.deltaIng} retraso={0.05} />
+          <TarjetaKpi icono="postulaciones" rotulo="Postulaciones" ciclo={ciclo} valor={k.postulaciones} variacion={k.deltaPost}
+            chispa={<Chispa serie={serie} campo="postulaciones" ciclo={ciclo} />} />
+          <TarjetaKpi icono="ingresantes" rotulo="Ingresantes" ciclo={ciclo} valor={k.ingresantes} variacion={k.deltaIng} retraso={0.05}
+            chispa={<Chispa serie={serie} campo="ingresantes" ciclo={ciclo} />} />
           <TarjetaKpi icono="tasa" rotulo="% Ingreso" ciclo={ciclo} valor={k.tasa} sufijo="%" decimales={2} variacion={k.deltaTasa} retraso={0.1}
+            chispa={<Chispa serie={serie} campo="tasa" ciclo={ciclo} />}
             alcance={k.tasa == null ? 'las actas de este ciclo no publican el total de postulantes' : `sobre las ${k.carrerasFiables} de ${k.carreras} carreras con denominador fiable`} />
         </div>
 
@@ -215,7 +260,7 @@ function Home({ ciclo, setCiclo, area, setArea, carrera, setCarrera, irAnalisis 
           <label className="filtro">
             <span>Carrera:</span>
             <select value={carrera ?? ''} onChange={e => setCarrera(e.target.value || null)}>
-              <option value="">Valores multiples</option>
+              <option value="">Todas</option>
               {todas.map(f => <option key={f.carrera} value={f.carrera}>{f.carrera}</option>)}
             </select>
           </label>

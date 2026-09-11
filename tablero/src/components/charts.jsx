@@ -65,13 +65,39 @@ export function Piruletas({ datos, ciclo, activa, onCarrera }) {
               <text x={cx} y="16" textAnchor="middle" className="piru-carrera">{corta(d.carrera, 16)}</text>
               <text x={cx} y="30" textAnchor="middle" className="piru-anio">{ciclo}</text>
 
-              <rect x={xMin - 7} y={y(d.min)} width="14" height={base - y(d.min)} fill={GRIS} />
-              <circle cx={xMin} cy={y(d.min)} r={r} fill={GRIS} />
-              <text x={xMin} y={y(d.min) - r - 8} textAnchor="middle" className="piru-valor">{dec(d.min)}</text>
+              <motion.rect
+                x={xMin - 7} width="14" fill={GRIS}
+                initial={{ y: base, height: 0 }}
+                animate={{ y: y(d.min), height: base - y(d.min) }}
+                transition={{ duration: 0.6, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              />
+              <motion.circle
+                cx={xMin} cy={y(d.min)} fill={GRIS}
+                initial={{ r: 0 }} animate={{ r }}
+                transition={{ type: 'spring', stiffness: 190, damping: 14, delay: 0.28 + i * 0.05 }}
+              />
+              <motion.text
+                x={xMin} y={y(d.min) - r - 9} textAnchor="middle" className="piru-valor"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.42 + i * 0.05 }}
+              >{dec(d.min)}</motion.text>
 
-              <rect x={xMax - 7} y={y(d.max)} width="14" height={base - y(d.max)} fill={VERDE} />
-              <circle cx={xMax} cy={y(d.max)} r={r} fill={VERDE} />
-              <text x={xMax} y={y(d.max) - r - 8} textAnchor="middle" className="piru-valor">{dec(d.max)}</text>
+              <motion.rect
+                x={xMax - 7} width="14" fill={VERDE}
+                initial={{ y: base, height: 0 }}
+                animate={{ y: y(d.max), height: base - y(d.max) }}
+                transition={{ duration: 0.6, delay: 0.08 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              />
+              <motion.circle
+                cx={xMax} cy={y(d.max)} fill={VERDE}
+                initial={{ r: 0 }} animate={{ r }}
+                transition={{ type: 'spring', stiffness: 190, damping: 14, delay: 0.34 + i * 0.05 }}
+              />
+              <motion.text
+                x={xMax} y={y(d.max) - r - 9} textAnchor="middle" className="piru-valor"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.48 + i * 0.05 }}
+              >{dec(d.max)}</motion.text>
             </g>
           );
         })}
@@ -147,10 +173,13 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
         </thead>
         <tbody>
           {filas.map((f, i) => (
-            <tr
+            <motion.tr
               key={f.carrera}
               className={`fila-clicable ${activa === f.carrera ? 'fila-activa' : ''}`}
               onClick={() => onCarrera?.(activa === f.carrera ? null : f.carrera)}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, delay: Math.min(i, 12) * 0.025 }}
             >
               <td className="col-anio tab-num">{i === 0 ? ciclo : ''}</td>
               <td className="col-area">
@@ -182,7 +211,7 @@ export function TablaDetalle({ filas, ciclo, maxPost, activa, onCarrera }) {
                   </span>
                 </span>
               </td>
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>
@@ -300,7 +329,7 @@ export function Anillo({ datos, total, campo = 'postulaciones', activa, onArea }
 
   return (
     <svg viewBox="0 0 480 420" className="grafico-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Distribucion por area">
-      {arcos.map(a => (
+      {arcos.map((a, i) => (
         <g
           key={a.cod}
           className="grupo-clicable"
@@ -309,16 +338,20 @@ export function Anillo({ datos, total, campo = 'postulaciones', activa, onArea }
           onClick={() => onArea?.(activa === a.cod ? null : a.cod)}
         >
           <title>{`${a.cod}: ${a.nombre} — ${mil(a[campo])} postulaciones`}</title>
-          <path
+          <motion.path
             d={a.d}
             fill={COLOR_AREA[a.cod]}
+            initial={{ opacity: 0, scale: 0.82 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: `${cx}px ${cy}px` }}
             stroke={activa === a.cod ? '#01422e' : 'transparent'}
             strokeWidth="2.5"
-            opacity={(hov && hov !== a.cod) || (activa && activa !== a.cod) ? 0.38 : 1}
-            style={{ transition: 'opacity .18s' }}
           />
+          <g opacity={(hov && hov !== a.cod) || (activa && activa !== a.cod) ? 0.38 : 1} style={{ transition: 'opacity .18s' }}>
           <text x={a.lx} y={a.ly} textAnchor={a.anclaje} className="anillo-rot">Area {a.cod}</text>
           <text x={a.lx} y={a.ly + 17} textAnchor={a.anclaje} className="anillo-pct tab-num">{a.pct.toFixed(2)}%</text>
+          </g>
         </g>
       ))}
       <text x={cx} y={cy + 2} textAnchor="middle" className="anillo-total tab-num">{mil(total)}</text>
