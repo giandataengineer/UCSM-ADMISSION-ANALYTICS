@@ -21,3 +21,8 @@ ExtraccionPDF/data_normalizada/postulaciones.csv
 # Tablero web: dependencias y build
 tablero/node_modules/
 tablero/dist/
+
+# Configuracion local del entorno de trabajo
+.vscode/
+.idea/
+*.local.json
