@@ -30,20 +30,20 @@ function useGlobo() {
 /* ============ Puntajes maximos y minimos (piruletas verticales) ============ */
 export function Piruletas({ datos, ciclo, activa, onCarrera }) {
   const [enlazar, Globo] = useGlobo();
-  const ancho = 1180, alto = 340;
-  const base = alto - 22, techo = 96;
+  const ancho = 1180, alto = 300;
+  const base = alto - 20, techo = 86;
   const max = Math.max(...datos.map(d => d.max), 1);
   const grupo = (ancho - 40) / Math.max(datos.length, 1);
   const y = v => base - (v / max) * (base - techo);
-  const r = Math.min(23, grupo / 5.4);
+  const r = Math.min(31, grupo / 4.2);
 
   return (
     <div className="lienzo-relativo">
       <svg viewBox={`0 0 ${ancho} ${alto}`} className="grafico-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Puntajes maximos y minimos por carrera">
         {datos.map((d, i) => {
           const cx = 20 + grupo * i + grupo / 2;
-          const xMin = cx - grupo * 0.17;
-          const xMax = cx + grupo * 0.17;
+          const xMin = cx - grupo * 0.19;
+          const xMax = cx + grupo * 0.19;
             const apagada = activa && activa !== d.carrera;
           return (
             <g
@@ -62,14 +62,14 @@ export function Piruletas({ datos, ciclo, activa, onCarrera }) {
               )}
             >
               <rect x={cx - grupo / 2} y="0" width={grupo} height={alto} fill="transparent" />
-              <text x={cx} y="16" textAnchor="middle" className="piru-carrera">{corta(d.carrera, 22)}</text>
+              <text x={cx} y="16" textAnchor="middle" className="piru-carrera">{corta(d.carrera, 16)}</text>
               <text x={cx} y="30" textAnchor="middle" className="piru-anio">{ciclo}</text>
 
-              <rect x={xMin - 5} y={y(d.min)} width="10" height={base - y(d.min)} fill={GRIS} />
+              <rect x={xMin - 7} y={y(d.min)} width="14" height={base - y(d.min)} fill={GRIS} />
               <circle cx={xMin} cy={y(d.min)} r={r} fill={GRIS} />
               <text x={xMin} y={y(d.min) - r - 8} textAnchor="middle" className="piru-valor">{dec(d.min)}</text>
 
-              <rect x={xMax - 5} y={y(d.max)} width="10" height={base - y(d.max)} fill={VERDE} />
+              <rect x={xMax - 7} y={y(d.max)} width="14" height={base - y(d.max)} fill={VERDE} />
               <circle cx={xMax} cy={y(d.max)} r={r} fill={VERDE} />
               <text x={xMax} y={y(d.max) - r - 8} textAnchor="middle" className="piru-valor">{dec(d.max)}</text>
             </g>

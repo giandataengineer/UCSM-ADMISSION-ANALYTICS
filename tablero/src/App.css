@@ -10,7 +10,7 @@
   flex-direction: column;
   overflow: hidden;
   background:
-    radial-gradient(125% 80% at 100% 0%, #ffffff 0%, transparent 56%),
+    radial-gradient(120% 76% at 100% 0%, #ffffff 0%, transparent 58%),
     var(--color-hueso);
 }
 .lienzo { flex: 1; min-height: 0; padding: 12px 14px 4px; }
@@ -34,13 +34,13 @@
 .pestana {
   border: 1px solid var(--color-piedra-300); border-bottom: 0; border-left: 0;
   background: var(--color-piedra-300);
-  color: var(--color-piedra-700);
+  color: var(--color-hondo);
   font: inherit; font-size: 11px; font-weight: 600; letter-spacing: .06em;
   padding: 0 20px; cursor: pointer;
   transition: background .15s ease, color .15s ease;
 }
 .pestana:first-of-type { border-left: 1px solid var(--color-piedra-300); }
-.pestana:hover { background: var(--color-menta-100); color: var(--color-v700); }
+.pestana:hover { background: var(--color-menta-200); color: var(--color-hondo); }
 .pestana-activa {
   background: var(--color-papel);
   color: var(--color-hondo);
@@ -71,7 +71,8 @@
 .lateral {
   position: relative;
   height: 100%; min-height: 0;
-  background: linear-gradient(168deg, #056f3c 0%, #02503a 44%, #01422e 100%);
+  background: linear-gradient(168deg, #02503a 0%, #01422e 52%, #012c1f 100%);
+  border: 1px solid rgba(14, 216, 94, .22);
   border-radius: 28px;
   padding: clamp(14px, 2vh, 24px) 18px clamp(12px, 1.8vh, 20px);
   color: var(--color-hueso);
@@ -91,17 +92,18 @@
 .lateral-titulo {
   margin: 0; text-align: center;
   font-family: var(--font-titulo);
-  font-size: clamp(22px, 3vh, 33px);
-  font-weight: 400; letter-spacing: .07em; text-transform: uppercase;
+  font-size: clamp(20px, 2.7vh, 30px);
+  font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   line-height: 1;
+  color: #ffffff;
 }
 .lateral-subtitulo {
   position: relative;
   margin: 3px 0 4px; padding-bottom: 11px; text-align: center;
   font-family: var(--font-display);
   font-size: clamp(8.5px, 1.05vh, 10.5px);
-  font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--color-menta-300);
+  font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: #ffffff;
 }
 .lateral-subtitulo::after {
   content: '';
@@ -126,10 +128,10 @@
   filter: drop-shadow(0 8px 22px rgba(14, 216, 94, .35));
 }
 .lateral-sigla {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(22px, 3.4vh, 34px);
-  font-weight: 800; letter-spacing: .14em; line-height: 1;
+  margin: 3px 0 0;
+  font-family: var(--font-marca);
+  font-size: clamp(23px, 3.5vh, 35px);
+  font-weight: 600; letter-spacing: .05em; line-height: 1;
   color: var(--color-vivo);
 }
 
@@ -208,13 +210,25 @@
 .lateral-linkedin {
   flex: none;
   display: flex; align-items: center; gap: 11px;
-  color: var(--color-hueso); text-decoration: none;
-  font-family: var(--font-display);
-  font-size: clamp(11px, 1.4vh, 14px); font-weight: 700; letter-spacing: .04em; line-height: 1.15;
-  transition: color .15s ease;
+  padding: clamp(7px, 1vh, 11px) 12px;
+  border: 1px solid rgba(14, 216, 94, .4);
+  border-radius: 10px;
+  background: rgba(1, 66, 46, .55);
+  color: #ffffff; text-decoration: none;
+  font-family: var(--font-titulo);
+  font-size: clamp(11px, 1.4vh, 14px); font-weight: 600; letter-spacing: .03em; line-height: 1.15;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.lateral-linkedin svg { width: clamp(24px, 3.4vh, 33px); height: clamp(24px, 3.4vh, 33px); flex: none; }
-.lateral-linkedin:hover { color: var(--color-vivo); }
+.lateral-linkedin svg {
+  width: clamp(26px, 3.4vh, 34px); height: clamp(26px, 3.4vh, 34px); flex: none;
+  padding: 5px; border-radius: 5px;
+  background: var(--color-vivo); color: var(--color-hondo);
+}
+.lateral-linkedin:hover {
+  background: rgba(14, 216, 94, .16);
+  border-color: var(--color-vivo);
+  transform: translateY(-1px);
+}
 
 /* ============================================================
    Columna del tablero
@@ -222,7 +236,7 @@
 .tablero {
   height: 100%; min-height: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1.05fr) minmax(0, 1.25fr);
+  grid-template-rows: auto auto minmax(0, 1.5fr) minmax(0, 1fr);
   gap: clamp(8px, 1.2vh, 14px);
 }
 
@@ -255,7 +269,7 @@
   margin: 1px 0 0;
   display: flex; align-items: baseline; justify-content: center;
   font-family: var(--font-display);
-  font-size: clamp(26px, 4.2vh, 42px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1;
+  font-size: clamp(26px, 4.2vh, 42px); font-weight: 700; letter-spacing: -.015em; line-height: 1.1;
   color: var(--color-hondo);
 }
 .kpi-nulo { font-family: var(--font-body); font-size: 17px; font-style: italic; color: var(--color-piedra-500); }
@@ -354,7 +368,7 @@
 .tarjeta-cab h2 {
   position: relative; margin: 0; padding-left: 13px;
   font-family: var(--font-titulo);
-  font-size: clamp(15px, 2vh, 20px); font-weight: 400; letter-spacing: .005em;
+  font-size: clamp(14px, 1.85vh, 19px); font-weight: 600; letter-spacing: 0;
   color: var(--color-hondo);
 }
 .tarjeta-cab h2::before {
@@ -387,9 +401,9 @@
 .globo span { display: block; color: var(--color-menta-300); }
 .globo .globo-pista { margin-top: 3px; color: var(--color-vivo); font-size: 10.5px; }
 
-.piru-carrera { font-family: var(--font-display); font-size: 11px; font-weight: 600; fill: var(--color-piedra-700); }
-.piru-anio { font-family: var(--font-mono); font-size: 10px; fill: var(--color-piedra-500); }
-.piru-valor { font-family: var(--font-display); font-size: 12.5px; font-weight: 700; fill: var(--color-hondo); }
+.piru-carrera { font-family: var(--font-display); font-size: 11.5px; font-weight: 600; fill: var(--color-piedra-700); }
+.piru-anio { font-family: var(--font-mono); font-size: 11px; fill: var(--color-piedra-500); }
+.piru-valor { font-family: var(--font-display); font-size: 15px; font-weight: 700; fill: var(--color-hondo); }
 
 .cabeza { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
 .cabeza-fila {
@@ -401,19 +415,30 @@
 .cabeza-fila.apagado { opacity: .32; }
 .cabeza-nombre { font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-piedra-500); line-height: 1.25; }
 .cabeza-activa .cabeza-nombre { color: var(--color-v600); font-weight: 700; }
-.cabeza-pista { display: block; height: clamp(16px, 2.3vh, 22px); }
+.cabeza-pista {
+  display: flex; align-items: center;
+  height: clamp(24px, 3.4vh, 32px);
+}
 .cabeza-barra {
   position: relative; display: flex; align-items: center;
-  height: 100%; background: var(--color-hondo);
-  border-radius: 3px; min-width: 42px;
+  height: clamp(16px, 2.3vh, 22px);
+  background: var(--color-hondo);
+  border-radius: 3px 0 0 3px;
+  min-width: 46px;
 }
 .cabeza-fila:hover .cabeza-barra, .cabeza-fila:hover .cabeza-punto { background: var(--color-v600); }
-.cabeza-valor { padding-left: 8px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--color-hueso); }
+.cabeza-valor {
+  padding-left: 9px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--color-hueso);
+}
+/* Cabeza redonda, mas alta que la barra, como en el modelo */
 .cabeza-punto {
-  position: absolute; right: calc(clamp(16px, 2.3vh, 22px) / -2); top: 50%;
-  width: clamp(16px, 2.3vh, 22px); height: clamp(16px, 2.3vh, 22px);
-  transform: translateY(-50%);
-  border-radius: 50%; background: var(--color-hondo);
+  position: absolute; top: 50%; right: 0;
+  width: clamp(24px, 3.4vh, 32px); height: clamp(24px, 3.4vh, 32px);
+  transform: translate(50%, -50%);
+  border-radius: 50%;
+  background: var(--color-hondo);
 }
 
 .top-cabecera { font-family: var(--font-display); font-size: 11px; font-weight: 600; fill: var(--color-piedra-700); }
@@ -524,7 +549,7 @@
   margin: 0; padding: 0 6px 2px;
   font-size: clamp(8px, .95vh, 9.5px);
   line-height: 1.45; letter-spacing: .004em;
-  color: var(--color-piedra-500);
+  color: var(--color-piedra-600);
   text-align: justify; text-wrap: pretty;
 }
 
@@ -552,7 +577,7 @@
   border: 0; border-radius: 50%;
   background: var(--color-hondo); color: var(--color-vivo);
   cursor: pointer;
-  box-shadow: 0 0 0 5px rgba(247, 249, 236, .92), 0 12px 24px -12px rgba(1, 66, 46, .95);
+  box-shadow: 0 0 0 5px rgba(247, 249, 236, .95), 0 12px 24px -12px rgba(1, 66, 46, .9);
   transition: transform .18s ease, background .18s ease;
 }
 .boton-volver:hover { transform: rotate(-18deg); background: var(--color-v600); }
