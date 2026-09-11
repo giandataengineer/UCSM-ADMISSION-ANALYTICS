@@ -1,0 +1,347 @@
+// ============================================================
+// MODELO ENTIDAD-RELACIÓN COMPLETO
+// Admisión UCSM en Datos — 7 ciclos, 2021 a 2027
+// Fuente: ExtraccionPDF/data/ (procedencia), data_normalizada/ (Silver),
+//         data_normalizada/gold/ (Gold). 151 PDFs, 69 652 filas, 47 carreras.
+// dbdiagram.io
+// ============================================================
+//
+// Tres decisiones sostienen este modelo y están codificadas en el esquema,
+// no dejadas a la aplicación:
+//
+//   1. La palabra APTO cambia de significado según la clase de documento
+//      (ADR-009). Se resuelve con una tabla puente, no con un IF en el código.
+//   2. Los puntajes anteriores y posteriores a 2024 no son comparables
+//      (ADR-004). La escala vive en el ciclo, para que una consulta que los
+//      mezcle se vea mal a simple vista.
+//   3. Desde 2026 la fuente publica solo a quien ingresa, así que la tasa de
+//      ingreso no tiene denominador. Es un atributo del ciclo, no un NULL
+//      disperso por las filas.
+//
+// El postulante nunca guarda datos personales: solo un seudónimo HMAC.
+// ============================================================
+
+
+// ============================================================
+// CAPA DE PROCEDENCIA — de qué archivo salió cada fila
+// ============================================================
+
+Table documento {
+  id_documento   integer  [pk, increment]
+  archivo        varchar  [not null, unique, note: 'EG2024I.pdf']
+  sha256         char(64) [not null, unique, note: 'huella del binario: hace la ingesta idempotente']
+  bytes          integer  [not null]
+  paginas        integer  [not null]
+  clase          varchar  [not null, note: 'ACTA_RESULTADOS, LISTA_APTITUD, INSTRUCTIVO, NORMATIVO']
+  familia        varchar  [not null, note: 'SISTEMA_ADMISION u OFIMATICA: define cómo se parsea']
+  origen         varchar  [not null, note: 'WAYBACK_CDX, SONDEO_NOMBRES, NAVEGADOR']
+  estado         varchar  [not null, default: 'DESCARGADO', note: 'DESCARGADO, NO_DISPONIBLE, DUPLICADO']
+  id_proceso     integer  [note: 'NULL en instructivos y normativos, que no publican resultados']
+  descubierto_en datetime [not null, default: `now`]
+
+  Note: 'Un PDF publica como mucho un proceso, pero un proceso puede salir en varios PDFs.'
+}
+
+Table pagina_extraida {
+  id_pagina      integer [pk, increment]
+  id_documento   integer [not null]
+  numero         integer [not null]
+  filas_parser   integer [not null, note: 'contadas por coordenadas de carácter']
+  filas_contraste integer [not null, note: 'contadas por expresiones regulares, método independiente']
+  concuerda      boolean [not null, note: 'GENERATED: filas_parser = filas_contraste']
+
+  indexes {
+    (id_documento, numero) [unique]
+  }
+
+  Note: 'Etapa 14. El contraste cerró en 4 974 de 4 974 páginas de actas.'
+}
+
+
+// ============================================================
+// DIMENSIONES
+// ============================================================
+
+Table ciclo {
+  anio_ingreso            integer [pk, note: 'año de ingreso declarado dentro del PDF, no el año del examen']
+  escala                  varchar [not null, note: 'ANTERIOR hasta 2023, VIGENTE desde 2024. Corte no comparable']
+  publica_no_ingresantes  boolean [not null, note: 'false desde 2026: sin denominador, la tasa no se calcula']
+  esta_abierto            boolean [not null, default: false, note: 'true en 2027: la UCSM sigue publicando actas']
+
+  Note: 'Siete filas. Aísla las dos rupturas de la serie para que ninguna consulta las cruce por accidente.'
+}
+
+Table area {
+  id_area   char(1) [pk, note: 'A a E']
+  nombre    varchar [not null, unique]
+  es_oficial boolean [not null, default: false]
+
+  Note: 'Agrupación editorial por afinidad académica. La UCSM no publica esta clasificación: por eso es_oficial = false.'
+}
+
+Table carrera {
+  id_carrera integer [pk, increment]
+  nombre     varchar [not null, unique, note: 'MAYÚSCULAS sin tilde, forma canónica del catálogo']
+  id_area    integer [not null]
+
+  Note: '47 carreras distintas entre 2021 y 2027. La oferta no es fija.'
+}
+
+// Una carrera no se convoca todos los años: 47 x 7 dan 329 combinaciones
+// posibles y solo existen 244. Esta tabla distingue "no se convocó" de
+// "nadie postuló", que son cosas muy distintas en una serie temporal.
+Table convocatoria {
+  id_carrera   integer [not null]
+  anio_ingreso integer [not null]
+
+  indexes {
+    (id_carrera, anio_ingreso) [pk]
+  }
+}
+
+Table modalidad {
+  id_modalidad  integer [pk, increment]
+  codigo        varchar [not null, unique, note: 'ordinario, precatolica, distancia, rendimiento_superior, beca, traslado, convenio_cci, extraordinario, complementario, lista_aptos, otro']
+  nombre        varchar [not null]
+  es_via_ingreso boolean [not null, default: true, note: 'false en lista_aptos: no admite, solo habilita']
+}
+
+Table proceso {
+  id_proceso            integer [pk, increment]
+  anio_ingreso          integer [not null]
+  id_modalidad          integer [not null]
+  nombre                varchar [not null, note: 'PRIMER EXAMEN ORDINARIO 2024']
+  fecha_examen          date
+  nota_minima_institucional decimal [note: 'mínimo para figurar en el acta, NO la nota de corte (ADR-003)']
+
+  indexes {
+    (anio_ingreso, nombre) [unique]
+  }
+
+  Note: 'Un ciclo reúne entre 6 y 28 procesos, repartidos entre el año anterior y el de inicio de clases.'
+}
+
+
+// ============================================================
+// EL HALLAZGO, CODIFICADO EN EL ESQUEMA
+// ============================================================
+//
+// La UCSM escribe APTO en dos clases de documento. En un acta se opone a
+// NO INGRESO y significa admitido. En una lista previa se opone a NO APTO y
+// solo significa habilitado para rendir. Leerlas igual convertía en
+// ingresantes a 414 personas que nunca dieron el examen.
+//
+// La clave primaria compuesta obliga a decidir el significado sabiendo de
+// qué clase de documento viene la etiqueta. Sin la clase, no hay lectura.
+
+Table condicion {
+  clase_documento varchar [not null, note: 'ACTA_RESULTADOS o LISTA_APTITUD']
+  etiqueta        varchar [not null, note: 'tal como aparece impresa: APTO, NO APTO, INGRESO, NO INGRESO, OBSERVADO...']
+  significado     varchar [not null, note: 'ADMITIDO, RECHAZADO, HABILITADO, NO_HABILITADO, EN_EVALUACION']
+  cuenta_ingreso  boolean [not null, note: 'solo ADMITIDO suma al conteo de ingresantes']
+
+  indexes {
+    (clase_documento, etiqueta) [pk]
+  }
+}
+
+
+// ============================================================
+// HECHOS
+// ============================================================
+
+Table postulante {
+  id_postulante char(16) [pk, note: 'HMAC-SHA256(documento, sal) truncado. La sal vive en .env']
+
+  Note: 'Sin nombre, sin documento, sin correo. La tabla no tiene dónde guardar un dato personal aunque alguien quisiera. El seudónimo permite seguir a la misma persona entre procesos solo hasta 2025, porque desde 2026 la fuente dejó de publicar el código.'
+}
+
+// Grano: una persona, en un proceso, postulando a una carrera.
+// El UNIQUE convierte "nadie postula dos veces a lo mismo en el mismo
+// proceso" en una restricción declarativa en vez de una prueba a posteriori.
+Table postulacion {
+  id_postulacion  integer [pk, increment]
+  id_proceso      integer [not null]
+  id_postulante   integer [not null]
+  id_carrera      integer [not null]
+  id_documento    integer [not null, note: 'de qué PDF salió esta fila: linaje hasta el archivo']
+  orden_merito    integer
+  nota_01         decimal
+  nota_02         decimal
+  puntaje_total   decimal [note: 'en la escala del ciclo, no comparable entre escalas']
+  percentil       decimal
+  clase_documento varchar [not null]
+  etiqueta        varchar [not null]
+
+  indexes {
+    (id_proceso, id_postulante, id_carrera) [unique]
+    (id_carrera, id_proceso)
+    (id_postulante)
+  }
+
+  Note: '69 652 filas. La pareja (clase_documento, etiqueta) apunta a condicion: el significado no se guarda aquí, se resuelve al leer.'
+}
+
+Table via_vacante {
+  id_via integer [pk, increment]
+  nombre varchar [not null, unique, note: 'CEPRE, ORDINARIO, TRASLADO_INTERNO, EXTRAORDINARIO, PRONABEC']
+}
+
+// El cuadro de vacantes llega en formato ancho, una columna por vía. Aquí
+// va normalizado: así una vía nueva es una fila, no una migración.
+Table vacante {
+  id_carrera   integer [not null]
+  anio_ingreso integer [not null]
+  id_via       integer [not null]
+  cantidad     integer [not null, default: 0]
+
+  indexes {
+    (id_carrera, anio_ingreso, id_via) [pk]
+  }
+}
+
+
+// ============================================================
+// CAPA GOLD — agregados que consume el tablero
+// ============================================================
+//
+// Se derivan de las tablas de arriba y se materializan como CSV. Se
+// versionan a propósito: el tablero tiene que abrir sin correr el pipeline.
+
+Table gold_admision_por_carrera {
+  anio_ingreso        integer [not null]
+  id_carrera          integer [not null]
+  postulaciones       integer [not null]
+  ingresantes         integer [not null]
+  tasa_ingreso        decimal [note: 'NULL si el ciclo no publica no ingresantes']
+  denominador_fiable  boolean [not null]
+  nota_corte_ordinario decimal
+  puntaje_min         decimal [note: 'sobre ingresantes: el mínimo sobre todos llega a cero por exámenes en blanco']
+  puntaje_mediana     decimal
+  puntaje_max         decimal
+
+  indexes {
+    (anio_ingreso, id_carrera) [pk]
+  }
+}
+
+Table gold_comparador_modalidad {
+  anio_ingreso  integer [not null]
+  id_carrera    integer [not null]
+  id_modalidad  integer [not null]
+  postulaciones integer [not null]
+  ingresantes   integer [not null]
+  tasa_ingreso  decimal
+  nota_corte    decimal
+
+  indexes {
+    (anio_ingreso, id_carrera, id_modalidad) [pk]
+  }
+}
+
+Table gold_distribucion_puntajes {
+  anio_ingreso integer [not null]
+  id_carrera   integer [not null]
+  tramo_desde  integer [not null, note: 'tramos de 10 puntos']
+  tramo_hasta  integer [not null]
+  resultado    varchar [not null, note: 'INGRESANTE o NO_INGRESANTE']
+  postulantes  integer [not null]
+
+  indexes {
+    (anio_ingreso, id_carrera, tramo_desde, resultado) [pk]
+  }
+}
+
+Table gold_ocupacion_vacantes {
+  anio_ingreso  integer [not null]
+  id_carrera    integer [not null]
+  vacantes      integer [not null]
+  ingresantes   integer [not null]
+  ocupacion     decimal [not null]
+  plazas_libres integer [not null]
+  estado        varchar [not null, default: 'PROVISIONAL', note: 'mezcla selección del CEPRE con admisión ordinaria']
+
+  indexes {
+    (anio_ingreso, id_carrera) [pk]
+  }
+}
+
+Table gold_cercanos_al_corte {
+  anio_ingreso        integer [not null]
+  id_carrera          integer [not null]
+  no_ingresantes      integer [not null]
+  a_menos_de_un_punto integer [not null]
+  porcentaje          decimal [not null]
+
+  indexes {
+    (anio_ingreso, id_carrera) [pk]
+  }
+}
+
+
+// ============================================================
+// RELACIONES
+// ============================================================
+
+Ref: documento.id_proceso > proceso.id_proceso
+Ref: pagina_extraida.id_documento > documento.id_documento
+
+Ref: carrera.id_area > area.id_area
+Ref: convocatoria.id_carrera > carrera.id_carrera
+Ref: convocatoria.anio_ingreso > ciclo.anio_ingreso
+
+Ref: proceso.anio_ingreso > ciclo.anio_ingreso
+Ref: proceso.id_modalidad > modalidad.id_modalidad
+
+Ref: postulacion.id_proceso > proceso.id_proceso
+Ref: postulacion.id_postulante > postulante.id_postulante
+Ref: postulacion.id_carrera > carrera.id_carrera
+Ref: postulacion.id_documento > documento.id_documento
+Ref: postulacion.(clase_documento, etiqueta) > condicion.(clase_documento, etiqueta)
+
+Ref: vacante.id_carrera > carrera.id_carrera
+Ref: vacante.anio_ingreso > ciclo.anio_ingreso
+Ref: vacante.id_via > via_vacante.id_via
+
+Ref: gold_admision_por_carrera.id_carrera > carrera.id_carrera
+Ref: gold_admision_por_carrera.anio_ingreso > ciclo.anio_ingreso
+Ref: gold_comparador_modalidad.id_carrera > carrera.id_carrera
+Ref: gold_comparador_modalidad.id_modalidad > modalidad.id_modalidad
+Ref: gold_distribucion_puntajes.id_carrera > carrera.id_carrera
+Ref: gold_ocupacion_vacantes.id_carrera > carrera.id_carrera
+Ref: gold_cercanos_al_corte.id_carrera > carrera.id_carrera
+
+
+// ============================================================
+// AGRUPACIÓN VISUAL POR CAPA
+// ============================================================
+
+TableGroup procedencia {
+  documento
+  pagina_extraida
+}
+
+TableGroup dimensiones {
+  ciclo
+  area
+  carrera
+  convocatoria
+  modalidad
+  proceso
+  condicion
+  via_vacante
+}
+
+TableGroup silver {
+  postulante
+  postulacion
+  vacante
+}
+
+TableGroup gold {
+  gold_admision_por_carrera
+  gold_comparador_modalidad
+  gold_distribucion_puntajes
+  gold_ocupacion_vacantes
+  gold_cercanos_al_corte
+}
